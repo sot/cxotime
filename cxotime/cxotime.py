@@ -1,4 +1,7 @@
+from copy import copy
+
 from astropy.time import Time, TimeCxcSec, TimeYearDayTime
+
 
 class CxoTime(Time):
     """Time class for Chandra analysis that is based on astropy.time.Time.
@@ -49,13 +52,18 @@ class CxoTime(Time):
     """
     def __init__(self, *args, **kwargs):
         if kwargs.get('format') is None:
+            kwargs_orig = copy(kwargs)
+            if 'scale' not in kwargs:
+                kwargs['scale'] = 'utc'
+
             for kwargs['format'] in ('secs', 'date'):
                 try:
                     super(CxoTime, self).__init__(*args, **kwargs)
                     return
                 except:
                     pass
-            kwargs['format'] = None
+
+            kwargs = kwargs_orig
 
         super(CxoTime, self).__init__(*args, **kwargs)
 
