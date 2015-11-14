@@ -20,11 +20,11 @@ class CxoTime(Time):
     Important differences:
 
     - In CxoTime the date '2000:001' is '2000:001:00:00:00' instead of
-      '2000:001:12:00:00' in DateTime.  In most cases this interpretation is more
-      rational and expected.
+      '2000:001:12:00:00' in DateTime.  In most cases this interpretation is
+      more rational and expected.
 
-    - In CxoTime the date '2001-01-01T00:00:00' is UTC, while in DateTime
-      that is interpreted as TT.
+    - In CxoTime the date '2001-01-01T00:00:00' is UTC by default, while in
+      DateTime that is interpreted as TT by default.
 
     The standard built-in Time formats that are available in CxoTime are:
 
@@ -51,6 +51,11 @@ class CxoTime(Time):
 
     """
     def __init__(self, *args, **kwargs):
+        # If format is not supplied then start off guessing with 'secs' and 'date'
+        # formats.  For both of those default to UTC scale.  In particular for
+        # 'secs' the default scale would be TT, which then produces surprising
+        # results (for DateTime users) when converting to most other formats which
+        # default to UTC scale.
         if kwargs.get('format') is None:
             kwargs_orig = copy(kwargs)
             if 'scale' not in kwargs:
