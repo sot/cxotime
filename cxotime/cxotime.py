@@ -6,9 +6,10 @@ from astropy.time import Time, TimeCxcSec, TimeYearDayTime
 class CxoTime(Time):
     """Time class for Chandra analysis that is based on astropy.time.Time.
 
-    The CXO-specific time formats are shown in the table below.  The
-    CxoTime class default is to interpret any numerical values as ``secs``
-    (aka ``cxcsec`` in the native Time class).
+    The CXO-specific time formats which are added to the astroy ``Time`` class
+    are shown in the table below.  Like ``DateTime``, the ``CxoTime`` class
+    default is to interpret any numerical values as ``secs`` (aka ``cxcsec`` in
+    the native ``Time`` class).
 
     ============ ==============================================  =======
      Format      Description                                     System
@@ -19,14 +20,16 @@ class CxoTime(Time):
         
     Important differences:
 
-    - In CxoTime the date '2000:001' is '2000:001:00:00:00' instead of
-      '2000:001:12:00:00' in DateTime.  In most cases this interpretation is
-      more rational and expected.
+    - In ``CxoTime`` the date '2000:001' is '2000:001:00:00:00' instead of
+      '2000:001:12:00:00' in ``DateTime``.  In most cases this interpretation
+      is more rational and expected.
 
-    - In CxoTime the date '2001-01-01T00:00:00' is UTC by default, while in
-      DateTime that is interpreted as TT by default.
+    - In ``CxoTime`` the date '2001-01-01T00:00:00' is UTC by default, while in
+      ``DateTime`` that is interpreted as TT by default.  This is triggered by
+      the ``T`` in the middle.  A date like '2001-01-01 00:00:00' defaults
+      to UTC in both ``CxoTime`` and ``DateTime``.
 
-    The standard built-in Time formats that are available in CxoTime are:
+    The standard built-in Time formats that are available in ``CxoTime`` are:
 
     ===========  ==============================
     Format       Example
