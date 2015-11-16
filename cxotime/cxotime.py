@@ -13,12 +13,13 @@ class CxoTime(Time):
     default is to interpret any numerical values as ``secs`` (aka ``cxcsec`` in
     the native ``Time`` class).
 
-    ============ ==============================================  =======
-     Format      Description                                     System
-    ============ ==============================================  =======
-    secs         Seconds since 1998-01-01T00:00:00 (float)       tt
-    date         YYYY:DDD:hh:mm:ss.ss..                          utc
-    ============ ==============================================  =======
+    ======== =======================================  =======
+     Format  Description                              System
+    ======== =======================================  =======
+    secs     Seconds since 1998-01-01T00:00:00 (TT)   utc
+    date     YYYY:DDD:hh:mm:ss.ss..                   utc
+    greta    YYYYDDD.hhmmsssss                        utc
+    ======== =======================================  =======
         
     Important differences:
 
