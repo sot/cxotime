@@ -1,6 +1,8 @@
+import numpy as np
 from copy import copy
+import re
 
-from astropy.time import Time, TimeCxcSec, TimeYearDayTime
+from astropy.time import Time, TimeCxcSec, TimeYearDayTime, TimeString
 
 
 class CxoTime(Time):
@@ -100,3 +102,43 @@ class TimeDate(TimeYearDayTime):
     - 'date': date
     """
     name = 'date'
+
+
+class TimeGreta(TimeYearDayTime):
+    """
+    Date in format YYYYDDD.hhmmsssss, where sssss is number of milliseconds.
+    """
+    name = 'greta'
+
+    subfmts = (('date_hms',
+                '%Y%j%H%M%S',
+                '{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}'),)
+
+    def _check_val_type(self, val1, val2):
+        # Note: don't care about val2 for these classes
+        if val1.dtype.kind not in ('S', 'U', 'i', 'f'):
+            raise TypeError('Input values for {0} class must be strings or numbers'
+                            .format(self.name))
+        return val1, None
+
+    def set_jds(self, val1, val2):
+        """
+        Remake the input to a form that standard parsing will work with.
+        """
+        shape = val1.shape
+
+        # Allow for float input
+        if val1.dtype.kind in ('f', 'i'):
+            val1 = np.array(['{:.9f}'.format(x) for x in val1.flat])
+
+        # Reformat from YYYYDDD.HHMMSSsss to YYYYDDDHHMMSS.sss
+        val1 = np.array([x[:7] + x[8:14] + '.' + x[14:] for x in val1.flat])
+
+        super(TimeGreta, self).set_jds(val1.reshape(shape), val2)
+
+    @property
+    def value(self):
+        out1 = super(TimeGreta, self).value
+        out = np.array([x[:7] + '.' + x[7:13] + x[14:] for x in out1.flat])
+        out.shape = out1.shape
+        return out
