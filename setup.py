@@ -1,10 +1,11 @@
-from setuptools import setup
+from distutils.core import setup
+
+from cxotime import __version__
 
 setup(name='cxotime',
       author='Tom Aldcroft',
       description='Chandra Time class base on astropy Time',
       author_email='taldcroft@cfa.harvard.edu',
-      version='0.1',
-      zip_safe=False,
+      version=__version__,
       packages=['cxotime'],
       )
