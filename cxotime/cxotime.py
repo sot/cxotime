@@ -1,8 +1,7 @@
 import numpy as np
 from copy import copy
-import re
 
-from astropy.time import Time, TimeCxcSec, TimeYearDayTime, TimeString
+from astropy.time import Time, TimeCxcSec, TimeYearDayTime
 
 
 class CxoTime(Time):
@@ -20,7 +19,7 @@ class CxoTime(Time):
     date     YYYY:DDD:hh:mm:ss.ss..                   utc
     greta    YYYYDDD.hhmmsssss                        utc
     ======== =======================================  =======
-        
+
     Important differences:
 
     - In ``CxoTime`` the date '2000:001' is '2000:001:00:00:00' instead of
@@ -57,6 +56,16 @@ class CxoTime(Time):
 
     """
     def __init__(self, *args, **kwargs):
+        if args:
+            if args[0].__class__.__name__ == 'DateTime':
+                try:
+                    args = args[0].secs, args[1:]
+                except:
+                    pass
+                finally:
+                    kwargs['format'] = 'secs'
+                    kwargs['scale'] = 'utc'
+
         # If format is not supplied then start off guessing with 'secs' and 'date'
         # formats.  For both of those default to UTC scale.  In particular for
         # 'secs' the default scale would be TT, which then produces surprising
