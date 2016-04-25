@@ -1,7 +1,7 @@
 import numpy as np
 from copy import copy
 
-from astropy.time import Time, TimeCxcSec, TimeYearDayTime
+from astropy.time import Time, TimeCxcSec, TimeYearDayTime, TimeDecimalYear
 
 
 class CxoTime(Time):
@@ -12,13 +12,14 @@ class CxoTime(Time):
     default is to interpret any numerical values as ``secs`` (aka ``cxcsec`` in
     the native ``Time`` class).
 
-    ======== =======================================  =======
-     Format  Description                              System
-    ======== =======================================  =======
-    secs     Seconds since 1998-01-01T00:00:00 (TT)   utc
-    date     YYYY:DDD:hh:mm:ss.ss..                   utc
-    greta    YYYYDDD.hhmmsssss                        utc
-    ======== =======================================  =======
+    ========= ===========================================  =======
+     Format   Description                                  System
+    ========= ===========================================  =======
+    secs      Seconds since 1998-01-01T00:00:00 (TT)       utc
+    date      YYYY:DDD:hh:mm:ss.ss..                       utc
+    frac_year YYYY.ffffff = date as a floating point year  utc
+    greta     YYYYDDD.hhmmsssss                            utc
+    ========= ===========================================  =======
 
     Important differences:
 
@@ -112,6 +113,15 @@ class TimeDate(TimeYearDayTime):
     - 'date': date
     """
     name = 'date'
+
+
+class TimeFracYear(TimeDecimalYear):
+    """
+    Time as a decimal year, with integer values corresponding to midnight
+    of the first day of each year.  For example 2000.5 corresponds to the
+    ISO time '2000-07-02 00:00:00'.
+    """
+    name = 'frac_year'
 
 
 class TimeGreta(TimeYearDayTime):

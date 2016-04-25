@@ -69,6 +69,13 @@ def test_arithmetic():
     assert isinstance(t3, CxoTime)
 
 
+def test_frac_year():
+    t = CxoTime(2000.5, format='frac_year')
+    assert t.date == '2000:184:00:00:00.000'
+    t = CxoTime('2000:184:00:00:00.000')
+    assert t.frac_year == 2000.5
+
+
 def test_greta():
     """Test greta format"""
     t_in = [['2001002.030405678', '2002002.030405678'],
