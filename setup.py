@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 from cxotime import __version__
 
