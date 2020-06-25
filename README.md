@@ -11,6 +11,8 @@ CxoTime class default is to interpret any numerical values as `secs`
 ----------- | -------------------------------------------- | --------
 secs        | Seconds since 1998-01-01T00:00:00 (float)    |   tt
 date        | YYYY:DDD:hh:mm:ss.ss..                       |   utc
+greta       | YYYYDDD.hhmmsssss                            |   utc
+frac_year   | YYYY.fffff                                   |   utc
 
 Important differences:
 

@@ -6,9 +6,9 @@ tested, so this simply confirms that the add-on in CxoTime works.
 
 import pytest
 import numpy as np
-from astropy.utils import minversion
 
 from .. import CxoTime
+from astropy.time import Time
 
 try:
     from Chandra.Time import DateTime
@@ -16,36 +16,40 @@ try:
 except ImportError:
     HAS_DATETIME = False
 
-ASTROPY_LT_1_1 = not minversion('astropy', '1.1')
-
 
 def test_cxotime_basic():
     t = CxoTime(1)
     assert t.format == 'secs'
     assert t.scale == 'utc'
     assert np.allclose(t.secs, 1.0, rtol=1e-10, atol=0)
-    assert t.tt.date == '1998:001:00:00:01.000'
+    assert t.tt.yday == '1998:001:00:00:01.000'
+
+    # Date is always UTC
+    assert t.date == '1997:365:23:58:57.816'
+    assert t.tt.date == '1997:365:23:58:57.816'
 
     # Multi-dim input
-    t = CxoTime([[1, 2], [3, 4]])
+    t = CxoTime([[1, 2], [3, 4]], scale='utc')
+    assert t.scale == 'utc'
     assert t.shape == (2, 2)
-    t_date = [['1998:001:00:00:01.000', '1998:001:00:00:02.000'],
-              ['1998:001:00:00:03.000', '1998:001:00:00:04.000']]
-    assert np.all(t.tt.date == t_date)
+    t_tt_iso = [['1998-01-01 00:00:01.000', '1998-01-01 00:00:02.000'],
+                ['1998-01-01 00:00:03.000', '1998-01-01 00:00:04.000']]
+    assert np.all(t.tt.iso == t_tt_iso)
+    assert np.all(t.date == t.yday)
+    assert np.all(t.utc.iso == Time(t_tt_iso, format='iso', scale='tt').utc.iso)
 
-    t = CxoTime('1998:001:00:00:01.000', scale='tt')
-    assert t.scale == 'tt'
-    assert np.allclose(t.secs, 1.0, atol=1e-10, rtol=0)
+    with pytest.raises(ValueError):
+        t = CxoTime('1998:001:00:00:01.000', scale='tt')
 
 
-@pytest.mark.xfail(ASTROPY_LT_1_1, reason='bug in astropy 1.1 time (see #4312)')
 def test_secs():
     """
     Test a problem fixed in https://github.com/astropy/astropy/pull/4312.
     This test would pass for ``t = CxoTime(1, scale='tt')`` or if
     comparing t.secs to 1.0.
     """
-    t = CxoTime(1)  # scale = UTC
+    t = CxoTime(1)
+    assert t.scale == 'utc'
     assert np.allclose(t.value, 1.0, atol=1e-10, rtol=0)
 
 
