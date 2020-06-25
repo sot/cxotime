@@ -9,12 +9,7 @@ import numpy as np
 
 from .. import CxoTime
 from astropy.time import Time
-
-try:
-    from Chandra.Time import DateTime
-    HAS_DATETIME = True
-except ImportError:
-    HAS_DATETIME = False
+from Chandra.Time import DateTime
 
 
 def test_cxotime_basic():
@@ -40,6 +35,44 @@ def test_cxotime_basic():
 
     with pytest.raises(ValueError):
         t = CxoTime('1998:001:00:00:01.000', scale='tt')
+
+
+def test_cxotime_from_datetime():
+    secs = DateTime(np.array(['2000:001', '2015:181:23:59:60.500', '2015:180:01:02:03.456'])).secs
+    dts = DateTime(secs)
+    ct = CxoTime(dts)
+    assert ct.scale == 'utc'
+    assert ct.format == 'date'
+
+    for out_fmt in ('greta', 'secs', 'date', 'frac_year'):
+        vals_out = getattr(ct, out_fmt)
+        if vals_out.dtype.kind == 'U':
+            assert np.all(vals_out == getattr(dts, out_fmt))
+        else:
+            assert np.allclose(vals_out, getattr(dts, out_fmt), atol=1e-4, rtol=0)
+
+
+def test_cxotime_vs_datetime():
+    # Note the bug (https://github.com/sot/Chandra.Time/issues/21), hence the odd first two lines
+    # >>> DateTime('2015:181:23:59:60.500').date
+    # '2015:182:00:00:00.500'
+    secs = DateTime(np.array(['2000:001', '2015:181:23:59:60.500', '2015:180:01:02:03.456'])).secs
+    dts = DateTime(secs)
+    vals = dict(date=dts.date,
+                secs=dts.secs,
+                greta=dts.greta,
+                frac_year=dts.frac_year)
+
+    fmts = list(vals.keys())
+    for in_fmt in fmts:
+        ct = CxoTime(vals[in_fmt], format=in_fmt)
+        assert ct.scale == 'utc'
+        for out_fmt in fmts:
+            vals_out = getattr(ct, out_fmt)
+            if vals_out.dtype.kind == 'U':
+                assert np.all(vals_out == vals[out_fmt])
+            else:
+                assert np.allclose(vals_out, vals[out_fmt], atol=1e-4, rtol=0)
 
 
 def test_secs():
@@ -102,16 +135,21 @@ def test_greta():
     assert CxoTime('2015181.235960500').date == '2015:181:23:59:60.500'
 
 
-@pytest.mark.skipif('not HAS_DATETIME')
-def test_cxotime_vs_datetime():
-    dates = ('2015-06-30 23:59:60.5', '2015:180:01:02:03.456')
-    for date in dates:
-        assert np.allclose(CxoTime(date).secs, DateTime(date).secs,
-                           atol=1e-4, rtol=0)
-        assert CxoTime(CxoTime(date).secs).date == DateTime(DateTime(date).secs).date
+def test_scale_exception():
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'secs'"):
+        CxoTime(1, scale='tt')
 
-    dates = ('2015-06-30 23:59:60.5', '2015:180:01:02:03.456')
-    for date in dates:
-        assert np.allclose(CxoTime(date).secs, DateTime(date).secs,
-                           atol=1e-4, rtol=0)
-        assert CxoTime(CxoTime(date).secs).date == DateTime(DateTime(date).secs).date
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'secs'"):
+        CxoTime(1, format='secs', scale='tt')
+
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'greta'"):
+        CxoTime('2019123.123456789', scale='tt')
+
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'greta'"):
+        CxoTime('2019123.123456789', format='greta', scale='tt')
+
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'date'"):
+        CxoTime('2019:123', scale='tt')
+
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'date'"):
+        CxoTime('2019:123:12:13:14', format='date', scale='tt')
