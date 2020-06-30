@@ -6,17 +6,10 @@ tested, so this simply confirms that the add-on in CxoTime works.
 
 import pytest
 import numpy as np
-from astropy.utils import minversion
 
 from .. import CxoTime
-
-try:
-    from Chandra.Time import DateTime
-    HAS_DATETIME = True
-except ImportError:
-    HAS_DATETIME = False
-
-ASTROPY_LT_1_1 = not minversion('astropy', '1.1')
+from astropy.time import Time
+from Chandra.Time import DateTime
 
 
 def test_cxotime_basic():
@@ -24,28 +17,72 @@ def test_cxotime_basic():
     assert t.format == 'secs'
     assert t.scale == 'utc'
     assert np.allclose(t.secs, 1.0, rtol=1e-10, atol=0)
-    assert t.tt.date == '1998:001:00:00:01.000'
+    assert t.tt.yday == '1998:001:00:00:01.000'
+
+    # Date is always UTC
+    assert t.date == '1997:365:23:58:57.816'
+    assert t.tt.date == '1997:365:23:58:57.816'
 
     # Multi-dim input
-    t = CxoTime([[1, 2], [3, 4]])
+    t = CxoTime([[1, 2], [3, 4]], scale='utc')
+    assert t.scale == 'utc'
     assert t.shape == (2, 2)
-    t_date = [['1998:001:00:00:01.000', '1998:001:00:00:02.000'],
-              ['1998:001:00:00:03.000', '1998:001:00:00:04.000']]
-    assert np.all(t.tt.date == t_date)
+    t_tt_iso = [['1998-01-01 00:00:01.000', '1998-01-01 00:00:02.000'],
+                ['1998-01-01 00:00:03.000', '1998-01-01 00:00:04.000']]
+    assert np.all(t.tt.iso == t_tt_iso)
+    assert np.all(t.date == t.yday)
+    assert np.all(t.utc.iso == Time(t_tt_iso, format='iso', scale='tt').utc.iso)
 
-    t = CxoTime('1998:001:00:00:01.000', scale='tt')
-    assert t.scale == 'tt'
-    assert np.allclose(t.secs, 1.0, atol=1e-10, rtol=0)
+    with pytest.raises(ValueError):
+        t = CxoTime('1998:001:00:00:01.000', scale='tt')
 
 
-@pytest.mark.xfail(ASTROPY_LT_1_1, reason='bug in astropy 1.1 time (see #4312)')
+def test_cxotime_from_datetime():
+    secs = DateTime(np.array(['2000:001', '2015:181:23:59:60.500', '2015:180:01:02:03.456'])).secs
+    dts = DateTime(secs)
+    ct = CxoTime(dts)
+    assert ct.scale == 'utc'
+    assert ct.format == 'date'
+
+    for out_fmt in ('greta', 'secs', 'date', 'frac_year'):
+        vals_out = getattr(ct, out_fmt)
+        if vals_out.dtype.kind == 'U':
+            assert np.all(vals_out == getattr(dts, out_fmt))
+        else:
+            assert np.allclose(vals_out, getattr(dts, out_fmt), atol=1e-4, rtol=0)
+
+
+def test_cxotime_vs_datetime():
+    # Note the bug (https://github.com/sot/Chandra.Time/issues/21), hence the odd first two lines
+    # >>> DateTime('2015:181:23:59:60.500').date
+    # '2015:182:00:00:00.500'
+    secs = DateTime(np.array(['2000:001', '2015:181:23:59:60.500', '2015:180:01:02:03.456'])).secs
+    dts = DateTime(secs)
+    vals = dict(date=dts.date,
+                secs=dts.secs,
+                greta=dts.greta,
+                frac_year=dts.frac_year)
+
+    fmts = list(vals.keys())
+    for in_fmt in fmts:
+        ct = CxoTime(vals[in_fmt], format=in_fmt)
+        assert ct.scale == 'utc'
+        for out_fmt in fmts:
+            vals_out = getattr(ct, out_fmt)
+            if vals_out.dtype.kind == 'U':
+                assert np.all(vals_out == vals[out_fmt])
+            else:
+                assert np.allclose(vals_out, vals[out_fmt], atol=1e-4, rtol=0)
+
+
 def test_secs():
     """
     Test a problem fixed in https://github.com/astropy/astropy/pull/4312.
     This test would pass for ``t = CxoTime(1, scale='tt')`` or if
     comparing t.secs to 1.0.
     """
-    t = CxoTime(1)  # scale = UTC
+    t = CxoTime(1)
+    assert t.scale == 'utc'
     assert np.allclose(t.value, 1.0, atol=1e-10, rtol=0)
 
 
@@ -98,16 +135,21 @@ def test_greta():
     assert CxoTime('2015181.235960500').date == '2015:181:23:59:60.500'
 
 
-@pytest.mark.skipif('not HAS_DATETIME')
-def test_cxotime_vs_datetime():
-    dates = ('2015-06-30 23:59:60.5', '2015:180:01:02:03.456')
-    for date in dates:
-        assert np.allclose(CxoTime(date).secs, DateTime(date).secs,
-                           atol=1e-4, rtol=0)
-        assert CxoTime(CxoTime(date).secs).date == DateTime(DateTime(date).secs).date
+def test_scale_exception():
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'secs'"):
+        CxoTime(1, scale='tt')
 
-    dates = ('2015-06-30 23:59:60.5', '2015:180:01:02:03.456')
-    for date in dates:
-        assert np.allclose(CxoTime(date).secs, DateTime(date).secs,
-                           atol=1e-4, rtol=0)
-        assert CxoTime(CxoTime(date).secs).date == DateTime(DateTime(date).secs).date
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'secs'"):
+        CxoTime(1, format='secs', scale='tt')
+
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'greta'"):
+        CxoTime('2019123.123456789', scale='tt')
+
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'greta'"):
+        CxoTime('2019123.123456789', format='greta', scale='tt')
+
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'date'"):
+        CxoTime('2019:123', scale='tt')
+
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'date'"):
+        CxoTime('2019:123:12:13:14', format='date', scale='tt')

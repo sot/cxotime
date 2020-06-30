@@ -3,24 +3,31 @@ import numpy as np
 from copy import copy
 
 from astropy.time import Time, TimeCxcSec, TimeYearDayTime, TimeDecimalYear
+from astropy.utils import iers
+
+# For working in Chandra operations, possibly with no network access, we cannot
+# allow auto downloads.
+iers.conf.auto_download = False
 
 
 class CxoTime(Time):
     """Time class for Chandra analysis that is based on astropy.time.Time.
 
-    The CXO-specific time formats which are added to the astroy ``Time`` class
+    The CXO-specific time formats which are added to the astropy ``Time`` class
     are shown in the table below.  Like ``DateTime``, the ``CxoTime`` class
     default is to interpret any numerical values as ``secs`` (aka ``cxcsec`` in
     the native ``Time`` class).
 
-    ========= ===========================================  =======
-     Format   Description                                  System
-    ========= ===========================================  =======
-    secs      Seconds since 1998-01-01T00:00:00 (TT)       utc
-    date      YYYY:DDD:hh:mm:ss.ss..                       utc
-    frac_year YYYY.ffffff = date as a floating point year  utc
-    greta     YYYYDDD.hhmmsssss                            utc
-    ========= ===========================================  =======
+    All of these formats use the UTC scale.
+
+    ========= ===========================================
+     Format   Description
+    ========= ===========================================
+    secs      Seconds since 1998-01-01T00:00:00 (TT)
+    date      YYYY:DDD:hh:mm:ss.ss..
+    frac_year YYYY.ffffff = date as a floating point year
+    greta     YYYYDDD.hhmmsssss
+    ========= ===========================================
 
     Important differences:
 
@@ -60,37 +67,42 @@ class CxoTime(Time):
     def __init__(self, *args, **kwargs):
         if args:
             if args[0].__class__.__name__ == 'DateTime':
-                try:
-                    args = args[0].secs, args[1:]
-                except:
-                    pass
-                finally:
-                    kwargs['format'] = 'secs'
-                    kwargs['scale'] = 'utc'
+                if len(args) > 1:
+                    raise ValueError('only one positional arg when DateTime is supplied')
+                args = (args[0].date,)
+                if kwargs.setdefault('scale', 'utc') != 'utc':
+                    raise ValueError("must use scale 'utc' for DateTime input")
+                if kwargs.setdefault('format', 'date') != 'date':
+                    raise ValueError("must use format 'date' for DateTime input")
 
-        # If format is not supplied then start off guessing with 'secs' and 'date'
-        # formats.  For both of those default to UTC scale.  In particular for
-        # 'secs' the default scale would be TT, which then produces surprising
-        # results (for DateTime users) when converting to most other formats which
-        # default to UTC scale.
-        if kwargs.get('format') is None:
+        # If format is supplied and is a DateTime format then require scale='utc'.
+        fmt = kwargs.get('format')
+        fmts_datetime = ('greta', 'secs', 'date', 'frac_year')
+        if fmt in fmts_datetime and kwargs.setdefault('scale', 'utc') != 'utc':
+            raise ValueError(f"must use scale 'utc' for format '{fmt}''")
+
+        # If format is not supplied and one arg (val) supplied then guess format
+        # in DateTime-compatibility mode. That means forcing scale to UTC.
+        if fmt is None and len(args) == 1:
             kwargs_orig = copy(kwargs)
-            if 'scale' not in kwargs:
-                kwargs['scale'] = 'utc'
+            kwargs['scale'] = 'utc'
 
-            for kwargs['format'] in ('secs', 'date'):
+            # TODO: `val = np.asarray(args[0])`, then check dtype and infer fmt
+            # from first element of `val`
+
+            for fmt in fmts_datetime:
+                kwargs['format'] = fmt
                 try:
                     super(CxoTime, self).__init__(*args, **kwargs)
-                    return
-                except:
+                except Exception:
                     pass
-
+                else:
+                    if kwargs_orig.get('scale', 'utc') != 'utc':
+                        raise ValueError(f"must use scale 'utc' for format '{fmt}''")
+                    return
             kwargs = kwargs_orig
 
         super(CxoTime, self).__init__(*args, **kwargs)
-
-    def __str__(self):
-        return self.date
 
 
 class TimeSecs(TimeCxcSec):
@@ -103,9 +115,19 @@ class TimeSecs(TimeCxcSec):
 
 class TimeDate(TimeYearDayTime):
     """
-    Year, day-of-year and time as "YYYY:DOY:HH:MM:SS.sss...".
+    Year, day-of-year and time as "YYYY:DOY:HH:MM:SS.sss..." in UTC.
+
     The day-of-year (DOY) goes from 001 to 365 (366 in leap years).
     For example, 2000:001:00:00:00.000 is midnight on January 1, 2000.
+
+    Time value in this format is always UTC regardless of the time scale
+    of the time object.  For example::
+
+      >>> t = CxoTime('2000-01-01', scale='tai')
+      >>> t.iso
+      '2000-01-01 00:00:00.000'
+      >>> t.date
+      '1999:365:23:59:28.000'
 
     The allowed subformats are:
 
@@ -115,19 +137,39 @@ class TimeDate(TimeYearDayTime):
     """
     name = 'date'
 
+    def to_value(self, parent=None, **kwargs):
+        if self.scale == 'utc':
+            return super().value
+        else:
+            return parent.utc._time.value
+
+    value = property(to_value)
+
 
 class TimeFracYear(TimeDecimalYear):
     """
     Time as a decimal year, with integer values corresponding to midnight
     of the first day of each year.  For example 2000.5 corresponds to the
     ISO time '2000-07-02 00:00:00'.
+
+    Time value is always in UTC regardless of time object scale.
     """
     name = 'frac_year'
 
+    def to_value(self, parent=None, **kwargs):
+        if self.scale == 'utc':
+            return super().value
+        else:
+            return parent.utc._time.value
 
-class TimeGreta(TimeYearDayTime):
+    value = property(to_value)
+
+
+class TimeGreta(TimeDate):
     """
     Date in format YYYYDDD.hhmmsssss, where sssss is number of milliseconds.
+
+    Time value is always in UTC regardless of time object scale.
     """
     name = 'greta'
 
@@ -157,9 +199,13 @@ class TimeGreta(TimeYearDayTime):
 
         super(TimeGreta, self).set_jds(val1.reshape(shape), val2)
 
-    @property
-    def value(self):
-        out1 = super(TimeGreta, self).value
+    def to_value(self, parent=None, **kwargs):
+        if self.scale == 'utc':
+            out1 = super().value
+        else:
+            out1 = parent.utc._time.value
         out = np.array([x[:7] + '.' + x[7:13] + x[14:] for x in out1.flat])
         out.shape = out1.shape
         return out
+
+    value = property(to_value)
