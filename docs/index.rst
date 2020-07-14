@@ -38,8 +38,8 @@ Compatibility with DateTime
 The key differences between |CxoTime| and DateTime_ are:
 
 - In |CxoTime| the date '2000:001' is '2000:001:00:00:00' instead of
-  '2000:001:12:00:00' in DateTime_.  In most cases this interpretation
-  is more rational and expected.
+  '2000:001:12:00:00' in DateTime_ (prior to version 4.0).  In most cases this
+  interpretation is more rational and expected.
 
 - In |CxoTime| the date '2001-01-01T00:00:00' is UTC by default, while in
   DateTime_ that is interpreted as TT by default.  This is triggered by
@@ -52,6 +52,8 @@ The key differences between |CxoTime| and DateTime_ are:
 
 - Conversely, starting with |CxoTime| one can add or subtract a TimeDelta_ or
   any quantity with time units.
+
+- To get the current time replace ``DateTime()`` with ``CxoTime.now()``
 
 The standard built-in Time formats that are available in |CxoTime| are:
 
@@ -81,15 +83,19 @@ Examples
 --------
 ::
 
-  >>> t = CxoTime(1.0)
+  >>> from cxotime import CxoTime
+  >>> t = CxoTime(100.0)
+  >>> t.date
+  '1998:001:00:00:36.816'
   >>> t.format
   'secs'
-
   >>> t.scale
   'utc'
 
-  >>> t.tt.date
-  '1998:001:00:00:01.000'
+  >>> import astropy.units as u
+  >>> t2 = t + [1, 2] * u.day + [10, 20] * u.s
+  >>> t2.date
+  array(['1998:002:00:00:46.816', '1998:003:00:00:56.816'], dtype='<U21')
 
   >>> t = CxoTime([['1998:001:00:00:01.000', '1998:001:00:00:02.000'],
                    ['1998:001:00:00:03.000', '1998:001:00:00:04.000']])
@@ -99,9 +105,6 @@ Examples
 
   >>> t.format
   'date'
-
-  >>> t.scale
-  'utc'
 
 .. toctree::
    :maxdepth: 2
