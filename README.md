@@ -6,11 +6,14 @@ The CXO-specific time formats are shown in the table below.  The
 CxoTime class default is to interpret any numerical values as `secs`
 (aka `cxcsec` in the native Time class).
 
+All of these formats use the UTC scale.
 
- Format     | Description                                  |  System
------------ | -------------------------------------------- | --------
-secs        | Seconds since 1998-01-01T00:00:00 (float)    |   tt
-date        | YYYY:DDD:hh:mm:ss.ss..                       |   utc
+ Format     | Description
+----------- | ----------------------------------------
+secs        | Seconds since 1998-01-01T00:00:00 (tt)
+date        | YYYY:DDD:hh:mm:ss.ss..
+greta       | YYYYDDD.hhmmsssss
+frac_year   | YYYY.fffff
 
 Important differences:
 
