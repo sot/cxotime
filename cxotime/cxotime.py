@@ -11,7 +11,7 @@ iers.conf.auto_download = False
 
 
 class CxoTime(Time):
-    """Time class for Chandra analysis that is based on astropy.time.Time.
+    """Time class for Chandra analysis that is based on ``astropy.time.Time``.
 
     The CXO-specific time formats which are added to the astropy ``Time`` class
     are shown in the table below.  Like ``DateTime``, the ``CxoTime`` class

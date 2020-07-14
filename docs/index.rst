@@ -13,7 +13,7 @@ Chandra-specific astropy Time class
 ===================================
 
 The ``cxotime`` package provides a |CxoTime| class which provides Chandra-specific
-functionality while deriving from the Time_ class of the astropy.time_ package.
+functionality while deriving from the Time_ class of the astropytime_ package.
 The astropytime_ package provides robust 128-bit time representation,
 arithmetic, and comparisons.
 
@@ -114,6 +114,3 @@ API docs
 
 .. automodule:: cxotime.cxotime
    :members:
-
-.. autoclass:: CxoTime
-
