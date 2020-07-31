@@ -33,8 +33,6 @@ Important differences:
 - Conversely, starting with `CxoTime` one can add or subtract a `TimeDelta` or
   any astropy `Quantity` with time units.
 
-- To get the current time replace `DateTime()` with `CxoTime.now()`
-
 The standard built-in Time formats that are available in `CxoTime` are:
 
 Format      |  Example

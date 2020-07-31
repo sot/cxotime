@@ -64,6 +64,16 @@ class CxoTime(Time):
     ===========  ==============================
 
     """
+    def __new__(cls, *args, **kwargs):
+        # Handle the case of `CxoTime()` which returns the current time. This is
+        # for compatibility with DateTime.
+        if not args:
+            if not kwargs:
+                args = (None, )
+            else:
+                raise ValueError('cannot supply keyword arguments with no time value')
+        return super().__new__(cls, *args, **kwargs)
+
     def __init__(self, *args, **kwargs):
         if args:
             if args[0].__class__.__name__ == 'DateTime':
@@ -74,6 +84,9 @@ class CxoTime(Time):
                     raise ValueError("must use scale 'utc' for DateTime input")
                 if kwargs.setdefault('format', 'date') != 'date':
                     raise ValueError("must use format 'date' for DateTime input")
+        else:
+            # For `CxoTime()`` return the current time in `date` format.
+            args = (Time.now().yday, )
 
         # If format is supplied and is a DateTime format then require scale='utc'.
         fmt = kwargs.get('format')
@@ -103,6 +116,12 @@ class CxoTime(Time):
             kwargs = kwargs_orig
 
         super(CxoTime, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def now(cls):
+        return cls()
+
+    now.__doc__ = Time.now.__doc__
 
 
 class TimeSecs(TimeCxcSec):
