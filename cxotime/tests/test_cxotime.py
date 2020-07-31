@@ -10,6 +10,7 @@ import numpy as np
 from .. import CxoTime
 from astropy.time import Time
 from Chandra.Time import DateTime
+import astropy.units as u
 
 
 def test_cxotime_basic():
@@ -35,6 +36,18 @@ def test_cxotime_basic():
 
     with pytest.raises(ValueError):
         t = CxoTime('1998:001:00:00:01.000', scale='tt')
+
+
+@pytest.mark.parametrize('now_method', [CxoTime, CxoTime.now])
+def test_cxotime_now(now_method):
+    ct_now = now_method()
+    t_now = Time.now()
+    assert t_now >= ct_now
+    assert (ct_now - t_now) < 10 * u.s
+
+    with pytest.raises(ValueError,
+                       match='cannot supply keyword arguments with no time value'):
+        CxoTime(scale='utc')
 
 
 def test_cxotime_from_datetime():
