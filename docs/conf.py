@@ -112,7 +112,12 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-# html_theme = 'alabaster'
+html_theme = 'bootstrap-ska'
+html_theme_options = {
+logotext1: 'Ska!' ,
+logotext2: 'CXO',
+logotext3: 'Time',
+}
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
