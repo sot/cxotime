@@ -90,7 +90,12 @@ class CxoTime(Time):
 
         # If format is supplied and is a DateTime format then require scale='utc'.
         fmt = kwargs.get('format')
+
+        # Define special formats and the type of vals that are accepted
         fmts_datetime = ('greta', 'secs', 'date', 'frac_year')
+        fmt_dtypes = (np.character, np.number, np.character, np.number)
+
+        # Check that scale=UTC for special formats
         if fmt in fmts_datetime and kwargs.setdefault('scale', 'utc') != 'utc':
             raise ValueError(f"must use scale 'utc' for format '{fmt}''")
 
@@ -99,11 +104,15 @@ class CxoTime(Time):
         if fmt is None and len(args) == 1:
             kwargs_orig = copy(kwargs)
             kwargs['scale'] = 'utc'
+            # Do not make a copy unless specifically set by user
+            kwargs.setdefault('copy', False)
+            # Convert to np.array at this point to get dtype
+            val = np.asarray(args[0])
 
-            # TODO: `val = np.asarray(args[0])`, then check dtype and infer fmt
-            # from first element of `val`
+            for fmt, fmt_dtype in zip(fmts_datetime, fmt_dtypes):
+                if not issubclass(val.dtype.type, fmt_dtype):
+                    continue
 
-            for fmt in fmts_datetime:
                 kwargs['format'] = fmt
                 try:
                     super(CxoTime, self).__init__(*args, **kwargs)
