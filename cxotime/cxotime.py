@@ -1,6 +1,10 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 import numpy as np
 from copy import copy
+from pathlib import Path
+
+import numpy.ctypeslib as npct
+from ctypes import c_int
 
 from astropy.time import Time, TimeCxcSec, TimeYearDayTime, TimeDecimalYear
 from astropy.utils import iers
@@ -8,6 +12,29 @@ from astropy.utils import iers
 # For working in Chandra operations, possibly with no network access, we cannot
 # allow auto downloads.
 iers.conf.auto_download = False
+
+# Input types in the parse_times.c code
+array_1d_char = npct.ndpointer(dtype=np.uint8, ndim=1, flags='C_CONTIGUOUS')
+array_1d_double = npct.ndpointer(dtype=np.double, ndim=1, flags='C_CONTIGUOUS')
+array_1d_int = npct.ndpointer(dtype=np.intc, ndim=1, flags='C_CONTIGUOUS')
+
+# load the library, using numpy mechanisms
+libpt = npct.load_library("_parse_times", Path(__file__).parent)
+
+# Set up the return types and argument types for parse_ymdhms_times()
+# int parse_ymdhms_times(char *times, int n_times, int max_str_len,
+#                    char *delims, int *starts, int *stops, int *break_allowed,
+#                    int *years, int *months, int *days, int *hours,
+#                    int *minutes, double *seconds)
+libpt.parse_ymdhms_times.restype = c_int
+libpt.parse_ymdhms_times.argtypes = [array_1d_char, c_int, c_int, c_int,
+                                     array_1d_char, array_1d_int, array_1d_int, array_1d_int,
+                                     array_1d_int, array_1d_int, array_1d_int,
+                                     array_1d_int, array_1d_int, array_1d_double]
+libpt.check_unicode.restype = c_int
+
+# Set up returns types and args for the unicode checker
+libpt.check_unicode.argtypes = [array_1d_char, c_int]
 
 
 class CxoTime(Time):
