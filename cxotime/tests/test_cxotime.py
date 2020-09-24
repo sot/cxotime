@@ -3,17 +3,23 @@
 Simple test of CxoTime.  The base Time object is extremely well
 tested, so this simply confirms that the add-on in CxoTime works.
 """
-
 import pytest
 import numpy as np
 
-from .. import CxoTime
+from .. import CxoTime, conf
 from astropy.time import Time
 from Chandra.Time import DateTime
 import astropy.units as u
 
 
-def test_cxotime_basic():
+@pytest.fixture(scope='module', params=['True', 'False', 'force'])
+def use_fast_parser(request):
+    conf.use_fast_parser = request.param
+    yield
+    conf.use_fast_parser = 'True'
+
+
+def test_cxotime_basic(use_fast_parser):
     t = CxoTime(1)
     assert t.format == 'secs'
     assert t.scale == 'utc'
@@ -38,8 +44,15 @@ def test_cxotime_basic():
         t = CxoTime('1998:001:00:00:01.000', scale='tt')
 
 
+# @pytest.mark.parmetrize('use_fast_parser', ['True', 'False', 'force'])
+# @pytest.mark.parametrize('now_method', [CxoTime, CxoTime.now])
+# def test_cxotime_now(use_fast_parser, now_method):
+#     with conf.set_temp('use_fast_parser', use_fast_parser):
+#         _test_cxotime_basic(now_method)
+
+
 @pytest.mark.parametrize('now_method', [CxoTime, CxoTime.now])
-def test_cxotime_now(now_method):
+def test_cxotime_now(use_fast_parser, now_method):
     ct_now = now_method()
     t_now = Time.now()
     assert t_now >= ct_now
@@ -50,7 +63,7 @@ def test_cxotime_now(now_method):
         CxoTime(scale='utc')
 
 
-def test_cxotime_from_datetime():
+def test_cxotime_from_datetime(use_fast_parser):
     secs = DateTime(np.array(['2000:001', '2015:181:23:59:60.500', '2015:180:01:02:03.456'])).secs
     dts = DateTime(secs)
     ct = CxoTime(dts)
@@ -65,7 +78,7 @@ def test_cxotime_from_datetime():
             assert np.allclose(vals_out, getattr(dts, out_fmt), atol=1e-4, rtol=0)
 
 
-def test_cxotime_vs_datetime():
+def test_cxotime_vs_datetime(use_fast_parser):
     # Note the bug (https://github.com/sot/Chandra.Time/issues/21), hence the odd first two lines
     # >>> DateTime('2015:181:23:59:60.500').date
     # '2015:182:00:00:00.500'
@@ -88,7 +101,7 @@ def test_cxotime_vs_datetime():
                 assert np.allclose(vals_out, vals[out_fmt], atol=1e-4, rtol=0)
 
 
-def test_secs():
+def test_secs(use_fast_parser):
     """
     Test a problem fixed in https://github.com/astropy/astropy/pull/4312.
     This test would pass for ``t = CxoTime(1, scale='tt')`` or if
@@ -99,7 +112,7 @@ def test_secs():
     assert np.allclose(t.value, 1.0, atol=1e-10, rtol=0)
 
 
-def test_date():
+def test_date(use_fast_parser):
     t = CxoTime('2001:002:03:04:05.678')
     assert t.format == 'date'
     assert t.scale == 'utc'
@@ -108,7 +121,7 @@ def test_date():
     assert CxoTime('2015-06-30 23:59:60.5').date == '2015:181:23:59:60.500'
 
 
-def test_arithmetic():
+def test_arithmetic(use_fast_parser):
     """Very basic test of arithmetic"""
     t1 = CxoTime(0.0)
     t2 = CxoTime(86400.0)
@@ -120,14 +133,14 @@ def test_arithmetic():
     assert isinstance(t3, CxoTime)
 
 
-def test_frac_year():
+def test_frac_year(use_fast_parser):
     t = CxoTime(2000.5, format='frac_year')
     assert t.date == '2000:184:00:00:00.000'
     t = CxoTime('2000:184:00:00:00.000')
     assert t.frac_year == 2000.5
 
 
-def test_greta():
+def test_greta(use_fast_parser):
     """Test greta format"""
     t_in = [['2001002.030405678', '2002002.030405678'],
             ['2003002.030405678', '2004002.030405678']]
@@ -148,7 +161,7 @@ def test_greta():
     assert CxoTime('2015181.235960500').date == '2015:181:23:59:60.500'
 
 
-def test_scale_exception():
+def test_scale_exception(use_fast_parser):
     with pytest.raises(ValueError, match="must use scale 'utc' for format 'secs'"):
         CxoTime(1, scale='tt')
 
