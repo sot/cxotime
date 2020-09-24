@@ -162,118 +162,20 @@ class CxoTime(Time):
     now.__doc__ = Time.now.__doc__
 
 
-class TimeSecs(TimeCxcSec):
-    """
-    Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.
-    For example, 63072064.184 is midnight on January 1, 2000.
-    """
-    name = 'secs'
-
-
-class TimeDate(TimeYearDayTime):
-    """
-    Year, day-of-year and time as "YYYY:DOY:HH:MM:SS.sss..." in UTC.
-
-    The day-of-year (DOY) goes from 001 to 365 (366 in leap years).
-    For example, 2000:001:00:00:00.000 is midnight on January 1, 2000.
-
-    Time value in this format is always UTC regardless of the time scale
-    of the time object.  For example::
-
-      >>> t = CxoTime('2000-01-01', scale='tai')
-      >>> t.iso
-      '2000-01-01 00:00:00.000'
-      >>> t.date
-      '1999:365:23:59:28.000'
-
-    The allowed subformats are:
-
-    - 'date_hms': date + hours, mins, secs (and optional fractional secs)
-    - 'date_hm': date + hours, mins
-    - 'date': date
-    """
-    name = 'date'
-
-    def to_value(self, parent=None, **kwargs):
-        if self.scale == 'utc':
-            return super().value
-        else:
-            return parent.utc._time.value
-
-    value = property(to_value)
-
-
-class TimeFracYear(TimeDecimalYear):
-    """
-    Time as a decimal year, with integer values corresponding to midnight
-    of the first day of each year.  For example 2000.5 corresponds to the
-    ISO time '2000-07-02 00:00:00'.
-
-    Time value is always in UTC regardless of time object scale.
-    """
-    name = 'frac_year'
-
-    def to_value(self, parent=None, **kwargs):
-        if self.scale == 'utc':
-            return super().value
-        else:
-            return parent.utc._time.value
-
-    value = property(to_value)
-
-
-class TimeGreta(TimeDate):
-    """
-    Date in format YYYYDDD.hhmmsssss, where sssss is number of milliseconds.
-
-    Time value is always in UTC regardless of time object scale.
-    """
-    name = 'greta'
-
-    subfmts = (('date_hms',
-                '%Y%j%H%M%S',
-                '{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}'),)
-
-    # Define positions and starting delimiter for year, month, day, hour,
-    # minute, seconds components of an ISO time. This is used by the fast
-    # C-parser parse_ymdhms_times()
-    #
-    #  "2000123.131415678"
-    #   01234567890123456
-    #   yyyyddd.hhmmssfff
-    # Parsed as ('yyyy', 'ddd', '.hh', 'mm', 'ss', 'fff')
-    #
-    # delims: character at corresponding `starts` position (0 => no character)
-    # starts: position where component starts (including delimiter if present)
-    # stops: position where component ends (-1 => continue to end of string)
-
-    # Before: yr mon  doy     hour      minute    second    frac
-    delims = (0, 0, 0, ord('.'), 0, 0, 0)
-    starts = (0, -1, 4, 7, 10, 12, 14)
-    stops = (3, -1, 6, 9, 11, 13, -1)
-    # Break before:  y  m  d  h  m  s  f
-    break_allowed = (0, 0, 0, 1, 0, 1, 1)
-    has_day_of_year = 1
-
-    def _check_val_type(self, val1, val2):
-        # Note: don't care about val2 for these classes
-        if val1.dtype.kind not in ('S', 'U', 'i', 'f'):
-            raise TypeError('Input values for {0} class must be strings or numbers'
-                            .format(self.name))
-        return val1, None
-
-    def set_jds(self, val1, val2):
+class FastDateParserMixin:
+    def set_jds_fast_or_python(self, val1, val2):
         """Parse the time strings contained in val1 and set jd1, jd2"""
         # If specific input subformat is required then use the Python parser.
         # Also do this if Time format class does not define `use_fast_parser`
         # or if the fast parser is entirely disabled.
-        # Allow for float input
-        if val1.dtype.kind in ('f', 'i'):
-            shape = val1.shape
-            val1 = np.array(['{:.9f}'.format(x) for x in val1.flat])
-            val1.shape = shape
-
-        self.set_jds_fast(val1)
+        if self.in_subfmt != '*':
+            self.set_jds_python(self, val1, val2)
+        else:
+            try:
+                self.set_jds_fast(val1)
+            except Exception:
+                # Fall through to the Python parser.
+                self.set_jds_python(self, val1, val2)
 
     def set_jds_fast(self, val1):
         """Use fast C parser to parse time strings in val1 and set jd1, jd2"""
@@ -325,6 +227,153 @@ class TimeGreta(TimeDate):
                     4: 'non-digit found where digit (0-9) required',
                     5: 'bad day of year (1 <= doy <= 365 or 366 for leap year'}
             raise ValueError(f'fast C time string parser failed: {msgs[status]}')
+
+    def set_jds_python(self, val1, val2):
+        """Parse the time strings contained in val1 and set jd1, jd2"""
+        # Select subformats based on current self.in_subfmt
+        subfmts = self._select_subfmts(self.in_subfmt)
+        # Be liberal in what we accept: convert bytes to ascii.
+        # Here .item() is needed for arrays with entries of unequal length,
+        # to strip trailing 0 bytes.
+        to_string = (str if val1.dtype.kind == 'U' else
+                     lambda x: str(x.item(), encoding='ascii'))
+        iterator = np.nditer([val1, None, None, None, None, None, None],
+                             flags=['zerosize_ok'],
+                             op_dtypes=[None] + 5 * [np.intc] + [np.double])
+        for val, iy, im, id, ihr, imin, dsec in iterator:
+            val = to_string(val)
+            iy[...], im[...], id[...], ihr[...], imin[...], dsec[...] = (
+                self.parse_string(val, subfmts))
+
+        jd1, jd2 = erfa.dtf2d(self.scale.upper().encode('ascii'),
+                              *iterator.operands[1:])
+        self.jd1, self.jd2 = day_frac(jd1, jd2)
+
+
+class TimeSecs(TimeCxcSec):
+    """
+    Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.
+    For example, 63072064.184 is midnight on January 1, 2000.
+    """
+    name = 'secs'
+
+
+class TimeDate(TimeYearDayTime, FastDateParserMixin):
+    """
+    Year, day-of-year and time as "YYYY:DOY:HH:MM:SS.sss..." in UTC.
+
+    The day-of-year (DOY) goes from 001 to 365 (366 in leap years).
+    For example, 2000:001:00:00:00.000 is midnight on January 1, 2000.
+
+    Time value in this format is always UTC regardless of the time scale
+    of the time object.  For example::
+
+      >>> t = CxoTime('2000-01-01', scale='tai')
+      >>> t.iso
+      '2000-01-01 00:00:00.000'
+      >>> t.date
+      '1999:365:23:59:28.000'
+
+    The allowed subformats are:
+
+    - 'date_hms': date + hours, mins, secs (and optional fractional secs)
+    - 'date_hm': date + hours, mins
+    - 'date': date
+    """
+    name = 'date'
+
+    # Class attributes for fast C-parsing
+    delims = (0, 0, ord(':'), ord(':'), ord(':'), ord(':'), ord('.'))
+    starts = (0, -1, 4, 8, 11, 14, 17)
+    stops = (3, -1, 7, 10, 13, 16, -1)
+    # Break before:  y  m  d  h  m  s  f
+    break_allowed = (0, 0, 0, 1, 0, 1, 1)
+    has_day_of_year = 1
+
+    def to_value(self, parent=None, **kwargs):
+        if self.scale == 'utc':
+            return super().value
+        else:
+            return parent.utc._time.value
+
+    value = property(to_value)
+
+    def set_jds(self, val1, val2):
+        """Parse the time strings contained in val1 and set jd1, jd2"""
+        self.set_jds_fast_or_python(val1, val2)
+
+
+class TimeFracYear(TimeDecimalYear):
+    """
+    Time as a decimal year, with integer values corresponding to midnight
+    of the first day of each year.  For example 2000.5 corresponds to the
+    ISO time '2000-07-02 00:00:00'.
+
+    Time value is always in UTC regardless of time object scale.
+    """
+    name = 'frac_year'
+
+    def to_value(self, parent=None, **kwargs):
+        if self.scale == 'utc':
+            return super().value
+        else:
+            return parent.utc._time.value
+
+    value = property(to_value)
+
+
+class TimeGreta(TimeDate, FastDateParserMixin):
+    """
+    Date in format YYYYDDD.hhmmsssss, where sssss is number of milliseconds.
+
+    Time value is always in UTC regardless of time object scale.
+    """
+    name = 'greta'
+
+    subfmts = (('date_hms',
+                '%Y%j%H%M%S',
+                '{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}'),)
+
+    # Define positions and starting delimiter for year, month, day, hour,
+    # minute, seconds components of an ISO time. This is used by the fast
+    # C-parser parse_ymdhms_times()
+    #
+    #  "2000123.131415678"
+    #   01234567890123456
+    #   yyyyddd.hhmmssfff
+    # Parsed as ('yyyy', 'ddd', '.hh', 'mm', 'ss', 'fff')
+    #
+    # delims: character at corresponding `starts` position (0 => no character)
+    # starts: position where component starts (including delimiter if present)
+    # stops: position where component ends (-1 => continue to end of string)
+
+    # Before: yr mon  doy     hour      minute    second    frac
+    delims = (0, 0, 0, ord('.'), 0, 0, 0)
+    starts = (0, -1, 4, 7, 10, 12, 14)
+    stops = (3, -1, 6, 9, 11, 13, -1)
+    # Break before:  y  m  d  h  m  s  f
+    break_allowed = (0, 0, 0, 1, 0, 1, 1)
+    has_day_of_year = 1
+
+    def _check_val_type(self, val1, val2):
+        # Note: don't care about val2 for these classes
+        if val1.dtype.kind not in ('S', 'U', 'i', 'f'):
+            raise TypeError('Input values for {0} class must be strings or numbers'
+                            .format(self.name))
+        return val1, None
+
+    def set_jds(self, val1, val2):
+        """Parse the time strings contained in val1 and set jd1, jd2"""
+        # If specific input subformat is required then use the Python parser.
+        # Also do this if Time format class does not define `use_fast_parser`
+        # or if the fast parser is entirely disabled.
+        # Allow for float input
+        if val1.dtype.kind in ('f', 'i'):
+            shape = val1.shape
+            val1 = np.array(['{:.9f}'.format(x) for x in val1.flat])
+            val1.shape = shape
+
+        self.set_jds_fast_or_python(val1, val2)
 
     def to_value(self, parent=None, **kwargs):
         if self.scale == 'utc':
