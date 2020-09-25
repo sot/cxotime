@@ -29,6 +29,7 @@ secs      Seconds since 1998-01-01T00:00:00 (TT)       utc
 date      YYYY:DDD:hh:mm:ss.ss..                       utc
 frac_year YYYY.ffffff = date as a floating point year  utc
 greta     YYYYDDD.hhmmsssss                            utc
+maude     YYYYDDDhhmmsssss                             utc
 ========= ===========================================  =======
 
 
@@ -79,6 +80,9 @@ yday         2000:001:00:00:00.000
 
 Examples
 --------
+
+Basic initialization
+^^^^^^^^^^^^^^^^^^^^
 ::
 
   >>> from cxotime import CxoTime
@@ -103,6 +107,19 @@ Examples
 
   >>> t.format
   'date'
+
+Guessing and specifying the format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Generally speaking ``CxoTime`` will successfully guess the format for
+string-based times. However this requires some time, so if you know the
+format in advance then it is recommended to provide this via the ``format``
+argument.
+::
+
+  >>> t = CxoTime('2020001223344555', format='maude')
+  >>> t.date
+  '2020:001:22:33:44.555'
 
 .. toctree::
    :maxdepth: 2
