@@ -127,12 +127,19 @@ def test_frac_year():
     assert t.frac_year == 2000.5
 
 
-def test_greta():
-    """Test greta format"""
-    t_in = [['2001002.030405678', '2002002.030405678'],
-            ['2003002.030405678', '2004002.030405678']]
+@pytest.mark.parametrize('format', ['maude', 'greta'])
+def test_maude_and_greta(format):
+    """Test maude and greta formats"""
+    def mg(val):
+        if format == 'greta':
+            return val
+        elif format == 'maude':
+            return val[:7] + val[8:]
+
+    t_in = [[mg('2001002.030405678'), mg('2002002.030405678')],
+            [mg('2003002.030405678'), mg('2004002.030405678')]]
     t = CxoTime(t_in)
-    assert t.format == 'greta'
+    assert t.format == format
     assert t.scale == 'utc'
     assert t.shape == (2, 2)
     assert np.all(t.yday == [['2001:002:03:04:05.678', '2002:002:03:04:05.678'],
@@ -140,12 +147,13 @@ def test_greta():
     assert np.all(t.value == t_in)
 
     # Input from float
-    t = CxoTime(np.array(t_in, dtype=np.float), format='greta')
-    assert np.all(t.value == t_in)
+    if format == 'greta':
+        t = CxoTime(np.array(t_in, dtype=np.float), format=format)
+        assert np.all(t.value == t_in)
 
     # During leap second
-    assert CxoTime('2015-06-30 23:59:60.5').greta == '2015181.235960500'
-    assert CxoTime('2015181.235960500').date == '2015:181:23:59:60.500'
+    assert getattr(CxoTime('2015-06-30 23:59:60.5'), format) == mg('2015181.235960500')
+    assert CxoTime(mg('2015181.235960500')).date == '2015:181:23:59:60.500'
 
 
 def test_scale_exception():
