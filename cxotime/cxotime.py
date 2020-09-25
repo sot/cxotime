@@ -121,8 +121,8 @@ class CxoTime(Time):
         fmt = kwargs.get('format')
 
         # Define special formats for guessing and type of accepted vals
-        fmts_datetime = ('greta', 'secs', 'date')
-        fmt_dtypes = (np.character, np.number, np.character)
+        fmts_datetime = ('greta', 'secs', 'date', 'maude')
+        fmt_dtypes = (np.character, np.number, np.character, np.character)
 
         # Check that scale=UTC for special formats
         if fmt in fmts_datetime and kwargs.setdefault('scale', 'utc') != 'utc':
