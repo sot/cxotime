@@ -399,3 +399,59 @@ class TimeGreta(TimeDate, FastDateParserMixin):
         return out
 
     value = property(to_value)
+
+
+class TimeMaude(TimeDate, FastDateParserMixin):
+    """
+    Date in format YYYYDDDhhmmsssss, where sssss is number of milliseconds.
+
+    Time value is always in UTC regardless of time object scale.
+    """
+    name = 'maude'
+
+    subfmts = (('date_hms',
+                '%Y%j%H%M%S',
+                '{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}'),)
+
+    # Define positions and starting delimiter for year, month, day, hour,
+    # minute, seconds components of an ISO time. This is used by the fast
+    # C-parser parse_ymdhms_times()
+    #
+    #  "2000123131415678"
+    #   0123456789012345
+    #   yyyydddhhmmssfff
+    # Parsed as ('yyyy', 'ddd', 'hh', 'mm', 'ss', 'fff')
+    #
+    # delims: character at corresponding `starts` position (0 => no character)
+    # starts: position where component starts (including delimiter if present)
+    # stops: position where component ends (-1 => continue to end of string)
+
+    # Before: yr mon  doy     hour      minute    second    frac
+    use_fast_parser = True
+    delims = (0, 0, 0, 0, 0, 0, 0)
+    starts = (0, -1, 4, 7, 9, 11, 13)
+    stops = (3, -1, 6, 8, 10, 12, -1)
+    # Break before:  y  m  d  h  m  s  f
+    break_allowed = (0, 0, 0, 1, 0, 1, 1)
+    has_day_of_year = 1
+
+    def _check_val_type(self, val1, val2):
+        # Note: don't care about val2 for these classes
+        if val1.dtype.kind not in ('S', 'U'):
+            raise TypeError('Input values for {0} class must be strings'
+                            .format(self.name))
+        return val1, None
+
+    def set_jds(self, val1, val2):
+        """Parse the time strings contained in val1 and set jd1, jd2"""
+        self.set_jds_fast_or_python(val1, val2)
+
+    def to_value(self, parent=None, **kwargs):
+        if self.scale == 'utc':
+            out = super().value
+        else:
+            out = parent.utc._time.value
+        out = np.array([x[:13] + x[14:] for x in out.flat]).reshape(out.shape)
+        return out
+
+    value = property(to_value)
