@@ -174,3 +174,17 @@ def test_scale_exception():
 
     with pytest.raises(ValueError, match="must use scale 'utc' for format 'date'"):
         CxoTime('2019:123:12:13:14', format='date', scale='tt')
+
+
+def test_strict_parsing():
+    """Python strptime parsing allows single digits for mon, day, etc.
+
+    CxoTime is stricter in the format requirements.
+    """
+    CxoTime('2000:001:1:2:3', format='yday')
+    with pytest.raises(ValueError, match='Input values did not match the format class date'):
+        CxoTime('2000:001:1:2:3', format='date')
+
+    with pytest.raises(ValueError, match='Input values did not match the format class greta'):
+        CxoTime('2000001.123', format='greta')
+
