@@ -11,8 +11,6 @@ from astropy.time.utils import day_frac
 from astropy.utils import iers
 from astropy import _erfa as erfa
 
-from cxotime import conf
-
 # For working in Chandra operations, possibly with no network access, we cannot
 # allow auto downloads.
 iers.conf.auto_download = False
@@ -170,19 +168,14 @@ class FastDateParserMixin:
         # If specific input subformat is required then use the Python parser.
         # Also do this if Time format class does not define `use_fast_parser`
         # or if the fast parser is entirely disabled.
-        if (self.in_subfmt != '*'
-                or not self.__class__.__dict__.get('use_fast_parser')
-                or conf.use_fast_parser == 'False'):
-            self.set_jds_python(val1, val2)
+        if self.in_subfmt != '*':
+            self.set_jds_python(self, val1, val2)
         else:
             try:
                 self.set_jds_fast(val1)
             except Exception:
-                # Fall through to the Python parser unless fast is forced.
-                if conf.use_fast_parser == 'force':
-                    raise
-                else:
-                    self.set_jds_python(val1, val2)
+                # Fall through to the Python parser.
+                self.set_jds_python(self, val1, val2)
 
     def set_jds_fast(self, val1):
         """Use fast C parser to parse time strings in val1 and set jd1, jd2"""
@@ -290,7 +283,6 @@ class TimeDate(TimeYearDayTime, FastDateParserMixin):
     name = 'date'
 
     # Class attributes for fast C-parsing
-    use_fast_parser = True
     delims = (0, 0, ord(':'), ord(':'), ord(':'), ord(':'), ord('.'))
     starts = (0, -1, 4, 8, 11, 14, 17)
     stops = (3, -1, 7, 10, 13, 16, -1)
@@ -356,7 +348,6 @@ class TimeGreta(TimeDate, FastDateParserMixin):
     # stops: position where component ends (-1 => continue to end of string)
 
     # Before: yr mon  doy     hour      minute    second    frac
-    use_fast_parser = True
     delims = (0, 0, 0, ord('.'), 0, 0, 0)
     starts = (0, -1, 4, 7, 10, 12, 14)
     stops = (3, -1, 6, 9, 11, 13, -1)
@@ -383,11 +374,6 @@ class TimeGreta(TimeDate, FastDateParserMixin):
             val1.shape = shape
 
         self.set_jds_fast_or_python(val1, val2)
-
-    def set_jds_python(self, val1, val2):
-        # Reformat from YYYYDDD.HHMMSSsss to YYYYDDDHHMMSS.sss
-        val1 = np.array([x[:7] + x[8:14] + '.' + x[14:] for x in val1.flat]).reshape(val1.shape)
-        super().set_jds_python(val1, val2)
 
     def to_value(self, parent=None, **kwargs):
         if self.scale == 'utc':
