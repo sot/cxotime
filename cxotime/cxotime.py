@@ -163,19 +163,6 @@ class CxoTime(Time):
 
 
 class FastDateParserMixin:
-    def set_jds_fast_or_python(self, val1, val2):
-        """Parse the time strings contained in val1 and set jd1, jd2"""
-        # If specific input subformat is required then use the Python parser.
-        # Also do this if Time format class does not define `use_fast_parser`
-        # or if the fast parser is entirely disabled.
-        if self.in_subfmt != '*':
-            self.set_jds_python(self, val1, val2)
-        else:
-            try:
-                self.set_jds_fast(val1)
-            except Exception:
-                # Fall through to the Python parser.
-                self.set_jds_python(self, val1, val2)
 
     def set_jds_fast(self, val1):
         """Use fast C parser to parse time strings in val1 and set jd1, jd2"""
@@ -228,27 +215,6 @@ class FastDateParserMixin:
                     5: 'bad day of year (1 <= doy <= 365 or 366 for leap year'}
             raise ValueError(f'fast C time string parser failed: {msgs[status]}')
 
-    def set_jds_python(self, val1, val2):
-        """Parse the time strings contained in val1 and set jd1, jd2"""
-        # Select subformats based on current self.in_subfmt
-        subfmts = self._select_subfmts(self.in_subfmt)
-        # Be liberal in what we accept: convert bytes to ascii.
-        # Here .item() is needed for arrays with entries of unequal length,
-        # to strip trailing 0 bytes.
-        to_string = (str if val1.dtype.kind == 'U' else
-                     lambda x: str(x.item(), encoding='ascii'))
-        iterator = np.nditer([val1, None, None, None, None, None, None],
-                             flags=['zerosize_ok'],
-                             op_dtypes=[None] + 5 * [np.intc] + [np.double])
-        for val, iy, im, id, ihr, imin, dsec in iterator:
-            val = to_string(val)
-            iy[...], im[...], id[...], ihr[...], imin[...], dsec[...] = (
-                self.parse_string(val, subfmts))
-
-        jd1, jd2 = erfa.dtf2d(self.scale.upper().encode('ascii'),
-                              *iterator.operands[1:])
-        self.jd1, self.jd2 = day_frac(jd1, jd2)
-
 
 class TimeSecs(TimeCxcSec):
     """
@@ -300,7 +266,9 @@ class TimeDate(TimeYearDayTime, FastDateParserMixin):
 
     def set_jds(self, val1, val2):
         """Parse the time strings contained in val1 and set jd1, jd2"""
-        self.set_jds_fast_or_python(val1, val2)
+        if val2 is not None:
+            raise ValueError(f'cannot supply val2 for {self.name} format')
+        self.set_jds_fast(val1)
 
 
 class TimeFracYear(TimeDecimalYear):
@@ -373,7 +341,10 @@ class TimeGreta(TimeDate, FastDateParserMixin):
             val1 = np.array(['{:.9f}'.format(x) for x in val1.flat])
             val1.shape = shape
 
-        self.set_jds_fast_or_python(val1, val2)
+        """Parse the time strings contained in val1 and set jd1, jd2"""
+        if val2 is not None:
+            raise ValueError(f'cannot supply val2 for {self.name} format')
+        self.set_jds_fast(val1)
 
     def to_value(self, parent=None, **kwargs):
         if self.scale == 'utc':
@@ -430,7 +401,9 @@ class TimeMaude(TimeDate, FastDateParserMixin):
 
     def set_jds(self, val1, val2):
         """Parse the time strings contained in val1 and set jd1, jd2"""
-        self.set_jds_fast_or_python(val1, val2)
+        if val2 is not None:
+            raise ValueError(f'cannot supply val2 for {self.name} format')
+        self.set_jds_fast(val1)
 
     def to_value(self, parent=None, **kwargs):
         if self.scale == 'utc':
