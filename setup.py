@@ -11,10 +11,10 @@ except ImportError:
 # NOTE: add '-Rpass-missed=.*' to ``extra_compile_args`` when compiling with clang
 # to report missed optimizations.
 if sys.platform.startswith('win'):
-    extra_compile_args = ['/DNDEBUG']
+    extra_compile_args = []
     extra_link_args = ['/EXPORT:parse_ymdhms_times', '/EXPORT:check_unicode']
 else:
-    extra_compile_args = ['-UNDEBUG', '-fPIC']
+    extra_compile_args = ['-fPIC']
     extra_link_args = []
 
 # Set up extension for C-based time parser. Numpy is required for build but is
