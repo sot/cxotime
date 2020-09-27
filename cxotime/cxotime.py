@@ -49,14 +49,15 @@ class CxoTime(Time):
 
     All of these formats use the UTC scale.
 
-    ========= ===========================================
+    ========= ==============================================
      Format   Description
-    ========= ===========================================
-    secs      Seconds since 1998-01-01T00:00:00 (TT)
-    date      YYYY:DDD:hh:mm:ss.ss..
+    ========= ==============================================
+    secs      Seconds since 1998-01-01T00:00:00 (TT) (float)
+    date      YYYY:DDD:hh:mm:ss.ss.. (string)
     frac_year YYYY.ffffff = date as a floating point year
-    greta     YYYYDDD.hhmmsssss
-    ========= ===========================================
+    greta     YYYYDDD.hhmmsss (string)
+    muade     YYYDDDhhmmsss (integer)
+    ========= ==============================================
 
     Important differences:
 
@@ -152,6 +153,9 @@ class CxoTime(Time):
                         raise ValueError(f"must use scale 'utc' for format '{fmt}''")
                     return
             kwargs = kwargs_orig
+
+        elif fmt == 'maude':
+            args = (np.asarray(args[0], dtype='S'),) + args[1:]
 
         super(CxoTime, self).__init__(*args, **kwargs)
 
@@ -292,7 +296,11 @@ class TimeFracYear(TimeDecimalYear):
 
 class TimeGreta(TimeDate, FastDateParserMixin):
     """
-    Date in format YYYYDDD.hhmmsssss, where sssss is number of milliseconds.
+    Date as a string in format 'YYYYDDD.hhmmsssss', where sssss is number of
+    milliseconds.
+
+    This can be input as a float, integer or string, but the output is always
+    string.
 
     Time value is always in UTC regardless of time object scale.
     """
@@ -324,9 +332,11 @@ class TimeGreta(TimeDate, FastDateParserMixin):
     has_day_of_year = 1
 
     def _check_val_type(self, val1, val2):
-        # Note: don't care about val2 for these classes
+        if val2 is not None:
+            raise ValueError(f'cannot supply val2 for {self.name} format')
+
         if val1.dtype.kind not in ('S', 'U', 'i', 'f'):
-            raise TypeError('Input values for {0} class must be strings or numbers'
+            raise TypeError('Input values for {0} class must be string or number'
                             .format(self.name))
         return val1, None
 
@@ -337,13 +347,9 @@ class TimeGreta(TimeDate, FastDateParserMixin):
         # or if the fast parser is entirely disabled.
         # Allow for float input
         if val1.dtype.kind in ('f', 'i'):
-            shape = val1.shape
-            val1 = np.array(['{:.9f}'.format(x) for x in val1.flat])
-            val1.shape = shape
+            print(val1, val1.dtype, val1.shape)
+            val1 = np.array(['{:.9f}'.format(x) for x in val1.flat]).reshape(val1.shape)
 
-        """Parse the time strings contained in val1 and set jd1, jd2"""
-        if val2 is not None:
-            raise ValueError(f'cannot supply val2 for {self.name} format')
         self.set_jds_fast(val1)
 
     def to_value(self, parent=None, **kwargs):
@@ -360,7 +366,10 @@ class TimeGreta(TimeDate, FastDateParserMixin):
 
 class TimeMaude(TimeDate, FastDateParserMixin):
     """
-    Date in format YYYYDDDhhmmsssss, where sssss is number of milliseconds.
+    Date as a 64-bit integer in format YYYYDDDhhmmsss, where sss is number of
+    milliseconds.
+
+    This can be input as an integer or string, but the output is always integer.
 
     Time value is always in UTC regardless of time object scale.
     """
@@ -393,16 +402,21 @@ class TimeMaude(TimeDate, FastDateParserMixin):
     has_day_of_year = 1
 
     def _check_val_type(self, val1, val2):
-        # Note: don't care about val2 for these classes
-        if val1.dtype.kind not in ('S', 'U'):
-            raise TypeError('Input values for {0} class must be strings'
+        if val2 is not None:
+            raise ValueError(f'cannot supply val2 for {self.name} format')
+
+        if val1.dtype.kind not in ('S', 'U', 'i'):
+            print(val1, val1.dtype.kind)
+            raise TypeError('Input values for {0} class must be string or int'
                             .format(self.name))
+
+        if val1.dtype.kind == 'i':
+            val1 = val1.astype('S')
+
         return val1, None
 
     def set_jds(self, val1, val2):
         """Parse the time strings contained in val1 and set jd1, jd2"""
-        if val2 is not None:
-            raise ValueError(f'cannot supply val2 for {self.name} format')
         self.set_jds_fast(val1)
 
     def to_value(self, parent=None, **kwargs):
@@ -411,6 +425,8 @@ class TimeMaude(TimeDate, FastDateParserMixin):
         else:
             out = parent.utc._time.value
         out = np.array([x[:13] + x[14:] for x in out.flat]).reshape(out.shape)
+        out = out.astype('i8')
+
         return out
 
     value = property(to_value)

@@ -28,8 +28,8 @@ the native Time_ class).
 secs      Seconds since 1998-01-01T00:00:00 (TT)       utc
 date      YYYY:DDD:hh:mm:ss.ss..                       utc
 frac_year YYYY.ffffff = date as a floating point year  utc
-greta     YYYYDDD.hhmmsssss                            utc
-maude     YYYYDDDhhmmsssss                             utc
+greta     YYYYDDD.hhmmsssss (string)                   utc
+maude     YYYYDDDhhmmsssss (integer)                   utc
 ========= ===========================================  =======
 
 
