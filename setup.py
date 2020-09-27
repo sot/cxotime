@@ -10,19 +10,24 @@ except ImportError:
 
 # NOTE: add '-Rpass-missed=.*' to ``extra_compile_args`` when compiling with clang
 # to report missed optimizations.
-extra_compile_args = ['-UNDEBUG']
-if not sys.platform.startswith('win'):
-    extra_compile_args.append('-fPIC')
+if sys.platform.startswith('win'):
+    extra_compile_args = ['/DNDEBUG']
+    extra_link_args = ['/EXPORT:parse_ymdhms_times', '/EXPORT:check_unicode']
+else:
+    extra_compile_args = ['-UNDEBUG', '-fPIC']
+    extra_link_args = []
 
 # Set up extension for C-based time parser. Numpy is required for build but is
 # optional for other things like `python setup.py --version`.
 try:
     import numpy
-    ext_modules = [Extension(name='cxotime._parse_times',
+    ext_modules = [Extension(name='cxotime.parse_times',
                              sources=['cxotime/parse_times.c'],
                              extra_compile_args=extra_compile_args,
+                             extra_link_args=extra_link_args,
                              include_dirs=[numpy.get_include()],
-                             language='c')]
+                             language='c'
+                             )]
 except ImportError:
     ext_modules = []
 

@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 
+void PyInit_parse_times(void)
+{
+    /* stub initialization function needed by distutils on Windows */
+}
+
 // ASCII codes for '0' and '9'
 const char char_zero = 48;
 const char char_nine = 57;

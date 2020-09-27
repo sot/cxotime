@@ -21,7 +21,7 @@ array_1d_double = npct.ndpointer(dtype=np.double, ndim=1, flags='C_CONTIGUOUS')
 array_1d_int = npct.ndpointer(dtype=np.intc, ndim=1, flags='C_CONTIGUOUS')
 
 # load the library, using numpy mechanisms
-libpt = npct.load_library("_parse_times", Path(__file__).parent)
+libpt = npct.load_library("parse_times", Path(__file__).parent)
 
 # Set up the return types and argument types for parse_ymdhms_times()
 # int parse_ymdhms_times(char *times, int n_times, int max_str_len,
