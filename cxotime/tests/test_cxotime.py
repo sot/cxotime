@@ -42,8 +42,7 @@ def test_cxotime_basic():
 def test_cxotime_now(now_method):
     ct_now = now_method()
     t_now = Time.now()
-    assert t_now >= ct_now
-    assert (ct_now - t_now) < 10 * u.s
+    assert abs((ct_now - t_now).to_value(u.s)) < 0.1
 
     with pytest.raises(ValueError,
                        match='cannot supply keyword arguments with no time value'):
