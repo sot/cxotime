@@ -108,7 +108,7 @@ Examples
    :maxdepth: 2
 
 API docs
-========
+--------
 
 .. automodule:: cxotime.cxotime
    :members:
