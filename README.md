@@ -13,6 +13,7 @@ All of these formats use the UTC scale.
 secs        | Seconds since 1998-01-01T00:00:00 (tt)
 date        | YYYY:DDD:hh:mm:ss.ss..
 greta       | YYYYDDD.hhmmsssss
+maude       | YYYYDDDhhmmsssss
 frac_year   | YYYY.fffff
 
 Important differences:

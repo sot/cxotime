@@ -42,8 +42,7 @@ def test_cxotime_basic():
 def test_cxotime_now(now_method):
     ct_now = now_method()
     t_now = Time.now()
-    assert t_now >= ct_now
-    assert (ct_now - t_now) < 10 * u.s
+    assert abs((ct_now - t_now).to_value(u.s)) < 0.1
 
     with pytest.raises(ValueError,
                        match='cannot supply keyword arguments with no time value'):
@@ -127,25 +126,44 @@ def test_frac_year():
     assert t.frac_year == 2000.5
 
 
-def test_greta():
-    """Test greta format"""
-    t_in = [['2001002.030405678', '2002002.030405678'],
-            ['2003002.030405678', '2004002.030405678']]
-    t = CxoTime(t_in)
-    assert t.format == 'greta'
+@pytest.mark.parametrize('fmt', ['maude', 'greta'])
+@pytest.mark.parametrize('number', [True, False])
+@pytest.mark.parametrize('bytestr', [True, False])
+def test_maude_and_greta(fmt, number, bytestr):
+    """Test maude and greta formats"""
+    def mg(val):
+        """Munge greta-style string input to desired type for CxoTime init"""
+        if fmt == 'greta':
+            out = float(val) if number else val
+        else:
+            val = val[:7] + val[8:]
+            out = int(val) if number else val
+        if bytestr and isinstance(out, str):
+            out = out.encode('ascii')
+        return out
+
+    def mgo(val):
+        """Munge output to expected type for CxoTime output"""
+        if fmt == 'greta':
+            return val
+        elif fmt == 'maude':
+            return int(val[:7] + val[8:])
+
+    t_in = [[mg('2001002.030405678'), mg('2002002.030405678')],
+            [mg('2003002.030405678'), mg('2004002.030405678')]]
+    val_out = [[mgo('2001002.030405678'), mgo('2002002.030405678')],
+               [mgo('2003002.030405678'), mgo('2004002.030405678')]]
+    t = CxoTime(t_in, format=fmt)
+    assert t.format == fmt
     assert t.scale == 'utc'
     assert t.shape == (2, 2)
     assert np.all(t.yday == [['2001:002:03:04:05.678', '2002:002:03:04:05.678'],
                              ['2003:002:03:04:05.678', '2004:002:03:04:05.678']])
-    assert np.all(t.value == t_in)
-
-    # Input from float
-    t = CxoTime(np.array(t_in, dtype=np.float), format='greta')
-    assert np.all(t.value == t_in)
+    assert np.all(t.value == val_out)
 
     # During leap second
-    assert CxoTime('2015-06-30 23:59:60.5').greta == '2015181.235960500'
-    assert CxoTime('2015181.235960500').date == '2015:181:23:59:60.500'
+    assert getattr(CxoTime('2015-06-30 23:59:60.5'), fmt) == mgo('2015181.235960500')
+    assert CxoTime(mg('2015181.235960500'), format=fmt).date == '2015:181:23:59:60.500'
 
 
 def test_scale_exception():
@@ -166,3 +184,16 @@ def test_scale_exception():
 
     with pytest.raises(ValueError, match="must use scale 'utc' for format 'date'"):
         CxoTime('2019:123:12:13:14', format='date', scale='tt')
+
+
+def test_strict_parsing():
+    """Python strptime parsing allows single digits for mon, day, etc.
+
+    CxoTime is stricter in the format requirements.
+    """
+    CxoTime('2000:001:1:2:3', format='yday')
+    with pytest.raises(ValueError, match='Input values did not match the format class date'):
+        CxoTime('2000:001:1:2:3', format='date')
+
+    with pytest.raises(ValueError, match='Input values did not match the format class greta'):
+        CxoTime('2000001.123', format='greta')
