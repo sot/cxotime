@@ -1,14 +1,19 @@
 #include <stdio.h>
 #include <string.h>
 
-void PyInit_parse_times(void)
-{
-    /* stub initialization function needed by distutils on Windows */
-}
-
 // ASCII codes for '0' and '9'
 const char char_zero = 48;
 const char char_nine = 57;
+
+// Distutils on Windows automatically exports ``PyInit__parse_times``,
+// create dummy to prevent linker complaining about missing symbol.
+// Based on convolution/src/convolve.c.
+#if defined(_MSC_VER)
+void PyInit__parse_times(void)
+{
+    return;
+}
+#endif
 
 int parse_int_from_char_array(char *chars, int str_len,
                               char delim, int idx0, int idx1,
@@ -44,14 +49,15 @@ int parse_int_from_char_array(char *chars, int str_len,
     int mult = 1;
     char digit;
     char ch;
+    int ii;
 
     // Check if string ends (has 0x00) before str_len. Require that this segment
     // of the string is entirely contained in the string (idx1 < str_len),
     // remembering that idx1 is inclusive and counts from 0.
     if (idx1 < str_len) {
-        for (int i = idx0; i <= idx1; i++) {
-            if (chars[i] == 0) {
-                str_len = i;
+        for (ii = idx0; ii <= idx1; ii++) {
+            if (chars[ii] == 0) {
+                str_len = ii;
                 break;
             }
         }
@@ -81,7 +87,7 @@ int parse_int_from_char_array(char *chars, int str_len,
 
     // Build up the value using reversed digits
     *val = 0;
-    for (int ii = idx1; ii >= idx0; ii--)
+    for (ii = idx1; ii >= idx0; ii--)
     {
         ch = chars[ii];
         if (ch < char_zero || ch > char_nine) {
@@ -127,6 +133,7 @@ int parse_frac_from_char_array(char *chars, int str_len, char delim, int idx0,
     double mult = 0.1;
     char digit;
     char ch;
+    int ii;
 
     *val = 0.0;
 
@@ -147,7 +154,7 @@ int parse_frac_from_char_array(char *chars, int str_len, char delim, int idx0,
         idx0 += 1;
     }
 
-    for (int ii = idx0; ii < str_len; ii++)
+    for (ii = idx0; ii < str_len; ii++)
     {
         ch = chars[ii];
         if (ch < char_zero || ch > char_nine) {
@@ -181,13 +188,14 @@ int convert_day_of_year_to_month_day(int year, int day_of_year, int *month, int 
     const unsigned short int _mon_yday_leap[13] =
         { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366 };
     const unsigned short int *mon_yday = leap_year ? _mon_yday_leap :_mon_yday_normal;
+    int mon;
 
     if (day_of_year < 1 || day_of_year > days_in_year) {
         // Error in day_of_year
         return 5;
     }
 
-    for (int mon = 1; mon <= 12; mon++) {
+    for (mon = 1; mon <= 12; mon++) {
         if (day_of_year <= mon_yday[mon]) {
             *month = mon;
             *day_of_month = day_of_year - mon_yday[mon - 1];
@@ -239,8 +247,9 @@ int parse_ymdhms_times(char *times, int n_times, int max_str_len, int has_day_of
     char *time;
     int *year, *month, *day, *hour, *minute;
     double *second;
+    int i, ii;
 
-    for (int ii = 0; ii < n_times; ii++)
+    for (ii = 0; ii < n_times; ii++)
     {
         time = times + ii * max_str_len;
         year = years + ii;
@@ -263,7 +272,7 @@ int parse_ymdhms_times(char *times, int n_times, int max_str_len, int has_day_of
         // Check for null termination before max_str_len. If called using a contiguous
         // numpy 2-d array of chars there may or may not be null terminations.
         str_len = max_str_len;
-        for (int i = 0; i < max_str_len; i++) {
+        for (i = 0; i < max_str_len; i++) {
             if (time[i] == 0) {
                 str_len = i;
                 break;
@@ -334,9 +343,10 @@ int check_unicode(char *chars, int n_unicode_char)
 // Check if *chars is pure ASCII, assuming input is UTF-32
 {
     char *ch;
+    int ii;
 
     ch = chars;
-    for (int i = 0; i < n_unicode_char; i++)
+    for (ii = 0; ii < n_unicode_char; ii++)
     {
         ch++;
         if (*ch++) return 1;
