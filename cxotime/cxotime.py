@@ -97,14 +97,21 @@ class CxoTime(Time):
     def __new__(cls, *args, **kwargs):
         # Handle the case of `CxoTime()` which returns the current time. This is
         # for compatibility with DateTime.
-        if not args:
+        if not args or (len(args) == 1 and args[0] is None):
             if not kwargs:
+                # Stub in a value for `val` so super()__new__ can run since `val`
+                # is a required positional arg.
                 args = (None, )
             else:
                 raise ValueError('cannot supply keyword arguments with no time value')
         return super().__new__(cls, *args, **kwargs)
 
     def __init__(self, *args, **kwargs):
+        if len(args) == 1 and args[0] is None:
+            # Compatibility with DateTime and allows kwarg default of None with
+            # input casting like `date = CxoTime(date)`.
+            args = ()
+
         if args:
             if args[0].__class__.__name__ == 'DateTime':
                 if len(args) > 1:

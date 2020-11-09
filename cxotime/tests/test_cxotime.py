@@ -49,6 +49,16 @@ def test_cxotime_now(now_method):
         CxoTime(scale='utc')
 
 
+def test_cxotime_now_by_none():
+    ct_now = CxoTime(None)
+    t_now = Time.now()
+    assert abs((ct_now - t_now).to_value(u.s)) < 0.1
+
+    with pytest.raises(ValueError,
+                       match='cannot supply keyword arguments with no time value'):
+        CxoTime(None, scale='utc')
+
+
 def test_cxotime_from_datetime():
     secs = DateTime(np.array(['2000:001', '2015:181:23:59:60.500', '2015:180:01:02:03.456'])).secs
     dts = DateTime(secs)
