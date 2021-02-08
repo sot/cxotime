@@ -12,7 +12,7 @@ from astropy.utils import iers
 # in astropy versions < 4.2, erfa was an astropy private package:
 try:
     import erfa
-except:
+except ModuleNotFoundError:
     from astropy import _erfa as erfa
 
 # For working in Chandra operations, possibly with no network access, we cannot
