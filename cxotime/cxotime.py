@@ -9,7 +9,11 @@ from ctypes import c_int
 from astropy.time import Time, TimeCxcSec, TimeYearDayTime, TimeDecimalYear
 from astropy.time.utils import day_frac
 from astropy.utils import iers
-from astropy import _erfa as erfa
+# in astropy versions < 4.2, erfa was an astropy private package:
+try:
+    import erfa
+except ModuleNotFoundError:
+    from astropy import _erfa as erfa
 
 # For working in Chandra operations, possibly with no network access, we cannot
 # allow auto downloads.
