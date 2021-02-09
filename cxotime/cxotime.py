@@ -2,6 +2,7 @@
 import numpy as np
 from copy import copy
 from pathlib import Path
+import warnings
 
 import numpy.ctypeslib as npct
 from ctypes import c_int
@@ -14,6 +15,12 @@ try:
     import erfa
 except ModuleNotFoundError:
     from astropy import _erfa as erfa
+
+# Globally ignore the ERFA dubious year warning that gets emitted for UTC dates
+# either before around 1950 or well after the last known leap second. This
+# warning is conservatively indicating that UTC is not well-defined in those
+# regimes, but we don't care.
+warnings.filterwarnings('ignore', category=erfa.ErfaWarning, message=r'.*dubious year')
 
 # For working in Chandra operations, possibly with no network access, we cannot
 # allow auto downloads.
