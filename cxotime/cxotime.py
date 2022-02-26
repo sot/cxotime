@@ -365,7 +365,6 @@ class TimeGreta(TimeDate, FastDateParserMixin):
         # or if the fast parser is entirely disabled.
         # Allow for float input
         if val1.dtype.kind in ('f', 'i'):
-            print(val1, val1.dtype, val1.shape)
             val1 = np.array(['{:.9f}'.format(x) for x in val1.flat]).reshape(val1.shape)
 
         self.set_jds_fast(val1)
@@ -424,7 +423,6 @@ class TimeMaude(TimeDate, FastDateParserMixin):
             raise ValueError(f'cannot supply val2 for {self.name} format')
 
         if val1.dtype.kind not in ('S', 'U', 'i'):
-            print(val1, val1.dtype.kind)
             raise TypeError('Input values for {0} class must be string or int'
                             .format(self.name))
 
