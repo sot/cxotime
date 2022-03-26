@@ -219,7 +219,7 @@ def test_date2secs(date):
     t = CxoTime(date)
     t_secs = t.secs
     assert t_secs == date2secs(t.date)  # np.array U
-    assert t_secs == date2secs(np.char.encode(t.date, 'ascii')) # np.array S
+    assert t_secs == date2secs(np.char.encode(t.date, 'ascii'))  # np.array S
     assert t_secs == date2secs(date)  # str
     assert t_secs == date2secs(date.encode('ascii'))  # bytes
 

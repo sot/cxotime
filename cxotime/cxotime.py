@@ -51,27 +51,28 @@ libpt.check_unicode.argtypes = [array_1d_char, c_int]
 
 
 def date2secs(date):
-    """Fast conversion from year-day-of-year date(s) to CXC seconds
+    """Fast conversion from Year Day-of-Year date(s) to CXC seconds
 
     This is a specialized function that allows for fast conversion of a single
-    date or an array of dates to CXC seconds.  It is intended to be used *ONLY*
-    when the input date is known to be in the correct year-day-of-year format.
+    date or an array of dates to CXC seconds.  It is intended to be used ONLY
+    when the input date is known to be in the correct Year Day-of-Year format.
 
-    The main use case is for a single date or a few dates. For a large array of
-    dates this is not significantly faster than the equivalent call to
-    ``CxoTime(date).secs``.
+    The main use case is for a single date or a few dates. For a single date
+    this function is about 10 times faster than the equivalent call to
+    ``CxoTime(date).secs``. For a large array of dates (more than about 100)
+    this function is not significantly faster.
 
     This function will raise an exception if the input date is not in one of
     these allowed formats:
+
     - YYYY:DDD
     - YYYY:DDD:HH:MM
     - YYYY:DDD:HH:MM:SS
     - YYYY:DDD:HH:MM:SS.sss
 
-    :param date: str, list of str, bytes, list of bytes, np.ndarray
-        Input date(s) in an allowed year-day-of-year date format
-    :returns: float, np.ndarray
-        CXC seconds matching dimensions of input date(s)
+    :param date: str, list of str, bytes, list of bytes, np.ndarray Input
+        date(s) in an allowed year-day-of-year date format
+    :returns: float, np.ndarray CXC seconds matching dimensions of input date(s)
     """
     # This code is adapted from the underlying code in astropy time, with some
     # of the general-purpose handling and validation removed.
