@@ -7,7 +7,7 @@ tested, so this simply confirms that the add-on in CxoTime works.
 import pytest
 import numpy as np
 
-from .. import CxoTime
+from .. import CxoTime, date2secs
 from astropy.time import Time
 from Chandra.Time import DateTime
 import astropy.units as u
@@ -207,3 +207,29 @@ def test_strict_parsing():
 
     with pytest.raises(ValueError, match='Input values did not match the format class greta'):
         CxoTime('2000001.123', format='greta')
+
+
+@pytest.mark.parametrize(
+    'date',
+    ['2001:002',
+     '2001:002:03:04',
+     '2001:002:03:04:05',
+     '2001:002:03:04:05.678'])
+def test_date2secs(date):
+    t = CxoTime(date)
+    t_secs = t.secs
+    assert t_secs == date2secs(t.date)  # np.array U
+    assert t_secs == date2secs(np.char.encode(t.date, 'ascii')) # np.array S
+    assert t_secs == date2secs(date)  # str
+    assert t_secs == date2secs(date.encode('ascii'))  # bytes
+
+    date2 = str((t + 20 * u.s).date)
+    date3 = str((t + 40 * u.s).date)
+    dates = [[date, date2], [date3, date2]]
+    t = CxoTime(dates)
+    t_secs = t.secs
+    assert np.all(t_secs == date2secs(t.date))  # np.array U
+    assert np.all(t_secs == date2secs(np.char.encode(t.date, 'ascii')))  # np.array S
+    assert np.all(t_secs == date2secs(dates))  # str
+    assert np.all(t_secs == date2secs(np.char.encode(t.date, 'ascii')).tolist())  # bytes
+    assert t_secs.shape == date2secs(dates).shape
