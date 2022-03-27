@@ -125,8 +125,8 @@ argument.
    :maxdepth: 2
 
 
-Fast conversion of Date to CXC seconds
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Fast conversion between Date and CXC seconds
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For fast conversion of an input date or dates in Year Day-of-Year date format,
 the function :func:`~cxotime.cxotime.date2secs` can be used.
@@ -148,6 +148,10 @@ these allowed formats:
 - YYYY:DDD:HH:MM
 - YYYY:DDD:HH:MM:SS
 - YYYY:DDD:HH:MM:SS.sss
+
+Conversely, for fast conversion from CXC seconds to Year Day-of-Year date, the
+function :func:`~cxotime.cxotime.secs2date` can be used. For scalar inputs this
+is 15-20 times faster than the equivalent call to ``CxoTime(secs).date``.
 
 API docs
 --------
