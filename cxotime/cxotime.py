@@ -50,6 +50,78 @@ libpt.check_unicode.restype = c_int
 libpt.check_unicode.argtypes = [array_1d_char, c_int]
 
 
+def date2secs(date):
+    """Fast conversion from Year Day-of-Year date(s) to CXC seconds
+
+    This is a specialized function that allows for fast conversion of a single
+    date or an array of dates to CXC seconds.  It is intended to be used ONLY
+    when the input date is known to be in the correct Year Day-of-Year format.
+
+    The main use case is for a single date or a few dates. For a single date
+    this function is about 10 times faster than the equivalent call to
+    ``CxoTime(date).secs``. For a large array of dates (more than about 100)
+    this function is not significantly faster.
+
+    This function will raise an exception if the input date is not in one of
+    these allowed formats:
+
+    - YYYY:DDD
+    - YYYY:DDD:HH:MM
+    - YYYY:DDD:HH:MM:SS
+    - YYYY:DDD:HH:MM:SS.sss
+
+    :param date: str, list of str, bytes, list of bytes, np.ndarray Input
+        date(s) in an allowed year-day-of-year date format
+    :returns: float, np.ndarray CXC seconds matching dimensions of input date(s)
+    """
+    # This code is adapted from the underlying code in astropy time, with some
+    # of the general-purpose handling and validation removed.
+    from astropy.time.formats import TimeYearDayTime
+    from astropy.time import _parse_times
+
+    # Handle bytes or str input and convert to uint8.  We need to the
+    # dtype _parse_times.dt_u1 instead of uint8, since otherwise it is
+    # not possible to create a gufunc with structured dtype output.
+    # See note about ufunc type resolver in pyerfa/erfa/ufunc.c.templ.
+    date = np.asarray(date)
+    if date.dtype.kind == 'U':
+        # This assumes the input is pure ASCII.
+        val1_uint32 = date.view((np.uint32, date.dtype.itemsize // 4))
+        chars = val1_uint32.astype(_parse_times.dt_u1)
+    else:
+        chars = date.view((_parse_times.dt_u1, date.dtype.itemsize))
+
+    # Call the fast parsing ufunc.
+    time_struct = TimeYearDayTime._fast_parser(chars)
+
+    # Convert time ISO date to jd
+    jd1, jd2, retval = erfa.ufunc.dtf2d(
+        b'UTC',
+        time_struct['year'],
+        time_struct['month'],
+        time_struct['day'],
+        time_struct['hour'],
+        time_struct['minute'],
+        time_struct['second'])
+    if np.any(retval):
+        raise ValueError(f'Error in dtf2d: {retval=}')
+
+    # Transform to TT via TAI
+    jd1, jd2, retval = erfa.ufunc.utctai(jd1, jd2)
+    if np.any(retval):
+        raise ValueError(f'Error in utctai: {retval=}')
+
+    jd1, jd2, retval = erfa.ufunc.taitt(jd1, jd2)
+    if np.any(retval):
+        raise ValueError(f'Error in taitt: {retval=}')
+
+    # Fixed offsets taken from CxoTime(0.0).tt.jd1,2
+    time_from_epoch1 = (jd1 - 2450814.0) * 86400.0
+    time_from_epoch2 = (jd2 - 0.5) * 86400.0
+
+    return time_from_epoch1 + time_from_epoch2
+
+
 class CxoTime(Time):
     """Time class for Chandra analysis that is based on ``astropy.time.Time``.
 

@@ -124,6 +124,31 @@ argument.
 .. toctree::
    :maxdepth: 2
 
+
+Fast conversion of Date to CXC seconds
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For fast conversion of an input date or dates in Year Day-of-Year date format,
+the function :func:`~cxotime.cxotime.date2secs` can be used.
+
+This is a specialized function similar to the legacy ``Chandra.Time.date2secs``
+that allows for fast conversion of a single date or an array of dates to CXC
+seconds.  It is intended to be used ONLY when the input date is known to be in
+the correct Year Day-of-Year format.
+
+The main use case is for a single date or a few dates. For a single date this
+function is about 10 times faster than the equivalent call to
+``CxoTime(date).secs``. For a large array of dates (more than about 100) this
+function  is not significantly faster.
+
+This function will raise an exception if the input date is not in one of
+these allowed formats:
+
+- YYYY:DDD
+- YYYY:DDD:HH:MM
+- YYYY:DDD:HH:MM:SS
+- YYYY:DDD:HH:MM:SS.sss
+
 API docs
 --------
 

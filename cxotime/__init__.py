@@ -1,5 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-from .cxotime import CxoTime  # noqa
+from .cxotime import CxoTime, date2secs  # noqa
 from astropy.time import TimeDelta  # noqa
 from astropy import units  # noqa
 import ska_helpers
