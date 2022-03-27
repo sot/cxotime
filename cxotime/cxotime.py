@@ -94,8 +94,11 @@ def date2secs(date):
     # Call the fast parsing ufunc.
     time_struct = TimeYearDayTime._fast_parser(chars)
 
-    # Convert time ISO date to jd
-    jd1, jd2, retval = erfa.ufunc.dtf2d(
+    # In these ERFA calls ignore the return value since we know jd1, jd2 are OK.
+    # Checking the return value via np.any nearly doubles the function time.
+
+    # Convert time ISO date to jd1, jd2
+    jd1, jd2, _ = erfa.ufunc.dtf2d(
         b'UTC',
         time_struct['year'],
         time_struct['month'],
@@ -103,17 +106,10 @@ def date2secs(date):
         time_struct['hour'],
         time_struct['minute'],
         time_struct['second'])
-    if np.any(retval):
-        raise ValueError(f'Error in dtf2d: {retval=}')
 
     # Transform to TT via TAI
-    jd1, jd2, retval = erfa.ufunc.utctai(jd1, jd2)
-    if np.any(retval):
-        raise ValueError(f'Error in utctai: {retval=}')
-
-    jd1, jd2, retval = erfa.ufunc.taitt(jd1, jd2)
-    if np.any(retval):
-        raise ValueError(f'Error in taitt: {retval=}')
+    jd1, jd2, _ = erfa.ufunc.utctai(jd1, jd2)
+    jd1, jd2, _ = erfa.ufunc.taitt(jd1, jd2)
 
     # Fixed offsets taken from CxoTime(0.0).tt.jd1,2
     time_from_epoch1 = (jd1 - 2450814.0) * 86400.0
