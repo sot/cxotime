@@ -3,6 +3,7 @@ import numpy as np
 from copy import copy
 from pathlib import Path
 import warnings
+import datetime
 
 import numpy.ctypeslib as npct
 from ctypes import c_int
@@ -116,6 +117,80 @@ def date2secs(date):
     time_from_epoch2 = (jd2 - 0.5) * 86400.0
 
     return time_from_epoch1 + time_from_epoch2
+
+
+def secs2date(secs):
+    """Fast conversion from CXC seconds to Year Day-of-Year date(s)
+
+    This is a specialized function that allows for fast conversion of one or
+    more CXC seconds times to Year Day-of-Year format.
+
+    The main use case is for a single date or a few dates. For a single date
+    this function is about 15-20 times faster than the equivalent call to
+    ``CxoTime(secs).date``. For a large array of dates (more than about 100)
+    this function is not significantly faster.
+
+    :param secs: float, list of float, np.ndarray
+        Input time(s) in CXC seconds
+    :returns: str, np.ndarray of str
+        Year Day-of-Year dates matching dimensions of input time(s)
+    """
+    # This code is adapted from the underlying code in astropy time, with some
+    # of the general-purpose handling and validation removed.
+
+    # For scalars use a specialized version that is about 30% faster.
+    if (isinstance(secs, float)
+            or isinstance(secs, np.ndarray) and secs.shape == ()):
+        return _secs2date_scalar(secs)
+
+    secs = np.asarray(secs, dtype=np.float64)
+    jd1 = secs / 86400.0 + 2450814.5
+    jd2 = 0.0
+
+    # In these ERFA calls ignore the return value since we know jd1, jd2 are OK.
+    # Checking the return value via np.any is quite slow.
+    # Transform TT to UTC via TAI
+    jd1, jd2, _ = erfa.ufunc.tttai(jd1, jd2)
+    jd1, jd2, _ = erfa.ufunc.taiutc(jd1, jd2)
+
+    dates = []
+    iys, ims, ids, ihmsfs = erfa.d2dtf(b'TT', 3, jd1, jd2)
+    ihrs = ihmsfs['h']
+    imins = ihmsfs['m']
+    isecs = ihmsfs['s']
+    ifracs = ihmsfs['f']
+    for iy, im, id, ihr, imin, isec, ifracsec in np.nditer(
+            [iys, ims, ids, ihrs, imins, isecs, ifracs],
+            flags=['zerosize_ok']):
+        yday = datetime.datetime(iy, im, id).timetuple().tm_yday
+        date = f'{iy:4d}:{yday:03d}:{ihr:02d}:{imin:02d}:{isec:02d}.{ifracsec:03d}'
+        dates.append(date)
+
+    out = np.array(dates).reshape(secs.shape)
+    return out
+
+
+def _secs2date_scalar(secs):
+    """Internal version of secs2date for scalar input
+
+    Same as secs2date but with the array handling removed. This is around 30%
+    faster.
+    """
+    jd1 = secs / 86400.0 + 2450814.5
+    jd2 = 0.0
+
+    jd1, jd2, _ = erfa.ufunc.tttai(jd1, jd2)
+    jd1, jd2, _ = erfa.ufunc.taiutc(jd1, jd2)
+
+    iy, im, id, ihmsfs = erfa.d2dtf(b'TT', 3, jd1, jd2)
+    ihr = ihmsfs['h']
+    imin = ihmsfs['m']
+    isec = ihmsfs['s']
+    ifracsec = ihmsfs['f']
+    yday = datetime.datetime(iy, im, id).timetuple().tm_yday
+    date = f'{iy:4d}:{yday:03d}:{ihr:02d}:{imin:02d}:{isec:02d}.{ifracsec:03d}'
+
+    return date
 
 
 class CxoTime(Time):
