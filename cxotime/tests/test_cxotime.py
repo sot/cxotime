@@ -7,7 +7,7 @@ tested, so this simply confirms that the add-on in CxoTime works.
 import pytest
 import numpy as np
 
-from .. import CxoTime, date2secs
+from .. import CxoTime, date2secs, secs2date
 from astropy.time import Time
 from Chandra.Time import DateTime
 import astropy.units as u
@@ -233,3 +233,28 @@ def test_date2secs(date):
     assert np.all(t_secs == date2secs(dates))  # str
     assert np.all(t_secs == date2secs(np.char.encode(t.date, 'ascii')).tolist())  # bytes
     assert t_secs.shape == date2secs(dates).shape
+
+
+@pytest.mark.parametrize(
+    'date',
+    ['2022:001:01:01:01.123', '1999:001'])
+def test_secs2date(date):
+    t = CxoTime(date)
+    t_secs = t.secs
+    t_date = t.date
+    assert t_date == secs2date(t_secs)  # np.array float64
+    assert t_date == secs2date(float(t_secs))  # Python float
+    assert isinstance(secs2date(t_secs), str)
+
+    date2 = str((t + 20 * u.s).date)
+    date3 = str((t + 40 * u.s).date)
+    dates = [[t_date, date2], [date3, date2]]
+    t = CxoTime(dates)
+    t_secs = t.secs
+    t_date = t.date
+    assert np.all(t_date == secs2date(t_secs))  # np.array float64
+    assert np.all(t_date == secs2date(t_secs.tolist()))  # Python 2-d list
+
+    val = secs2date(t_secs)
+    assert isinstance(val, np.ndarray)
+    assert val.dtype.kind == 'U'
