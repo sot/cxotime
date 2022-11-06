@@ -256,8 +256,9 @@ class CxoTime(Time):
                 # Stub in a value for `val` so super()__new__ can run since `val`
                 # is a required positional arg.
                 args = (None, )
-            else:
+            elif 'val' not in kwargs:
                 raise ValueError('cannot supply keyword arguments with no time value')
+
         return super().__new__(cls, *args, **kwargs)
 
     def __init__(self, *args, **kwargs):
@@ -276,8 +277,11 @@ class CxoTime(Time):
                 if kwargs.setdefault('format', 'date') != 'date':
                     raise ValueError("must use format 'date' for DateTime input")
         else:
-            # For `CxoTime()`` return the current time in `date` format.
-            args = (Time.now().yday, )
+            if 'val' in kwargs:
+                args = (kwargs.pop('val'), )
+            else:
+                # For `CxoTime()`` return the current time in `date` format.
+                args = (Time.now().yday, )
 
         # If format is supplied and is a DateTime format then require scale='utc'.
         fmt = kwargs.get('format')
