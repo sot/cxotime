@@ -1,4 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
+import sys
 import numpy as np
 from copy import copy
 from pathlib import Path
@@ -49,6 +50,13 @@ libpt.check_unicode.restype = c_int
 
 # Set up returns types and args for the unicode checker
 libpt.check_unicode.argtypes = [array_1d_char, c_int]
+
+
+def print_time_conversions():
+    """Interface to entry_point script ``cxotime`` to print time conversions"""
+    date = None if len(sys.argv) == 1 else sys.argv[1]
+    date = CxoTime(date)
+    date.print_conversions()
 
 
 def date2secs(date):
@@ -325,6 +333,50 @@ class CxoTime(Time):
         return cls()
 
     now.__doc__ = Time.now.__doc__
+
+    def print_conversions(self):
+        """
+        Print a table of conversions to other formats.
+
+        Example::
+
+           >>> from cxotime import CxoTime
+           >>> t = CxoTime('2010:001:00:00:00')
+           >>> t.print_conversions()
+           local       2009 Thu Dec 31 07:00:00 PM EST
+           iso_local   2009-12-31T19:00:00-05:00
+           date        2010:001:00:00:00.000
+           cxcsec      378691266.184
+           decimalyear 2010.00000
+           iso         2010-01-01 00:00:00.000
+           unix        1262304000.000
+        """
+        from dateutil import tz
+        from astropy.table import Table
+
+        formats = {
+            "date": "s",
+            "cxcsec": ".3f",
+            "decimalyear": ".5f",
+            "iso": "s",
+            "unix": ".3f",
+        }
+        dt_utc = self.datetime.replace(tzinfo=tz.tzutc())
+        dt_local = dt_utc.astimezone(tz.tzlocal())
+
+        rows = []
+        rows.append(["local", dt_local.strftime("%Y %a %b %d %I:%M:%S %p %Z")])
+        rows.append(["iso_local", dt_local.isoformat()])
+        for name, fmt in formats.items():
+            row = [name, format(getattr(self, name), fmt)]
+            rows.append(row)
+
+        out = Table(rows=rows, names=["format", "value"])
+        out["format"].info.format = "<s"
+        out["value"].info.format = "<s"
+        # Remove the header and print
+        lines = out.pformat_all()[2:]
+        print("\n".join(lines))
 
 
 class FastDateParserMixin:
