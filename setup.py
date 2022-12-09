@@ -31,6 +31,12 @@ try:
 except ImportError:
     ext_modules = []
 
+entry_points = {
+    "console_scripts": [
+        "cxotime = cxotime.cxotime:print_time_conversions",
+    ]
+}
+
 setup(name='cxotime',
       author='Tom Aldcroft',
       description='Chandra Time class base on astropy Time',
@@ -42,4 +48,5 @@ setup(name='cxotime',
       packages=['cxotime', 'cxotime.tests'],
       tests_require=['pytest'],
       cmdclass=cmdclass,
+      entry_points=entry_points,
       )
