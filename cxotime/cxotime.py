@@ -1,22 +1,27 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-import sys
-import numpy as np
-from copy import copy
-from pathlib import Path
-import warnings
 import datetime
-
-import numpy.ctypeslib as npct
+import sys
+import warnings
+from copy import copy
 from ctypes import c_int
+from pathlib import Path
+from typing import Union
 
-from astropy.time import Time, TimeCxcSec, TimeYearDayTime, TimeDecimalYear
+import numpy as np
+import numpy.ctypeslib as npct
+import numpy.typing as npt
+from astropy.time import Time, TimeCxcSec, TimeDecimalYear, TimeYearDayTime
 from astropy.time.utils import day_frac
 from astropy.utils import iers
+
 # in astropy versions < 4.2, erfa was an astropy private package:
 try:
     import erfa
 except ModuleNotFoundError:
     from astropy import _erfa as erfa
+
+# TODO: use npt.NDArray with numpy 1.21
+CxoTimeLike = Union["CxoTime", str, float, int, np.ndarray, npt.ArrayLike, None]
 
 # Globally ignore the ERFA dubious year warning that gets emitted for UTC dates
 # either before around 1950 or well after the last known leap second. This
@@ -85,8 +90,8 @@ def date2secs(date):
     """
     # This code is adapted from the underlying code in astropy time, with some
     # of the general-purpose handling and validation removed.
-    from astropy.time.formats import TimeYearDayTime
     from astropy.time import _parse_times
+    from astropy.time.formats import TimeYearDayTime
 
     # Handle bytes or str input and convert to uint8.  We need to the
     # dtype _parse_times.dt_u1 instead of uint8, since otherwise it is
@@ -351,8 +356,8 @@ class CxoTime(Time):
            iso         2010-01-01 00:00:00.000
            unix        1262304000.000
         """
-        from dateutil import tz
         from astropy.table import Table
+        from dateutil import tz
 
         formats = {
             "date": "s",
