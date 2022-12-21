@@ -1,6 +1,4 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-import datetime
-import sys
 import warnings
 from copy import copy
 from typing import Union
@@ -23,148 +21,6 @@ warnings.filterwarnings("ignore", category=erfa.ErfaWarning, message=r".*dubious
 # For working in Chandra operations, possibly with no network access, we cannot
 # allow auto downloads.
 iers.conf.auto_download = False
-
-
-def date2secs(date):
-    """Fast conversion from Year Day-of-Year date(s) to CXC seconds
-
-    This is a specialized function that allows for fast conversion of a single
-    date or an array of dates to CXC seconds.  It is intended to be used ONLY
-    when the input date is known to be in the correct Year Day-of-Year format.
-
-    The main use case is for a single date or a few dates. For a single date
-    this function is about 10 times faster than the equivalent call to
-    ``CxoTime(date).secs``. For a large array of dates (more than about 100)
-    this function is not significantly faster.
-
-    This function will raise an exception if the input date is not in one of
-    these allowed formats:
-
-    - YYYY:DDD
-    - YYYY:DDD:HH:MM
-    - YYYY:DDD:HH:MM:SS
-    - YYYY:DDD:HH:MM:SS.sss
-
-    :param date: str, list of str, bytes, list of bytes, np.ndarray Input
-        date(s) in an allowed year-day-of-year date format
-    :returns: float, np.ndarray CXC seconds matching dimensions of input date(s)
-    """
-    # This code is adapted from the underlying code in astropy time, with some
-    # of the general-purpose handling and validation removed.
-    from astropy.time import _parse_times
-    from astropy.time.formats import TimeYearDayTime
-
-    # Handle bytes or str input and convert to uint8.  We need to the
-    # dtype _parse_times.dt_u1 instead of uint8, since otherwise it is
-    # not possible to create a gufunc with structured dtype output.
-    # See note about ufunc type resolver in pyerfa/erfa/ufunc.c.templ.
-    date = np.asarray(date)
-    if date.dtype.kind == "U":
-        # This assumes the input is pure ASCII.
-        val1_uint32 = date.view((np.uint32, date.dtype.itemsize // 4))
-        chars = val1_uint32.astype(_parse_times.dt_u1)
-    else:
-        chars = date.view((_parse_times.dt_u1, date.dtype.itemsize))
-
-    # Call the fast parsing ufunc.
-    time_struct = TimeYearDayTime._fast_parser(chars)
-
-    # In these ERFA calls ignore the return value since we know jd1, jd2 are OK.
-    # Checking the return value via np.any nearly doubles the function time.
-
-    # Convert time ISO date to jd1, jd2
-    jd1, jd2, _ = erfa.ufunc.dtf2d(
-        b"UTC",
-        time_struct["year"],
-        time_struct["month"],
-        time_struct["day"],
-        time_struct["hour"],
-        time_struct["minute"],
-        time_struct["second"],
-    )
-
-    # Transform to TT via TAI
-    jd1, jd2, _ = erfa.ufunc.utctai(jd1, jd2)
-    jd1, jd2, _ = erfa.ufunc.taitt(jd1, jd2)
-
-    # Fixed offsets taken from CxoTime(0.0).tt.jd1,2
-    time_from_epoch1 = (jd1 - 2450814.0) * 86400.0
-    time_from_epoch2 = (jd2 - 0.5) * 86400.0
-
-    return time_from_epoch1 + time_from_epoch2
-
-
-def secs2date(secs):
-    """Fast conversion from CXC seconds to Year Day-of-Year date(s)
-
-    This is a specialized function that allows for fast conversion of one or
-    more CXC seconds times to Year Day-of-Year format.
-
-    The main use case is for a single date or a few dates. For a single date
-    this function is about 15-20 times faster than the equivalent call to
-    ``CxoTime(secs).date``. For a large array of dates (more than about 100)
-    this function is not significantly faster.
-
-    :param secs: float, list of float, np.ndarray
-        Input time(s) in CXC seconds
-    :returns: str, np.ndarray of str
-        Year Day-of-Year dates matching dimensions of input time(s)
-    """
-    # This code is adapted from the underlying code in astropy time, with some
-    # of the general-purpose handling and validation removed.
-
-    # For scalars use a specialized version that is about 30% faster.
-    if isinstance(secs, float) or isinstance(secs, np.ndarray) and secs.shape == ():
-        return _secs2date_scalar(secs)
-
-    secs = np.asarray(secs, dtype=np.float64)
-    jd1 = secs / 86400.0 + 2450814.5
-    jd2 = 0.0
-
-    # In these ERFA calls ignore the return value since we know jd1, jd2 are OK.
-    # Checking the return value via np.any is quite slow.
-    # Transform TT to UTC via TAI
-    jd1, jd2, _ = erfa.ufunc.tttai(jd1, jd2)
-    jd1, jd2, _ = erfa.ufunc.taiutc(jd1, jd2)
-
-    dates = []
-    iys, ims, ids, ihmsfs = erfa.d2dtf(b"TT", 3, jd1, jd2)
-    ihrs = ihmsfs["h"]
-    imins = ihmsfs["m"]
-    isecs = ihmsfs["s"]
-    ifracs = ihmsfs["f"]
-    for iy, im, id, ihr, imin, isec, ifracsec in np.nditer(
-        [iys, ims, ids, ihrs, imins, isecs, ifracs], flags=["zerosize_ok"]
-    ):
-        yday = datetime.datetime(iy, im, id).timetuple().tm_yday
-        date = f"{iy:4d}:{yday:03d}:{ihr:02d}:{imin:02d}:{isec:02d}.{ifracsec:03d}"
-        dates.append(date)
-
-    out = np.array(dates).reshape(secs.shape)
-    return out
-
-
-def _secs2date_scalar(secs):
-    """Internal version of secs2date for scalar input
-
-    Same as secs2date but with the array handling removed. This is around 30%
-    faster.
-    """
-    jd1 = secs / 86400.0 + 2450814.5
-    jd2 = 0.0
-
-    jd1, jd2, _ = erfa.ufunc.tttai(jd1, jd2)
-    jd1, jd2, _ = erfa.ufunc.taiutc(jd1, jd2)
-
-    iy, im, id, ihmsfs = erfa.d2dtf(b"TT", 3, jd1, jd2)
-    ihr = ihmsfs["h"]
-    imin = ihmsfs["m"]
-    isec = ihmsfs["s"]
-    ifracsec = ihmsfs["f"]
-    yday = datetime.datetime(iy, im, id).timetuple().tm_yday
-    date = f"{iy:4d}:{yday:03d}:{ihr:02d}:{imin:02d}:{isec:02d}.{ifracsec:03d}"
-
-    return date
 
 
 class CxoTime(Time):
@@ -232,10 +88,21 @@ class CxoTime(Time):
                 # is a required positional arg.
                 args = (None,)
             else:
-                raise ValueError("cannot supply keyword arguments with no time value")
+                raise ValueError('cannot supply keyword arguments with no time value')
+
+        if len(args) == 1 and isinstance(args[0], CxoTime) and not kwargs:
+            # If input is already a CxoTime instance and no other kwargs just return
+            # the instance. Note that copy=False is the default.
+            return args[0]
+
         return super().__new__(cls, *args, **kwargs)
 
     def __init__(self, *args, **kwargs):
+        if len(args) == 1 and isinstance(args[0], CxoTime) and not kwargs:
+            # If input is already a CxoTime instance and no other kwargs (which
+            # implies copy=False) then no other initialization is needed.
+            return
+
         if len(args) == 1 and args[0] is None:
             # Compatibility with DateTime and allows kwarg default of None with
             # input casting like `date = CxoTime(date)`.
