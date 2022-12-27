@@ -4,13 +4,13 @@ Simple test of CxoTime.  The base Time object is extremely well
 tested, so this simply confirms that the add-on in CxoTime works.
 """
 
-import pytest
+import astropy.units as u
 import numpy as np
-
-from .. import CxoTime, date2secs, secs2date
+import pytest
 from astropy.time import Time
 from Chandra.Time import DateTime
-import astropy.units as u
+
+from .. import CxoTime, date2secs, secs2date
 
 
 def test_cxotime_basic():
