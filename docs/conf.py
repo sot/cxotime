@@ -13,9 +13,9 @@
 # serve to show the default.
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
-import sys
 import os
 import shlex
+import sys
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
