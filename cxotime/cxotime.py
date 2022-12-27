@@ -47,10 +47,22 @@ libpt = npct.load_library("parse_times", Path(__file__).parent)
 #                    int *years, int *months, int *days, int *hours,
 #                    int *minutes, double *seconds)
 libpt.parse_ymdhms_times.restype = c_int
-libpt.parse_ymdhms_times.argtypes = [array_1d_char, c_int, c_int, c_int,
-                                     array_1d_char, array_1d_int, array_1d_int, array_1d_int,
-                                     array_1d_int, array_1d_int, array_1d_int,
-                                     array_1d_int, array_1d_int, array_1d_double]
+libpt.parse_ymdhms_times.argtypes = [
+    array_1d_char,
+    c_int,
+    c_int,
+    c_int,
+    array_1d_char,
+    array_1d_int,
+    array_1d_int,
+    array_1d_int,
+    array_1d_int,
+    array_1d_int,
+    array_1d_int,
+    array_1d_int,
+    array_1d_int,
+    array_1d_double,
+]
 libpt.check_unicode.restype = c_int
 
 # Set up returns types and args for the unicode checker
@@ -119,7 +131,8 @@ def date2secs(date):
         time_struct['day'],
         time_struct['hour'],
         time_struct['minute'],
-        time_struct['second'])
+        time_struct['second'],
+    )
 
     # Transform to TT via TAI
     jd1, jd2, _ = erfa.ufunc.utctai(jd1, jd2)
@@ -152,8 +165,7 @@ def secs2date(secs):
     # of the general-purpose handling and validation removed.
 
     # For scalars use a specialized version that is about 30% faster.
-    if (isinstance(secs, float)
-            or isinstance(secs, np.ndarray) and secs.shape == ()):
+    if isinstance(secs, float) or isinstance(secs, np.ndarray) and secs.shape == ():
         return _secs2date_scalar(secs)
 
     secs = np.asarray(secs, dtype=np.float64)
@@ -173,8 +185,8 @@ def secs2date(secs):
     isecs = ihmsfs['s']
     ifracs = ihmsfs['f']
     for iy, im, id, ihr, imin, isec, ifracsec in np.nditer(
-            [iys, ims, ids, ihrs, imins, isecs, ifracs],
-            flags=['zerosize_ok']):
+        [iys, ims, ids, ihrs, imins, isecs, ifracs], flags=['zerosize_ok']
+    ):
         yday = datetime.datetime(iy, im, id).timetuple().tm_yday
         date = f'{iy:4d}:{yday:03d}:{ihr:02d}:{imin:02d}:{isec:02d}.{ifracsec:03d}'
         dates.append(date)
@@ -261,6 +273,7 @@ class CxoTime(Time):
     ===========  ==============================
 
     """
+
     def __new__(cls, *args, **kwargs):
         # Handle the case of `CxoTime()` which returns the current time. This is
         # for compatibility with DateTime.
@@ -268,7 +281,7 @@ class CxoTime(Time):
             if not kwargs:
                 # Stub in a value for `val` so super()__new__ can run since `val`
                 # is a required positional arg.
-                args = (None, )
+                args = (None,)
             else:
                 raise ValueError('cannot supply keyword arguments with no time value')
         return super().__new__(cls, *args, **kwargs)
@@ -282,7 +295,9 @@ class CxoTime(Time):
         if args:
             if args[0].__class__.__name__ == 'DateTime':
                 if len(args) > 1:
-                    raise ValueError('only one positional arg when DateTime is supplied')
+                    raise ValueError(
+                        'only one positional arg when DateTime is supplied'
+                    )
                 args = (args[0].date,)
                 if kwargs.setdefault('scale', 'utc') != 'utc':
                     raise ValueError("must use scale 'utc' for DateTime input")
@@ -290,7 +305,7 @@ class CxoTime(Time):
                     raise ValueError("must use format 'date' for DateTime input")
         else:
             # For `CxoTime()`` return the current time in `date` format.
-            args = (Time.now().yday, )
+            args = (Time.now().yday,)
 
         # If format is supplied and is a DateTime format then require scale='utc'.
         fmt = kwargs.get('format')
@@ -385,7 +400,6 @@ class CxoTime(Time):
 
 
 class FastDateParserMixin:
-
     def set_jds_fast(self, val1):
         """Use fast C parser to parse time strings in val1 and set jd1, jd2"""
         # Handle bytes or str input and flatten down to a single array of uint8.
@@ -419,22 +433,47 @@ class FastDateParserMixin:
         break_allowed = np.array(self.break_allowed, dtype=np.intc)
 
         # Call C parser
-        status = libpt.parse_ymdhms_times(chars, n_times, val1_str_len, self.has_day_of_year,
-                                          delims, starts, stops, break_allowed,
-                                          year, month, day, hour, minute, second)
+        status = libpt.parse_ymdhms_times(
+            chars,
+            n_times,
+            val1_str_len,
+            self.has_day_of_year,
+            delims,
+            starts,
+            stops,
+            break_allowed,
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+        )
         if status == 0:
             # All went well, finish the job
-            jd1, jd2 = erfa.dtf2d(self.scale.upper().encode('ascii'),
-                                  year, month, day, hour, minute, second)
+            jd1, jd2 = erfa.dtf2d(
+                self.scale.upper().encode('ascii'),
+                year,
+                month,
+                day,
+                hour,
+                minute,
+                second,
+            )
             jd1.shape = val1.shape
             jd2.shape = val1.shape
             self.jd1, self.jd2 = day_frac(jd1, jd2)
         else:
-            msgs = {1: 'time string ends at beginning of component where break is not allowed',
-                    2: 'time string ends in middle of component',
-                    3: 'required delimiter character not found',
-                    4: 'non-digit found where digit (0-9) required',
-                    5: 'bad day of year (1 <= doy <= 365 or 366 for leap year'}
+            msgs = {
+                1: (
+                    'time string ends at beginning of component where break is not'
+                    ' allowed'
+                ),
+                2: 'time string ends in middle of component',
+                3: 'required delimiter character not found',
+                4: 'non-digit found where digit (0-9) required',
+                5: 'bad day of year (1 <= doy <= 365 or 366 for leap year',
+            }
             raise ValueError(f'fast C time string parser failed: {msgs[status]}')
 
 
@@ -443,6 +482,7 @@ class TimeSecs(TimeCxcSec):
     Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.
     For example, 63072064.184 is midnight on January 1, 2000.
     """
+
     name = 'secs'
 
 
@@ -468,6 +508,7 @@ class TimeDate(TimeYearDayTime, FastDateParserMixin):
     - 'date_hm': date + hours, mins
     - 'date': date
     """
+
     name = 'date'
 
     # Class attributes for fast C-parsing
@@ -501,6 +542,7 @@ class TimeFracYear(TimeDecimalYear):
 
     Time value is always in UTC regardless of time object scale.
     """
+
     name = 'frac_year'
 
     def to_value(self, parent=None, **kwargs):
@@ -522,11 +564,12 @@ class TimeGreta(TimeDate, FastDateParserMixin):
 
     Time value is always in UTC regardless of time object scale.
     """
+
     name = 'greta'
 
-    subfmts = (('date_hms',
-                '%Y%j%H%M%S',
-                '{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}'),)
+    subfmts = (
+        ('date_hms', '%Y%j%H%M%S', '{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}'),
+    )
 
     # Define positions and starting delimiter for year, month, day, hour,
     # minute, seconds components of an ISO time. This is used by the fast
@@ -554,8 +597,9 @@ class TimeGreta(TimeDate, FastDateParserMixin):
             raise ValueError(f'cannot supply val2 for {self.name} format')
 
         if val1.dtype.kind not in ('S', 'U', 'i', 'f'):
-            raise TypeError('Input values for {0} class must be string or number'
-                            .format(self.name))
+            raise TypeError(
+                'Input values for {0} class must be string or number'.format(self.name)
+            )
         return val1, None
 
     def set_jds(self, val1, val2):
@@ -590,11 +634,12 @@ class TimeMaude(TimeDate, FastDateParserMixin):
 
     Time value is always in UTC regardless of time object scale.
     """
+
     name = 'maude'
 
-    subfmts = (('date_hms',
-                '%Y%j%H%M%S',
-                '{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}'),)
+    subfmts = (
+        ('date_hms', '%Y%j%H%M%S', '{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}'),
+    )
 
     # Define positions and starting delimiter for year, month, day, hour,
     # minute, seconds components of an ISO time. This is used by the fast
@@ -623,8 +668,9 @@ class TimeMaude(TimeDate, FastDateParserMixin):
             raise ValueError(f'cannot supply val2 for {self.name} format')
 
         if val1.dtype.kind not in ('S', 'U', 'i'):
-            raise TypeError('Input values for {0} class must be string or int'
-                            .format(self.name))
+            raise TypeError(
+                'Input values for {0} class must be string or int'.format(self.name)
+            )
 
         if val1.dtype.kind == 'i':
             val1 = val1.astype('S')

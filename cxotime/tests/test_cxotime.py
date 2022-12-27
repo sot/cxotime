@@ -28,8 +28,10 @@ def test_cxotime_basic():
     t = CxoTime([[1, 2], [3, 4]], scale='utc')
     assert t.scale == 'utc'
     assert t.shape == (2, 2)
-    t_tt_iso = [['1998-01-01 00:00:01.000', '1998-01-01 00:00:02.000'],
-                ['1998-01-01 00:00:03.000', '1998-01-01 00:00:04.000']]
+    t_tt_iso = [
+        ['1998-01-01 00:00:01.000', '1998-01-01 00:00:02.000'],
+        ['1998-01-01 00:00:03.000', '1998-01-01 00:00:04.000'],
+    ]
     assert np.all(t.tt.iso == t_tt_iso)
     assert np.all(t.date == t.yday)
     assert np.all(t.utc.iso == Time(t_tt_iso, format='iso', scale='tt').utc.iso)
@@ -44,8 +46,9 @@ def test_cxotime_now(now_method):
     t_now = Time.now()
     assert abs((ct_now - t_now).to_value(u.s)) < 0.1
 
-    with pytest.raises(ValueError,
-                       match='cannot supply keyword arguments with no time value'):
+    with pytest.raises(
+        ValueError, match='cannot supply keyword arguments with no time value'
+    ):
         CxoTime(scale='utc')
 
 
@@ -54,13 +57,16 @@ def test_cxotime_now_by_none():
     t_now = Time.now()
     assert abs((ct_now - t_now).to_value(u.s)) < 0.1
 
-    with pytest.raises(ValueError,
-                       match='cannot supply keyword arguments with no time value'):
+    with pytest.raises(
+        ValueError, match='cannot supply keyword arguments with no time value'
+    ):
         CxoTime(None, scale='utc')
 
 
 def test_cxotime_from_datetime():
-    secs = DateTime(np.array(['2000:001', '2015:181:23:59:60.500', '2015:180:01:02:03.456'])).secs
+    secs = DateTime(
+        np.array(['2000:001', '2015:181:23:59:60.500', '2015:180:01:02:03.456'])
+    ).secs
     dts = DateTime(secs)
     ct = CxoTime(dts)
     assert ct.scale == 'utc'
@@ -78,12 +84,11 @@ def test_cxotime_vs_datetime():
     # Note the bug (https://github.com/sot/Chandra.Time/issues/21), hence the odd first two lines
     # >>> DateTime('2015:181:23:59:60.500').date
     # '2015:182:00:00:00.500'
-    secs = DateTime(np.array(['2000:001', '2015:181:23:59:60.500', '2015:180:01:02:03.456'])).secs
+    secs = DateTime(
+        np.array(['2000:001', '2015:181:23:59:60.500', '2015:180:01:02:03.456'])
+    ).secs
     dts = DateTime(secs)
-    vals = dict(date=dts.date,
-                secs=dts.secs,
-                greta=dts.greta,
-                frac_year=dts.frac_year)
+    vals = dict(date=dts.date, secs=dts.secs, greta=dts.greta, frac_year=dts.frac_year)
 
     fmts = list(vals.keys())
     for in_fmt in fmts:
@@ -141,6 +146,7 @@ def test_frac_year():
 @pytest.mark.parametrize('bytestr', [True, False])
 def test_maude_and_greta(fmt, number, bytestr):
     """Test maude and greta formats"""
+
     def mg(val):
         """Munge greta-style string input to desired type for CxoTime init"""
         if fmt == 'greta':
@@ -159,16 +165,25 @@ def test_maude_and_greta(fmt, number, bytestr):
         elif fmt == 'maude':
             return int(val[:7] + val[8:])
 
-    t_in = [[mg('2001002.030405678'), mg('2002002.030405678')],
-            [mg('2003002.030405678'), mg('2004002.030405678')]]
-    val_out = [[mgo('2001002.030405678'), mgo('2002002.030405678')],
-               [mgo('2003002.030405678'), mgo('2004002.030405678')]]
+    t_in = [
+        [mg('2001002.030405678'), mg('2002002.030405678')],
+        [mg('2003002.030405678'), mg('2004002.030405678')],
+    ]
+    val_out = [
+        [mgo('2001002.030405678'), mgo('2002002.030405678')],
+        [mgo('2003002.030405678'), mgo('2004002.030405678')],
+    ]
     t = CxoTime(t_in, format=fmt)
     assert t.format == fmt
     assert t.scale == 'utc'
     assert t.shape == (2, 2)
-    assert np.all(t.yday == [['2001:002:03:04:05.678', '2002:002:03:04:05.678'],
-                             ['2003:002:03:04:05.678', '2004:002:03:04:05.678']])
+    assert np.all(
+        t.yday
+        == [
+            ['2001:002:03:04:05.678', '2002:002:03:04:05.678'],
+            ['2003:002:03:04:05.678', '2004:002:03:04:05.678'],
+        ]
+    )
     assert np.all(t.value == val_out)
 
     # During leap second
@@ -202,19 +217,20 @@ def test_strict_parsing():
     CxoTime is stricter in the format requirements.
     """
     CxoTime('2000:001:1:2:3', format='yday')
-    with pytest.raises(ValueError, match='Input values did not match the format class date'):
+    with pytest.raises(
+        ValueError, match='Input values did not match the format class date'
+    ):
         CxoTime('2000:001:1:2:3', format='date')
 
-    with pytest.raises(ValueError, match='Input values did not match the format class greta'):
+    with pytest.raises(
+        ValueError, match='Input values did not match the format class greta'
+    ):
         CxoTime('2000001.123', format='greta')
 
 
 @pytest.mark.parametrize(
-    'date',
-    ['2001:002',
-     '2001:002:03:04',
-     '2001:002:03:04:05',
-     '2001:002:03:04:05.678'])
+    'date', ['2001:002', '2001:002:03:04', '2001:002:03:04:05', '2001:002:03:04:05.678']
+)
 def test_date2secs(date):
     t = CxoTime(date)
     t_secs = t.secs
@@ -231,13 +247,13 @@ def test_date2secs(date):
     assert np.all(t_secs == date2secs(t.date))  # np.array U
     assert np.all(t_secs == date2secs(np.char.encode(t.date, 'ascii')))  # np.array S
     assert np.all(t_secs == date2secs(dates))  # str
-    assert np.all(t_secs == date2secs(np.char.encode(t.date, 'ascii')).tolist())  # bytes
+    assert np.all(
+        t_secs == date2secs(np.char.encode(t.date, 'ascii')).tolist()
+    )  # bytes
     assert t_secs.shape == date2secs(dates).shape
 
 
-@pytest.mark.parametrize(
-    'date',
-    ['2022:001:01:01:01.123', '1999:001'])
+@pytest.mark.parametrize('date', ['2022:001:01:01:01.123', '1999:001'])
 def test_secs2date(date):
     t = CxoTime(date)
     t_secs = t.secs
