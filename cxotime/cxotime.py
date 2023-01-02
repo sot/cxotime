@@ -33,41 +33,6 @@ warnings.filterwarnings("ignore", category=erfa.ErfaWarning, message=r".*dubious
 # allow auto downloads.
 iers.conf.auto_download = False
 
-# Input types in the parse_times.c code
-array_1d_char = npct.ndpointer(dtype=np.uint8, ndim=1, flags="C_CONTIGUOUS")
-array_1d_double = npct.ndpointer(dtype=np.double, ndim=1, flags="C_CONTIGUOUS")
-array_1d_int = npct.ndpointer(dtype=np.intc, ndim=1, flags="C_CONTIGUOUS")
-
-# load the library, using numpy mechanisms
-libpt = npct.load_library("parse_times", Path(__file__).parent)
-
-# Set up the return types and argument types for parse_ymdhms_times()
-# int parse_ymdhms_times(char *times, int n_times, int max_str_len,
-#                    char *delims, int *starts, int *stops, int *break_allowed,
-#                    int *years, int *months, int *days, int *hours,
-#                    int *minutes, double *seconds)
-libpt.parse_ymdhms_times.restype = c_int
-libpt.parse_ymdhms_times.argtypes = [
-    array_1d_char,
-    c_int,
-    c_int,
-    c_int,
-    array_1d_char,
-    array_1d_int,
-    array_1d_int,
-    array_1d_int,
-    array_1d_int,
-    array_1d_int,
-    array_1d_int,
-    array_1d_int,
-    array_1d_int,
-    array_1d_double,
-]
-libpt.check_unicode.restype = c_int
-
-# Set up returns types and args for the unicode checker
-libpt.check_unicode.argtypes = [array_1d_char, c_int]
-
 
 def print_time_conversions():
     """Interface to entry_point script ``cxotime`` to print time conversions"""
@@ -399,84 +364,6 @@ class CxoTime(Time):
         print("\n".join(lines))
 
 
-class FastDateParserMixin:
-    def set_jds_fast(self, val1):
-        """Use fast C parser to parse time strings in val1 and set jd1, jd2"""
-        # Handle bytes or str input and flatten down to a single array of uint8.
-        char_size = 4 if val1.dtype.kind == "U" else 1
-        val1_str_len = int(val1.dtype.itemsize // char_size)
-        chars = val1.ravel().view(np.uint8)
-
-        if char_size == 4:
-            # Check that this is pure ASCII
-            status = libpt.check_unicode(chars, len(chars) // 4)
-            if status != 0:
-                raise ValueError("input is not pure ASCII")
-            # It might be possible to avoid this copy with cleverness in
-            # parse_times.c but leave that for another day.
-            chars = chars[::4]
-        chars = np.ascontiguousarray(chars)
-
-        # Pre-allocate output components
-        n_times = len(chars) // val1_str_len
-        year = np.zeros(n_times, dtype=np.intc)
-        month = np.zeros(n_times, dtype=np.intc)
-        day = np.zeros(n_times, dtype=np.intc)
-        hour = np.zeros(n_times, dtype=np.intc)
-        minute = np.zeros(n_times, dtype=np.intc)
-        second = np.zeros(n_times, dtype=np.double)
-
-        # Set up parser parameters as numpy arrays for passing to C parser
-        delims = np.array(self.delims, dtype=np.uint8)
-        starts = np.array(self.starts, dtype=np.intc)
-        stops = np.array(self.stops, dtype=np.intc)
-        break_allowed = np.array(self.break_allowed, dtype=np.intc)
-
-        # Call C parser
-        status = libpt.parse_ymdhms_times(
-            chars,
-            n_times,
-            val1_str_len,
-            self.has_day_of_year,
-            delims,
-            starts,
-            stops,
-            break_allowed,
-            year,
-            month,
-            day,
-            hour,
-            minute,
-            second,
-        )
-        if status == 0:
-            # All went well, finish the job
-            jd1, jd2 = erfa.dtf2d(
-                self.scale.upper().encode("ascii"),
-                year,
-                month,
-                day,
-                hour,
-                minute,
-                second,
-            )
-            jd1.shape = val1.shape
-            jd2.shape = val1.shape
-            self.jd1, self.jd2 = day_frac(jd1, jd2)
-        else:
-            msgs = {
-                1: (
-                    "time string ends at beginning of component where break is not"
-                    " allowed"
-                ),
-                2: "time string ends in middle of component",
-                3: "required delimiter character not found",
-                4: "non-digit found where digit (0-9) required",
-                5: "bad day of year (1 <= doy <= 365 or 366 for leap year",
-            }
-            raise ValueError(f"fast C time string parser failed: {msgs[status]}")
-
-
 class TimeSecs(TimeCxcSec):
     """
     Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.
@@ -486,7 +373,7 @@ class TimeSecs(TimeCxcSec):
     name = "secs"
 
 
-class TimeDate(TimeYearDayTime, FastDateParserMixin):
+class TimeDate(TimeYearDayTime):
     """
     Year, day-of-year and time as "YYYY:DOY:HH:MM:SS.sss..." in UTC.
 
@@ -511,14 +398,6 @@ class TimeDate(TimeYearDayTime, FastDateParserMixin):
 
     name = "date"
 
-    # Class attributes for fast C-parsing
-    delims = (0, 0, ord(":"), ord(":"), ord(":"), ord(":"), ord("."))
-    starts = (0, -1, 4, 8, 11, 14, 17)
-    stops = (3, -1, 7, 10, 13, 16, -1)
-    # Break before:  y  m  d  h  m  s  f
-    break_allowed = (0, 0, 0, 1, 0, 1, 1)
-    has_day_of_year = 1
-
     def to_value(self, parent=None, **kwargs):
         if self.scale == "utc":
             return super().value
@@ -531,7 +410,7 @@ class TimeDate(TimeYearDayTime, FastDateParserMixin):
         """Parse the time strings contained in val1 and set jd1, jd2"""
         if val2 is not None:
             raise ValueError(f"cannot supply val2 for {self.name} format")
-        self.set_jds_fast(val1)
+        self.jd1, self.jd2 = self.get_jds_fast(val1, val2)
 
 
 class TimeFracYear(TimeDecimalYear):
@@ -554,7 +433,7 @@ class TimeFracYear(TimeDecimalYear):
     value = property(to_value)
 
 
-class TimeGreta(TimeDate, FastDateParserMixin):
+class TimeGreta(TimeDate):
     """
     Date as a string in format 'YYYYDDD.hhmmsssss', where sssss is number of
     milliseconds.
@@ -585,12 +464,15 @@ class TimeGreta(TimeDate, FastDateParserMixin):
     # stops: position where component ends (-1 => continue to end of string)
 
     # Before: yr mon  doy     hour      minute    second    frac
-    delims = (0, 0, 0, ord("."), 0, 0, 0)
-    starts = (0, -1, 4, 7, 10, 12, 14)
-    stops = (3, -1, 6, 9, 11, 13, -1)
-    # Break before:  y  m  d  h  m  s  f
-    break_allowed = (0, 0, 0, 1, 0, 1, 1)
-    has_day_of_year = 1
+
+    fast_parser_pars = dict(
+        delims=(0, 0, 0, ord("."), 0, 0, 0),
+        starts=(0, -1, 4, 7, 10, 12, 14),
+        stops=(3, -1, 6, 9, 11, 13, -1),
+        # Break before:  y  m  d  h  m  s  f
+        break_allowed=(0, 0, 0, 1, 0, 1, 1),
+        has_day_of_year=1,
+    )
 
     def _check_val_type(self, val1, val2):
         if val2 is not None:
@@ -600,18 +482,11 @@ class TimeGreta(TimeDate, FastDateParserMixin):
             raise TypeError(
                 "Input values for {0} class must be string or number".format(self.name)
             )
-        return val1, None
 
-    def set_jds(self, val1, val2):
-        """Parse the time strings contained in val1 and set jd1, jd2"""
-        # If specific input subformat is required then use the Python parser.
-        # Also do this if Time format class does not define `use_fast_parser`
-        # or if the fast parser is entirely disabled.
-        # Allow for float input
         if val1.dtype.kind in ("f", "i"):
             val1 = np.array(["{:.9f}".format(x) for x in val1.flat]).reshape(val1.shape)
 
-        self.set_jds_fast(val1)
+        return val1, None
 
     def to_value(self, parent=None, **kwargs):
         if self.scale == "utc":
@@ -625,7 +500,7 @@ class TimeGreta(TimeDate, FastDateParserMixin):
     value = property(to_value)
 
 
-class TimeMaude(TimeDate, FastDateParserMixin):
+class TimeMaude(TimeDate):
     """
     Date as a 64-bit integer in format YYYYDDDhhmmsss, where sss is number of
     milliseconds.
@@ -655,13 +530,15 @@ class TimeMaude(TimeDate, FastDateParserMixin):
     # stops: position where component ends (-1 => continue to end of string)
 
     # Before: yr mon  doy     hour      minute    second    frac
-    use_fast_parser = True
-    delims = (0, 0, 0, 0, 0, 0, 0)
-    starts = (0, -1, 4, 7, 9, 11, 13)
-    stops = (3, -1, 6, 8, 10, 12, -1)
-    # Break before:  y  m  d  h  m  s  f
-    break_allowed = (0, 0, 0, 1, 0, 1, 1)
-    has_day_of_year = 1
+    fast_parser_pars = dict(
+        use_fast_parser=True,
+        delims=(0, 0, 0, 0, 0, 0, 0),
+        starts=(0, -1, 4, 7, 9, 11, 13),
+        stops=(3, -1, 6, 8, 10, 12, -1),
+        # Break before:  y  m  d  h  m  s  f,
+        break_allowed=(0, 0, 0, 1, 0, 1, 1),
+        has_day_of_year=1,
+    )
 
     def _check_val_type(self, val1, val2):
         if val2 is not None:
@@ -676,10 +553,6 @@ class TimeMaude(TimeDate, FastDateParserMixin):
             val1 = val1.astype("S")
 
         return val1, None
-
-    def set_jds(self, val1, val2):
-        """Parse the time strings contained in val1 and set jd1, jd2"""
-        self.set_jds_fast(val1)
 
     def to_value(self, parent=None, **kwargs):
         if self.scale == "utc":
