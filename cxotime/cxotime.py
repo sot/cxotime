@@ -5,16 +5,11 @@ import warnings
 from copy import copy
 from typing import Union
 
+import erfa
 import numpy as np
 import numpy.typing as npt
 from astropy.time import Time, TimeCxcSec, TimeDecimalYear, TimeYearDayTime
 from astropy.utils import iers
-
-# in astropy versions < 4.2, erfa was an astropy private package:
-try:
-    import erfa
-except ModuleNotFoundError:
-    from astropy import _erfa as erfa
 
 # TODO: use npt.NDArray with numpy 1.21
 CxoTimeLike = Union["CxoTime", str, float, int, np.ndarray, npt.ArrayLike, None]
