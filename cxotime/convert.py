@@ -9,7 +9,7 @@ from astropy.time.formats import TimeYearDayTime, _parse_times
 
 from .cxotime import CxoTime, TimeGreta, TimeMaude
 
-__all__ = ['print_time_conversions', 'convert_time_format']
+__all__ = ["print_time_conversions", "convert_time_format"]
 
 
 def print_time_conversions():
@@ -19,7 +19,7 @@ def print_time_conversions():
     date.print_conversions()
 
 
-def convert_time_format(val, fmt_out, fmt_in=None):
+def convert_time_format(val, fmt_out, *, fmt_in=None):
     """
     Convert a time to a different format.
 
@@ -37,6 +37,9 @@ def convert_time_format(val, fmt_out, fmt_in=None):
     val_out : str
         Time string in output format
     """
+    if fmt_in == fmt_out:
+        return val
+
     if fmt_in is not None:
         jd1, jd2 = globals()[f"convert_{fmt_in}_to_jd1_jd2"](val)
         out = globals()[f"convert_jd1_jd2_to_{fmt_out}"](jd1, jd2)
@@ -86,7 +89,11 @@ def get_format(val, fmt_out):
         # No clue, punt this back for generic conversion by CxoTime
         return fmt_in, jd1, jd2
 
-    convert_funcs = [convert_date_to_jd1_jd2]  # , greta_to_jd1_jd2, maude_to_jd1_jd2]
+    convert_funcs = [
+        convert_date_to_jd1_jd2,
+        convert_greta_to_jd1_jd2,
+        convert_maude_to_jd1_jd2,
+    ]
     for convert_func in convert_funcs:
         try:
             jd1, jd2 = convert_func(val)
@@ -333,7 +340,6 @@ _formats = [
 
 for fmt1 in _formats:
     for fmt2 in _formats:
-        print(fmt1, fmt2)
         if fmt1 != fmt2:
             name = f"{fmt1}2{fmt2}"
             func = globals()[name] = functools.partial(
