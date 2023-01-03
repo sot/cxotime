@@ -125,9 +125,15 @@ def convert_date_to_secs(date):
     - YYYY:DDD:HH:MM:SS
     - YYYY:DDD:HH:MM:SS.sss
 
-    :param date: str, list of str, bytes, list of bytes, np.ndarray Input
-        date(s) in an allowed year-day-of-year date format
-    :returns: float, np.ndarray CXC seconds matching dimensions of input date(s)
+    Parameters
+    ----------
+    date : str, list of str, bytes, list of bytes, np.ndarray
+        Input date(s) in an allowed year-day-of-year date format
+
+    Returns
+    -------
+    time : float, np.ndarray
+        CXC seconds matching dimensions of input date(s)
     """
     # This code is adapted from the underlying code in astropy time, with some
     # of the general-purpose handling and validation removed.
@@ -329,6 +335,38 @@ def convert_secs_to_jd1_jd2(secs):
     return jd1, jd2
 
 
+from astropy.time.formats import TIME_FORMATS
+
+
+def make_docstring(fmt_in, fmt_out):
+    import textwrap
+
+    fmt_in_cls = TIME_FORMATS[fmt_in]
+    doc_in = fmt_in_cls.convert_doc
+    fmt_out_cls = TIME_FORMATS[fmt_out]
+    doc_out = fmt_out_cls.convert_doc
+    equiv = f"CxoTime({doc_in['input_name']}, format='{fmt_in_cls.name}').{fmt_out_cls.name}"
+    out = f"""\
+    Convert {doc_in['descr_short']} to {doc_out['descr_short']}.
+
+    This is equivalent to ``{equiv}`` but potentially 10x faster.
+
+    Format in: {doc_in['input_format']}
+    Format out: {doc_out['output_format']}
+
+    Parameters
+    ----------
+    {doc_in['input_name']} : {doc_in['input_type']}
+        {doc_in['descr_short']}
+
+    Returns
+    -------
+    {doc_out['input_name']} : {doc_out['output_type']}
+        {doc_out['descr_short']}
+    """
+    return textwrap.dedent(out)
+
+
 # Define shortcuts for converters like date2secs or greta2date.
 # Accept each value of globals if it matches the pattern convert_jd1_jd2_to_...
 _formats = [
@@ -339,11 +377,14 @@ _formats = [
 
 
 for fmt1 in _formats:
+    input_name = TIME_FORMATS[fmt1].convert_doc["input_name"]
     for fmt2 in _formats:
         if fmt1 != fmt2:
             name = f"{fmt1}2{fmt2}"
-            func = globals()[name] = functools.partial(
-                convert_time_format, fmt_in=fmt1, fmt_out=fmt2
+            func_str = (
+                f"lambda {input_name}: "
+                f"convert_time_format({input_name}, fmt_in='{fmt1}', fmt_out='{fmt2}')"
             )
-            func.__doc__ = f"Convert time from '{fmt1}' to '{fmt2}'"
+            func = globals()[name] = eval(func_str)
+            func.__doc__ = make_docstring(fmt1, fmt2)
             __all__.append(name)
