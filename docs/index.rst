@@ -158,3 +158,6 @@ API docs
 
 .. automodule:: cxotime.cxotime
    :members:
+
+.. automodule:: cxotime.convert
+   :members:

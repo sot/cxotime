@@ -6,7 +6,7 @@ from typing import Union
 import erfa
 import numpy as np
 import numpy.typing as npt
-from astropy.time import Time, TimeCxcSec, TimeDecimalYear, TimeYearDayTime
+from astropy.time import Time, TimeCxcSec, TimeDecimalYear, TimeYearDayTime, TimeJD
 from astropy.utils import iers
 
 # TODO: use npt.NDArray with numpy 1.21
@@ -88,7 +88,7 @@ class CxoTime(Time):
                 # is a required positional arg.
                 args = (None,)
             else:
-                raise ValueError('cannot supply keyword arguments with no time value')
+                raise ValueError("cannot supply keyword arguments with no time value")
 
         if len(args) == 1 and isinstance(args[0], CxoTime) and not kwargs:
             # If input is already a CxoTime instance and no other kwargs just return
@@ -215,6 +215,16 @@ class CxoTime(Time):
         print("\n".join(lines))
 
 
+TimeJD.convert_doc = dict(
+    input_name="jd",
+    descr_short="Julian Date",
+    input_format="Julian Date (numeric)",
+    output_format="Julian Date (numeric)",
+    input_type="float, int, list, ndarray",
+    output_type="float, ndarray[float]",
+)
+
+
 class TimeSecs(TimeCxcSec):
     """
     Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.
@@ -222,6 +232,16 @@ class TimeSecs(TimeCxcSec):
     """
 
     name = "secs"
+
+    # Documentation inputs for convert functions
+    convert_doc = dict(
+        input_name="time",
+        descr_short="CXC seconds",
+        input_format="CXC seconds (numeric)",
+        output_format="CXC seconds (numeric)",
+        input_type="float, int, list, ndarray",
+        output_type="float, ndarray[float]",
+    )
 
 
 class TimeDate(TimeYearDayTime):
@@ -248,6 +268,20 @@ class TimeDate(TimeYearDayTime):
     """
 
     name = "date"
+
+    # Documentation inputs for convert functions
+    convert_doc = dict(
+        input_name="date",
+        descr_short="Date (Year, day-of-year, time)",
+        input_format="""
+    - YYYY:DDD:HH:MM:SS.sss
+    - YYYY:DDD:HH:MM:SS
+    - YYYY:DDD:HH:MM
+    - YYYY:DDD""",
+        output_format="YYYY:DDD:HH:MM:SS.sss",
+        input_type="str, bytes, float, list, ndarray",
+        output_type="str, ndarray[str]",
+    )
 
     def to_value(self, parent=None, **kwargs):
         if self.scale == "utc":
@@ -296,6 +330,16 @@ class TimeGreta(TimeDate):
     """
 
     name = "greta"
+
+    # Documentation inputs for convert functions
+    convert_doc = dict(
+        input_name="date",
+        descr_short="GRETA date",
+        input_format="YYYYDDD.HHMMSSsss (str or float)",
+        output_format="YYYYDDD.HHMMSSsss (str)",
+        input_type="str, bytes, float, list, np.ndarray",
+        output_type="str, np.ndarray[str]",
+    )
 
     subfmts = (
         ("date_hms", "%Y%j%H%M%S", "{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}"),
@@ -353,7 +397,7 @@ class TimeGreta(TimeDate):
 
 class TimeMaude(TimeDate):
     """
-    Date as a 64-bit integer in format YYYYDDDhhmmsss, where sss is number of
+    Date as a 64-bit integer in format YYYYDDDHHMMSSsss, where sss is number of
     milliseconds.
 
     This can be input as an integer or string, but the output is always integer.
@@ -362,6 +406,14 @@ class TimeMaude(TimeDate):
     """
 
     name = "maude"
+    convert_doc = dict(
+        input_name="date",
+        descr_short="MAUDE date",
+        input_format="YYYYDDDHHMMSSsss (str or int)",
+        output_format="YYYYDDD.HHMMSSsss (int)",
+        input_type="str, bytes, int, list, ndarray",
+        output_type="int, ndarray[int]",
+    )
 
     subfmts = (
         ("date_hms", "%Y%j%H%M%S", "{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}"),
