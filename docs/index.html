@@ -229,6 +229,30 @@ argument.</p>
 <div class="toctree-wrapper compound">
 </div>
 </section>
+<section id="fast-conversion-between-date-and-cxc-seconds">
+<h3>Fast conversion between Date and CXC seconds<a class="headerlink" href="#fast-conversion-between-date-and-cxc-seconds" title="Permalink to this headline">¶</a></h3>
+<p>For fast conversion of an input date or dates in Year Day-of-Year date format,
+the function <code class="xref py py-func docutils literal notranslate"><span class="pre">date2secs()</span></code> can be used.</p>
+<p>This is a specialized function similar to the legacy <code class="docutils literal notranslate"><span class="pre">Chandra.Time.date2secs</span></code>
+that allows for fast conversion of a single date or an array of dates to CXC
+seconds.  It is intended to be used ONLY when the input date is known to be in
+the correct Year Day-of-Year format.</p>
+<p>The main use case is for a single date or a few dates. For a single date this
+function is about 10 times faster than the equivalent call to
+<code class="docutils literal notranslate"><span class="pre">CxoTime(date).secs</span></code>. For a large array of dates (more than about 100) this
+function  is not significantly faster.</p>
+<p>This function will raise an exception if the input date is not in one of
+these allowed formats:</p>
+<ul class="simple">
+<li><p>YYYY:DDD</p></li>
+<li><p>YYYY:DDD:HH:MM</p></li>
+<li><p>YYYY:DDD:HH:MM:SS</p></li>
+<li><p>YYYY:DDD:HH:MM:SS.sss</p></li>
+</ul>
+<p>Conversely, for fast conversion from CXC seconds to Year Day-of-Year date, the
+function <code class="xref py py-func docutils literal notranslate"><span class="pre">secs2date()</span></code> can be used. For scalar inputs this
+is 15-20 times faster than the equivalent call to <code class="docutils literal notranslate"><span class="pre">CxoTime(secs).date</span></code>.</p>
+</section>
 </section>
 <section id="api-docs">
 <h2>API docs<a class="headerlink" href="#api-docs" title="Permalink to this headline">¶</a></h2>
@@ -248,6 +272,7 @@ argument.</p>
 <li><a class="reference internal" href="#examples">Examples</a><ul>
 <li><a class="reference internal" href="#basic-initialization">Basic initialization</a></li>
 <li><a class="reference internal" href="#guessing-and-specifying-the-format">Guessing and specifying the format</a></li>
+<li><a class="reference internal" href="#fast-conversion-between-date-and-cxc-seconds">Fast conversion between Date and CXC seconds</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#api-docs">API docs</a></li>
