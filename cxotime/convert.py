@@ -1,11 +1,10 @@
 import datetime
-import functools
 import re
 import sys
 
 import erfa
 import numpy as np
-from astropy.time.formats import TimeYearDayTime, _parse_times
+from astropy.time.formats import TIME_FORMATS, TimeYearDayTime, _parse_times
 
 from .cxotime import CxoTime, TimeGreta, TimeMaude
 
@@ -37,34 +36,35 @@ def convert_time_format(val, fmt_out, *, fmt_in=None):
     val_out : str
         Time string in output format
     """
-    if fmt_in == fmt_out:
-        return val
+    jd1, jd2 = None, None
+    if fmt_in is None:
+        # Get the format. For some formats the jd1/jd2 values are generated as a
+        # byproduct so we can capture them to avoid re-calculating later.
+        fmt_in, jd1, jd2 = get_format(val)
 
-    if fmt_in is not None:
-        jd1, jd2 = globals()[f"convert_{fmt_in}_to_jd1_jd2"](val)
-        out = globals()[f"convert_jd1_jd2_to_{fmt_out}"](jd1, jd2)
+    try:
+        converter_in = globals()[f"convert_{fmt_in}_to_jd1_jd2"]
+        converter_out = globals()[f"convert_jd1_jd2_to_{fmt_out}"]
+    except KeyError:
+        # Don't have a converter for this format, so use full CxoTime guessing
+        kwargs = {} if fmt_in is None else {"format": fmt_in}
+        tm = CxoTime(val, **kwargs)
+        out = getattr(tm, fmt_out)
         return out
 
-    # Guess the input format. Returns None if guessing failed.
-    fmt_in, jd1, jd2 = get_format(val, fmt_out)
+    if jd1 is None or jd2 is None:
+        jd1, jd2 = converter_in(val)
+    out = converter_out(jd1, jd2)
 
-    if fmt_in == fmt_out:
-        return val
-
-    # Try with the fast converters. If we don't have a fast converter then use CxoTime.
-    out = None
-    try:
-        if jd1 is None:
-            jd1, jd2 = globals()[f"convert_{fmt_in}_to_jd1_jd2"](val)
-        out = globals()[f"convert_jd1_jd2_to_{fmt_out}"](jd1, jd2)
-    except KeyError:
-        tm = CxoTime(val, format=fmt_in)
-        out = getattr(tm, fmt_out)
+    # If the output is a scalar ndarray then return a scalar pure Python type
+    if isinstance(out, np.ndarray) and out.shape == ():
+        out = out.item()
 
     return out
 
 
-def get_format(val, fmt_out):
+def get_format(val):
+    """Get time format of ``val`` and return jd1, jd2 if available"""
     fmt_in = None
     jd1 = None
     jd2 = None
@@ -77,16 +77,12 @@ def get_format(val, fmt_out):
     # First check for a number or array of numbers, which implies CXC seconds
     if issubclass(val.dtype.type, np.number):
         fmt_in = "secs"
-        if fmt_out != "secs":
-            # Same code as _secs2date_scalar but inlined here for speed
-            jd1 = val / 86400.0 + 2450814.5
-            jd2 = 0.0
-            jd1, jd2, _ = erfa.ufunc.tttai(jd1, jd2)
-            jd1, jd2, _ = erfa.ufunc.taiutc(jd1, jd2)
+        jd1, jd2 = convert_secs_to_jd1_jd2(val)
         return fmt_in, jd1, jd2
 
     if val.dtype.kind not in ("U", "S"):
-        # No clue, punt this back for generic conversion by CxoTime
+        # Not a number or string (could be CxoTime obj or None), so push this
+        # back for generic conversion by CxoTime
         return fmt_in, jd1, jd2
 
     convert_funcs = [
@@ -97,54 +93,12 @@ def get_format(val, fmt_out):
     for convert_func in convert_funcs:
         try:
             jd1, jd2 = convert_func(val)
-            fmt_in = convert_func.__name__.split("_")[0]
+            fmt_in = convert_func.__name__.split("_")[1]
             break
         except Exception:
             pass
 
     return fmt_in, jd1, jd2
-
-
-def convert_date_to_secs(date):
-    """Fast conversion from Year Day-of-Year date(s) to CXC seconds
-
-    This is a specialized function that allows for fast conversion of a single
-    date or an array of dates to CXC seconds.  It is intended to be used ONLY
-    when the input date is known to be in the correct Year Day-of-Year format.
-
-    The main use case is for a single date or a few dates. For a single date
-    this function is about 10 times faster than the equivalent call to
-    ``CxoTime(date).secs``. For a large array of dates (more than about 100)
-    this function is not significantly faster.
-
-    This function will raise an exception if the input date is not in one of
-    these allowed formats:
-
-    - YYYY:DDD
-    - YYYY:DDD:HH:MM
-    - YYYY:DDD:HH:MM:SS
-    - YYYY:DDD:HH:MM:SS.sss
-
-    Parameters
-    ----------
-    date : str, list of str, bytes, list of bytes, np.ndarray
-        Input date(s) in an allowed year-day-of-year date format
-
-    Returns
-    -------
-    time : float, np.ndarray
-        CXC seconds matching dimensions of input date(s)
-    """
-    # This code is adapted from the underlying code in astropy time, with some
-    # of the general-purpose handling and validation removed.
-
-    # Handle bytes or str input and convert to uint8.  We need to the
-    # dtype _parse_times.dt_u1 instead of uint8, since otherwise it is
-    # not possible to create a gufunc with structured dtype output.
-    # See note about ufunc type resolver in pyerfa/erfa/ufunc.c.templ.
-    jd1, jd2 = convert_date_to_jd1_jd2(date)
-    secs = convert_jd1_jd2_to_secs(jd1, jd2)
-    return secs
 
 
 def convert_jd1_jd2_to_secs(jd1, jd2=None):
@@ -238,7 +192,7 @@ def convert_jd1_jd2_to_jd(jd1, jd2=None):
 
 
 def convert_jd_to_jd1_jd2(jd):
-    jd1 = jd
+    jd1 = np.asarray(jd)
     jd2 = 0.0
     return jd1, jd2
 
@@ -269,28 +223,6 @@ def convert_string_to_jd1_jd2(date, time_format_cls):
     )
 
     return jd1, jd2
-
-
-def convert_secs_to_date(secs):
-    """Fast conversion from CXC seconds to Year Day-of-Year date(s)
-
-    This is a specialized function that allows for fast conversion of one or
-    more CXC seconds times to Year Day-of-Year format.
-
-    The main use case is for a single date or a few dates. For a single date
-    this function is about 15-20 times faster than the equivalent call to
-    ``CxoTime(secs).date``. For a large array of dates (more than about 100)
-    this function is not significantly faster.
-
-    :param secs: float, list of float, np.ndarray
-        Input time(s) in CXC seconds
-    :returns: str, np.ndarray of str
-        Year Day-of-Year dates matching dimensions of input time(s)
-    """
-    jd1, jd2 = convert_secs_to_jd1_jd2(secs)
-    out = convert_jd1_jd2_to_date(jd1, jd2)
-
-    return out
 
 
 def convert_jd1_jd2_to_date(jd1, jd2=None):
@@ -335,9 +267,6 @@ def convert_secs_to_jd1_jd2(secs):
     return jd1, jd2
 
 
-from astropy.time.formats import TIME_FORMATS
-
-
 def make_docstring(fmt_in, fmt_out):
     import textwrap
 
@@ -369,16 +298,16 @@ def make_docstring(fmt_in, fmt_out):
 
 # Define shortcuts for converters like date2secs or greta2date.
 # Accept each value of globals if it matches the pattern convert_jd1_jd2_to_...
-_formats = [
+CONVERT_FORMATS = [
     m.group(1)
     for fmt in list(globals())
     if (m := re.match(r"convert_jd1_jd2_to_(\w+)", fmt))
 ]
 
 
-for fmt1 in _formats:
+for fmt1 in CONVERT_FORMATS:
     input_name = TIME_FORMATS[fmt1].convert_doc["input_name"]
-    for fmt2 in _formats:
+    for fmt2 in CONVERT_FORMATS:
         if fmt1 != fmt2:
             name = f"{fmt1}2{fmt2}"
             func_str = (
