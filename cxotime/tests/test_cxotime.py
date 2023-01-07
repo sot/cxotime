@@ -11,8 +11,10 @@ import pytest
 from astropy.time import Time
 from Chandra.Time import DateTime
 
-from .. import CxoTime, date2secs, secs2date
-from ..scripts import print_time_conversions
+# Test that cxotime.__init__ imports the CxoTime class and all converters like date2secs
+from cxotime import CxoTime, convert
+from cxotime import *  # noqa
+from cxotime.scripts import print_time_conversions
 
 
 def test_cxotime_basic():
@@ -328,3 +330,70 @@ unix        1262304000.000"""
     # Strip all trailing whitespace on each line
     out_str = "\n".join([line.rstrip() for line in out_str.splitlines()])
     assert out_str == exp or out_str == exp2
+
+
+inputs = [
+    ("secs", 3e8, "f"),
+    ("date", "2001:001:02:03:04.123", "U"),
+    ("date", "2001:001:02:03:04", "U"),
+    ("date", "2001:001:02:03", "U"),
+    ("date", "2001:001", "U"),
+    ("greta", "2001001.123456789", "U"),
+    ("greta", 2001001.123456789, "U"),
+    ("maude", "2001001123456789", "U"),
+    ("maude", 2001001123456789, "U"),
+    ("jd", 2451544.5, "f"),
+    ("iso", "2001-01-01 02:03:04.123", "U"),
+]
+
+test_fmts = set([fmt_name for fmt_name, val, fmt_kind in inputs])
+
+
+@pytest.mark.parametrize("fmt_val", inputs)
+@pytest.mark.parametrize("val_type", ["scalar", "list", "array"])
+@pytest.mark.parametrize("fmt_out", test_fmts)
+def test_convert_functions(fmt_val, val_type, fmt_out):
+    fmt_in, val, fmt_kind = fmt_val
+    if val_type == "scalar":
+        pass
+    elif val_type == "list":
+        val = [val, val]
+    elif val_type == "array":
+        val = np.array([val, val])
+    else:
+        raise ValueError(f"Unexpected val_type={val_type}")
+
+    exp = getattr(CxoTime(val, format=fmt_in), fmt_out)
+    out = convert_time_format(val, fmt_out, fmt_in=fmt_in)
+
+    exp_kind = np.asarray(exp).dtype.kind
+    val_kind = np.asarray(val).dtype.kind
+
+    assert type(exp) == type(out)
+    if exp_kind == "f":
+        assert np.allclose(exp, out, rtol=1e-12)
+    else:
+        assert np.all(exp == out)
+
+    if (
+        fmt_in in convert.CONVERT_FORMATS
+        and fmt_kind == val_kind
+        and (val_kind == "U" or fmt_in == "secs")
+    ):
+        # Should be able to convert without specifying fmt_in. We need the
+        # exp_kind == ... test because e.g. you can input greta as a float but this
+        # format cannot be auto detected.
+        out2 = convert_time_format(val, fmt_out)
+        assert type(out) == type(out2)
+        assert np.all(out == out2)
+
+    # Test the convenience functions like date2secs
+    if (
+        fmt_in != fmt_out
+        and fmt_in in convert.CONVERT_FORMATS
+        and fmt_out in convert.CONVERT_FORMATS
+    ):
+        func = globals()[f"{fmt_in}2{fmt_out}"]
+        out3 = func(val)
+        assert type(out) == type(out3)
+        assert np.all(out == out3)
