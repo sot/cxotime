@@ -11,12 +11,18 @@ import pytest
 from astropy.time import Time
 from Chandra.Time import DateTime
 
-from .. import CxoTime, convert_time_format, date2secs, secs2date
-
 # Test that cxotime.__init__ imports the CxoTime class and all converters like date2secs
 from cxotime import CxoTime, convert
 from cxotime import *  # noqa
 from cxotime.scripts import print_time_conversions
+from cxotime import CxoTime, convert_time_format
+from cxotime import secs2greta, secs2maude, secs2jd, secs2date  # noqa: F401
+from cxotime import greta2secs, greta2maude, greta2jd, greta2date  # noqa: F401
+from cxotime import maude2secs, maude2greta, maude2jd, maude2date  # noqa: F401
+from cxotime import jd2secs, jd2greta, jd2maude, jd2date  # noqa: F401
+from cxotime import date2secs, date2greta, date2maude, date2jd  # noqa: F401
+
+import cxotime.convert
 
 
 def test_cxotime_basic():
@@ -378,7 +384,7 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
         assert np.all(exp == out)
 
     if (
-        fmt_in in convert.CONVERT_FORMATS
+        fmt_in in cxotime.convert.CONVERT_FORMATS
         and fmt_kind == val_kind
         and (val_kind == "U" or fmt_in == "secs")
     ):
@@ -392,8 +398,8 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
     # Test the convenience functions like date2secs
     if (
         fmt_in != fmt_out
-        and fmt_in in convert.CONVERT_FORMATS
-        and fmt_out in convert.CONVERT_FORMATS
+        and fmt_in in cxotime.convert.CONVERT_FORMATS
+        and fmt_out in cxotime.convert.CONVERT_FORMATS
     ):
         func = globals()[f"{fmt_in}2{fmt_out}"]
         out3 = func(val)
