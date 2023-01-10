@@ -1,10 +1,10 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 import ska_helpers
-from astropy import units  # noqa
-from astropy.time import TimeDelta  # noqa
+from astropy import units
+from astropy.time import TimeDelta
 
+from .convert import *
 from .cxotime import CxoTime, CxoTimeLike
-from .convert import *  # noqa
 
 __version__ = ska_helpers.get_version(__package__)
 

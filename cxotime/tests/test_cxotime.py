@@ -89,7 +89,8 @@ def test_cxotime_from_datetime():
 
 
 def test_cxotime_vs_datetime():
-    # Note the bug (https://github.com/sot/Chandra.Time/issues/21), hence the odd first two lines
+    # Note the bug (https://github.com/sot/Chandra.Time/issues/21),
+    # hence the odd first two lines
     # >>> DateTime('2015:181:23:59:60.500').date
     # '2015:182:00:00:00.500'
     secs = DateTime(
