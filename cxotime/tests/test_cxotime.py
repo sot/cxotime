@@ -11,6 +11,8 @@ import pytest
 from astropy.time import Time
 from Chandra.Time import DateTime
 
+from .. import CxoTime, convert_time_format, date2secs, secs2date
+
 # Test that cxotime.__init__ imports the CxoTime class and all converters like date2secs
 from cxotime import CxoTime, convert
 from cxotime import *  # noqa
