@@ -101,10 +101,7 @@ def get_format(val):
     return fmt_in, jd1, jd2
 
 
-def convert_jd1_jd2_to_secs(jd1, jd2=None):
-    if jd2 is None:
-        jd2 = 0.0
-
+def convert_jd1_jd2_to_secs(jd1, jd2):
     # Transform to TT via TAI
     jd1, jd2, _ = erfa.ufunc.utctai(jd1, jd2)
     jd1, jd2, _ = erfa.ufunc.taitt(jd1, jd2)
@@ -149,7 +146,7 @@ def convert_maude_to_jd1_jd2(date):
     return jd1, jd2
 
 
-def convert_jd1_jd2_to_greta(jd1, jd2=None):
+def convert_jd1_jd2_to_greta(jd1, jd2):
     date = convert_jd1_jd2_to_date(jd1, jd2)
     # Convert '1997:365:23:58:57.816' to '1997365.235857816'
     #          012345678901234567890
@@ -167,7 +164,7 @@ def convert_jd1_jd2_to_greta(jd1, jd2=None):
     return out
 
 
-def convert_jd1_jd2_to_maude(jd1, jd2=None):
+def convert_jd1_jd2_to_maude(jd1, jd2):
     date = convert_jd1_jd2_to_date(jd1, jd2)
     if isinstance(date, np.ndarray):
         out = np.array(
@@ -184,9 +181,7 @@ def convert_jd1_jd2_to_maude(jd1, jd2=None):
     return out
 
 
-def convert_jd1_jd2_to_jd(jd1, jd2=None):
-    if jd2 is None:
-        jd2 = 0.0
+def convert_jd1_jd2_to_jd(jd1, jd2):
     jd = jd1 + jd2
     return jd
 
@@ -225,9 +220,7 @@ def convert_string_to_jd1_jd2(date, time_format_cls):
     return jd1, jd2
 
 
-def convert_jd1_jd2_to_date(jd1, jd2=None):
-    if jd2 is None:
-        jd2 = np.zeros_like(jd1)
+def convert_jd1_jd2_to_date(jd1, jd2):
     iys, ims, ids, ihmsfs = erfa.d2dtf(b"TT", 3, jd1, jd2)
     ihrs = ihmsfs["h"]
     imins = ihmsfs["m"]
