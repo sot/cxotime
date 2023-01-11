@@ -1,7 +1,9 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """
-Simple test of CxoTime.  The base Time object is extremely well
-tested, so this simply confirms that the add-on in CxoTime works.
+Simple test of CxoTime.
+
+The base Time object is extremely well tested, so this simply confirms that the
+add-on in CxoTime works.
 """
 
 import astropy.units as u
@@ -48,7 +50,7 @@ def test_cxotime_basic():
     assert np.all(t.date == t.yday)
     assert np.all(t.utc.iso == Time(t_tt_iso, format="iso", scale="tt").utc.iso)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="must use scale 'utc' for format 'date'"):
         t = CxoTime("1998:001:00:00:01.000", scale="tt")
 
 
@@ -118,6 +120,7 @@ def test_cxotime_vs_datetime():
 def test_secs():
     """
     Test a problem fixed in https://github.com/astropy/astropy/pull/4312.
+
     This test would pass for ``t = CxoTime(1, scale='tt')`` or if
     comparing t.secs to 1.0.
     """
@@ -225,7 +228,8 @@ def test_scale_exception():
 
 
 def test_strict_parsing():
-    """Python strptime parsing allows single digits for mon, day, etc.
+    """
+    Python strptime parsing allows single digits for mon, day, etc.
 
     CxoTime is stricter in the format requirements.
     """

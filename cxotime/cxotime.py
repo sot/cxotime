@@ -24,7 +24,8 @@ iers.conf.auto_download = False
 
 
 class CxoTime(Time):
-    """Time class for Chandra analysis that is based on ``astropy.time.Time``.
+    """
+    Time class for Chandra analysis that is based on ``astropy.time.Time``.
 
     The CXO-specific time formats which are added to the astropy ``Time`` class
     are shown in the table below.  Like ``DateTime``, the ``CxoTime`` class
@@ -228,6 +229,7 @@ TimeJD.convert_doc = dict(
 class TimeSecs(TimeCxcSec):
     """
     Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.
+
     For example, 63072064.184 is midnight on January 1, 2000.
     """
 
@@ -283,7 +285,7 @@ class TimeDate(TimeYearDayTime):
         output_type="str, ndarray[str]",
     )
 
-    def to_value(self, parent=None, **kwargs):
+    def to_value(self, parent=None, **kwargs):  # noqa: ARG002
         if self.scale == "utc":
             return super().value
         else:
@@ -292,7 +294,7 @@ class TimeDate(TimeYearDayTime):
     value = property(to_value)
 
     def set_jds(self, val1, val2):
-        """Parse the time strings contained in val1 and set jd1, jd2"""
+        """Parse the time strings contained in val1 and set jd1, jd2."""
         if val2 is not None:
             raise ValueError(f"cannot supply val2 for {self.name} format")
         self.jd1, self.jd2 = self.get_jds_fast(val1, val2)
@@ -300,16 +302,17 @@ class TimeDate(TimeYearDayTime):
 
 class TimeFracYear(TimeDecimalYear):
     """
-    Time as a decimal year, with integer values corresponding to midnight
-    of the first day of each year.  For example 2000.5 corresponds to the
-    ISO time '2000-07-02 00:00:00'.
+    Time as a decimal year.
+
+    Integer values correspond to midnight of the first day of each year.  For
+    example 2000.5 corresponds to the ISO time '2000-07-02 00:00:00'.
 
     Time value is always in UTC regardless of time object scale.
     """
 
     name = "frac_year"
 
-    def to_value(self, parent=None, **kwargs):
+    def to_value(self, parent=None, **kwargs):  # noqa: ARG002
         if self.scale == "utc":
             return super().value
         else:
@@ -320,11 +323,10 @@ class TimeFracYear(TimeDecimalYear):
 
 class TimeGreta(TimeDate):
     """
-    Date as a string in format 'YYYYDDD.hhmmsssss', where sssss is number of
-    milliseconds.
+    Date as a string in format 'YYYYDDD.hhmmsssss'.
 
-    This can be input as a float, integer or string, but the output is always
-    string.
+    Here sssss is number of milliseconds. This can be input as a float, integer
+    or string, but the output is always string.
 
     Time value is always in UTC regardless of time object scale.
     """
@@ -383,7 +385,7 @@ class TimeGreta(TimeDate):
 
         return val1, None
 
-    def to_value(self, parent=None, **kwargs):
+    def to_value(self, parent=None, **kwargs):  # noqa: ARG002
         if self.scale == "utc":
             out1 = super().value
         else:
@@ -397,10 +399,10 @@ class TimeGreta(TimeDate):
 
 class TimeMaude(TimeDate):
     """
-    Date as a 64-bit integer in format YYYYDDDHHMMSSsss, where sss is number of
-    milliseconds.
+    Date as a 64-bit integer in format YYYYDDDHHMMSSsss.
 
-    This can be input as an integer or string, but the output is always integer.
+    Here sss is the number of milliseconds. This can be input as an integer or
+    string, but the output is always integer.
 
     Time value is always in UTC regardless of time object scale.
     """
@@ -457,7 +459,7 @@ class TimeMaude(TimeDate):
 
         return val1, None
 
-    def to_value(self, parent=None, **kwargs):
+    def to_value(self, parent=None, **kwargs):  # noqa: ARG002
         if self.scale == "utc":
             out = super().value
         else:

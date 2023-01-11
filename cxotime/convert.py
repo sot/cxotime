@@ -230,10 +230,10 @@ def convert_jd1_jd2_to_date(jd1, jd2):
 
     if isinstance(jd1, np.ndarray):
         dates = []
-        for iy, im, id, ihr, imin, isec, ifracsec in np.nditer(
+        for iy, im, iday, ihr, imin, isec, ifracsec in np.nditer(
             [iys, ims, ids, ihrs, imins, isecs, ifracs], flags=["zerosize_ok"]
         ):
-            yday = datetime.datetime(iy, im, id).timetuple().tm_yday
+            yday = datetime.datetime(iy, im, iday).timetuple().tm_yday
             date = f"{iy:4d}:{yday:03d}:{ihr:02d}:{imin:02d}:{isec:02d}.{ifracsec:03d}"
             dates.append(date)
 
@@ -311,6 +311,6 @@ for fmt1 in CONVERT_FORMATS:
                 f"lambda {input_name}: "
                 f"convert_time_format({input_name}, fmt_in='{fmt1}', fmt_out='{fmt2}')"
             )
-            func = globals()[name] = eval(func_str)
+            func = globals()[name] = eval(func_str)  # noqa: PGH001
             func.__doc__ = make_docstring(fmt1, fmt2)
             __all__.append(name)

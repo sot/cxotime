@@ -21,6 +21,26 @@ profile = "black"
 
 [tool.ruff]
 line-length = 88
+select = ["ALL"]
+ignore = [
+    "ANN",
+    "S101",
+    "D1",
+    "D400",
+    "D415",
+    "D203",
+    "SIM105",
+    "SIM108",
+    "DTZ",
+    "D212",
+    "EM",
+    "ERA001",
+    "C",
+    "B905",
+    "BLE001",
+    "T",
+    "RET",
+]
 extend-exclude = [
     "docs",
 ]
