@@ -1,3 +1,4 @@
+"""Convert time formats."""
 import datetime
 import re
 import sys

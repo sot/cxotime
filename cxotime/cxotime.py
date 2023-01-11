@@ -6,7 +6,7 @@ from typing import Union
 import erfa
 import numpy as np
 import numpy.typing as npt
-from astropy.time import Time, TimeCxcSec, TimeDecimalYear, TimeYearDayTime, TimeJD
+from astropy.time import Time, TimeCxcSec, TimeDecimalYear, TimeJD, TimeYearDayTime
 from astropy.utils import iers
 
 # TODO: use npt.NDArray with numpy 1.21
@@ -150,7 +150,7 @@ class CxoTime(Time):
 
                 kwargs["format"] = fmt
                 try:
-                    super(CxoTime, self).__init__(*args, **kwargs)
+                    super().__init__(*args, **kwargs)
                 except Exception:
                     pass
                 else:
@@ -162,7 +162,7 @@ class CxoTime(Time):
         elif fmt == "maude":
             args = (np.asarray(args[0], dtype="S"),) + args[1:]
 
-        super(CxoTime, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def now(cls):

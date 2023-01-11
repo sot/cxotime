@@ -10,13 +10,17 @@ import pytest
 from astropy.time import Time
 from Chandra.Time import DateTime
 
-# Test that cxotime.__init__ imports the CxoTime class and all converters like date2secs
 from cxotime import CxoTime, convert_time_format
+
+# Note: ``from cxotime import *`` fails in pytest for reasons I don't understand.
+# isort: off
 from cxotime import secs2greta, secs2maude, secs2jd, secs2date  # noqa: F401
 from cxotime import greta2secs, greta2maude, greta2jd, greta2date  # noqa: F401
 from cxotime import maude2secs, maude2greta, maude2jd, maude2date  # noqa: F401
 from cxotime import jd2secs, jd2greta, jd2maude, jd2date  # noqa: F401
 from cxotime import date2secs, date2greta, date2maude, date2jd  # noqa: F401
+
+# isort: on
 
 import cxotime.convert
 
