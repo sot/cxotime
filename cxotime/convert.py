@@ -267,8 +267,10 @@ def make_docstring(fmt_in, fmt_out):
     doc_in = fmt_in_cls.convert_doc
     fmt_out_cls = TIME_FORMATS[fmt_out]
     doc_out = fmt_out_cls.convert_doc
-    equiv = (f"CxoTime({doc_in['input_name']}, "
-             f"format='{fmt_in_cls.name}').{fmt_out_cls.name}")
+    equiv = (
+        f"CxoTime({doc_in['input_name']}, "
+        f"format='{fmt_in_cls.name}').{fmt_out_cls.name}"
+    )
     out = f"""\
     Convert {doc_in['descr_short']} to {doc_out['descr_short']}.
 
