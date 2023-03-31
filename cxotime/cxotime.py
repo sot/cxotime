@@ -25,13 +25,6 @@ warnings.filterwarnings("ignore", category=erfa.ErfaWarning, message=r".*dubious
 iers.conf.auto_download = False
 
 
-def print_time_conversions():
-    """Interface to entry_point script ``cxotime`` to print time conversions"""
-    date = None if len(sys.argv) == 1 else sys.argv[1]
-    date = CxoTime(date)
-    date.print_conversions()
-
-
 def date2secs(date):
     """Fast conversion from Year Day-of-Year date(s) to CXC seconds
 
@@ -310,9 +303,9 @@ class CxoTime(Time):
 
     now.__doc__ = Time.now.__doc__
 
-    def print_conversions(self):
+    def print_conversions(self, file=sys.stdout):
         """
-        Print a table of conversions to other formats.
+        Print a table of conversions to a standard set of formats.
 
         Example::
 
@@ -326,33 +319,63 @@ class CxoTime(Time):
            decimalyear 2010.00000
            iso         2010-01-01 00:00:00.000
            unix        1262304000.000
+
+        :param file: file-like, optional
+            File-like object to write output (default=sys.stdout).
         """
         from astropy.table import Table
-        from dateutil import tz
 
         formats = {
-            "date": "s",
             "cxcsec": ".3f",
             "decimalyear": ".5f",
-            "iso": "s",
             "unix": ".3f",
         }
-        dt_utc = self.datetime.replace(tzinfo=tz.tzutc())
-        dt_local = dt_utc.astimezone(tz.tzlocal())
 
-        rows = []
-        rows.append(["local", dt_local.strftime("%Y %a %b %d %I:%M:%S %p %Z")])
-        rows.append(["iso_local", dt_local.isoformat()])
+        conversions = self.get_conversions()
+
+        # Format numerical values as strings with specified precision
         for name, fmt in formats.items():
-            row = [name, format(getattr(self, name), fmt)]
-            rows.append(row)
+            conversions[name] = format(conversions[name], fmt)
 
-        out = Table(rows=rows, names=["format", "value"])
+        formats = list(conversions)
+        values = list(conversions.values())
+        out = Table([formats, values], names=["format", "value"])
         out["format"].info.format = "<s"
         out["value"].info.format = "<s"
+
         # Remove the header and print
         lines = out.pformat_all()[2:]
-        print("\n".join(lines))
+        print("\n".join(lines), file=file)
+
+    def get_conversions(self):
+        """
+        Get a dict of conversions to a standard set of formats.
+
+        Example::
+
+           >>> from cxotime import CxoTime
+           >>> t = CxoTime('2010:001:00:00:00')
+           >>> t.get_conversions()
+           {'local': '2009 Thu Dec 31 07:00:00 PM EST',
+           'iso_local': '2009-12-31T19:00:00-05:00',
+           'date': '2010:001:00:00:00.000',
+           'cxcsec': 378691266.184,
+           'decimalyear': 2010.0,
+           'iso': '2010-01-01 00:00:00.000',
+           'unix': 1262304000.0}
+        """
+        from datetime import timezone
+
+        out = {}
+
+        dt_local = self.datetime.replace(tzinfo=timezone.utc).astimezone(tz=None)
+        out["local"] = dt_local.strftime("%Y %a %b %d %I:%M:%S %p %Z")
+        out["iso_local"] = dt_local.isoformat()
+
+        for name in ["date", "cxcsec", "decimalyear", "iso", "unix"]:
+            out[name] = getattr(self, name)
+
+        return out
 
 
 class TimeSecs(TimeCxcSec):

@@ -3,6 +3,7 @@
 Simple test of CxoTime.  The base Time object is extremely well
 tested, so this simply confirms that the add-on in CxoTime works.
 """
+import io
 
 import astropy.units as u
 import numpy as np
@@ -11,6 +12,7 @@ from astropy.time import Time
 from Chandra.Time import DateTime
 
 from .. import CxoTime, date2secs, secs2date
+from ..scripts import print_time_conversions
 
 
 def test_cxotime_basic():
@@ -274,3 +276,38 @@ def test_secs2date(date):
     val = secs2date(t_secs)
     assert isinstance(val, np.ndarray)
     assert val.dtype.kind == "U"
+
+
+def test_get_conversions():
+    t = CxoTime("2010:001:00:00:00")
+    out = t.get_conversions()
+    exp = {
+        "local": "2009 Thu Dec 31 07:00:00 PM EST",
+        "iso_local": "2009-12-31T19:00:00-05:00",
+        "date": "2010:001:00:00:00.000",
+        "cxcsec": 378691266.184,
+        "decimalyear": 2010.0,
+        "iso": "2010-01-01 00:00:00.000",
+        "unix": 1262304000.0,
+    }
+    assert out == exp
+
+
+@pytest.mark.parametrize(
+    "date", ["378691266.184", "2010:001", "2010-01-01 00:00:00.000"]
+)
+def test_print_time_conversions(date):
+    out = io.StringIO()
+    print_time_conversions.main(date, file=out)
+    exp = """\
+local       2009 Thu Dec 31 07:00:00 PM EST
+iso_local   2009-12-31T19:00:00-05:00
+date        2010:001:00:00:00.000
+cxcsec      378691266.184
+decimalyear 2010.00000
+iso         2010-01-01 00:00:00.000
+unix        1262304000.000"""
+    out_str = out.getvalue()
+    # Strip all trailing whitespace on each line
+    out_str = "\n".join([line.rstrip() for line in out_str.splitlines()])
+    assert out_str == exp

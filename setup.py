@@ -8,7 +8,7 @@ except ImportError:
 
 entry_points = {
     "console_scripts": [
-        "cxotime = cxotime.cxotime:print_time_conversions",
+        "cxotime = cxotime.scripts.print_time_conversions:main",
     ]
 }
 
