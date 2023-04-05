@@ -11,18 +11,34 @@ import pytest
 from astropy.time import Time
 from Chandra.Time import DateTime
 
-# Test that cxotime.__init__ imports the CxoTime class and all converters like date2secs
-from cxotime import CxoTime, convert
-from cxotime import *  # noqa
-from cxotime.scripts import print_time_conversions
-from cxotime import CxoTime, convert_time_format
-from cxotime import secs2greta, secs2maude, secs2jd, secs2date  # noqa: F401
-from cxotime import greta2secs, greta2maude, greta2jd, greta2date  # noqa: F401
-from cxotime import maude2secs, maude2greta, maude2jd, maude2date  # noqa: F401
-from cxotime import jd2secs, jd2greta, jd2maude, jd2date  # noqa: F401
-from cxotime import date2secs, date2greta, date2maude, date2jd  # noqa: F401
-
 import cxotime.convert
+
+# Test that cxotime.__init__ imports the CxoTime class and all converters like date2secs
+from cxotime import (  # noqa: F401
+    CxoTime,
+    convert_time_format,
+    date2greta,
+    date2jd,
+    date2maude,
+    date2secs,
+    greta2date,
+    greta2jd,
+    greta2maude,
+    greta2secs,
+    jd2date,
+    jd2greta,
+    jd2maude,
+    jd2secs,
+    maude2date,
+    maude2greta,
+    maude2jd,
+    maude2secs,
+    secs2date,
+    secs2greta,
+    secs2jd,
+    secs2maude,
+)
+from cxotime.scripts import print_time_conversions
 
 
 def test_cxotime_basic():
@@ -93,7 +109,8 @@ def test_cxotime_from_datetime():
 
 
 def test_cxotime_vs_datetime():
-    # Note the bug (https://github.com/sot/Chandra.Time/issues/21), hence the odd first two lines
+    # Note the bug (https://github.com/sot/Chandra.Time/issues/21), hence the odd first
+    # two lines
     # >>> DateTime('2015:181:23:59:60.500').date
     # '2015:182:00:00:00.500'
     secs = DateTime(

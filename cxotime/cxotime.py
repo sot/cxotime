@@ -1,4 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
+import sys
 import warnings
 from copy import copy
 from typing import Union
@@ -6,7 +7,7 @@ from typing import Union
 import erfa
 import numpy as np
 import numpy.typing as npt
-from astropy.time import Time, TimeCxcSec, TimeDecimalYear, TimeYearDayTime, TimeJD
+from astropy.time import Time, TimeCxcSec, TimeDecimalYear, TimeJD, TimeYearDayTime
 from astropy.utils import iers
 
 # TODO: use npt.NDArray with numpy 1.21
