@@ -8,7 +8,7 @@ except ImportError:
 
 entry_points = {
     "console_scripts": [
-        "cxotime = cxotime.cxotime:print_time_conversions",
+        "cxotime = cxotime.scripts.print_time_conversions:main",
     ]
 }
 
@@ -20,7 +20,7 @@ setup(
     use_scm_version=True,
     setup_requires=["setuptools_scm", "setuptools_scm_git_archive"],
     zip_safe=False,
-    packages=["cxotime", "cxotime.tests"],
+    packages=["cxotime", "cxotime.scripts", "cxotime.tests"],
     tests_require=["pytest"],
     cmdclass=cmdclass,
     entry_points=entry_points,
