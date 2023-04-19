@@ -64,7 +64,21 @@ def convert_time_format(val, fmt_out, *, fmt_in=None):
 
 
 def get_format(val):
-    """Get time format of ``val`` and return jd1, jd2 if available"""
+    """Get time format of ``val`` and return jd1, jd2 if available.
+
+    This infers the time format (e.g. 'secs', 'date', 'greta', 'maude') based on the
+    input ``val``. In some cases inferring the format has the side effect of computing
+    the jd1, jd2 values, so those are returned if available.
+
+    The jd1, jd2 values are the internal representation of time used in the astropy Time
+    class, with jd1 being the integer part and jd2 being the fractional remainder of the
+    date as a float Julian Date.
+
+    :param val: str, float, obj
+        Time value
+    :returns: tuple
+        (format, jd1, jd2)
+    """
     fmt_in = None
     jd1 = None
     jd2 = None
