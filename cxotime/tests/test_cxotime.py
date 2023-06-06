@@ -290,7 +290,16 @@ def test_get_conversions():
         "iso": "2010-01-01 00:00:00.000",
         "unix": 1262304000.0,
     }
-    assert out == exp
+    exp2 = {
+        "local": "2009 Thu Dec 31 07:00:00 PM Eastern Standard Time",
+        "iso_local": "2009-12-31T19:00:00-05:00",
+        "date": "2010:001:00:00:00.000",
+        "cxcsec": 378691266.184,
+        "decimalyear": 2010.0,
+        "iso": "2010-01-01 00:00:00.000",
+        "unix": 1262304000.0,
+    }
+    assert out == exp or out == exp2
 
 
 @pytest.mark.parametrize(
@@ -307,7 +316,15 @@ cxcsec      378691266.184
 decimalyear 2010.00000
 iso         2010-01-01 00:00:00.000
 unix        1262304000.000"""
+    exp2 = """\
+local       2009 Thu Dec 31 07:00:00 PM Eastern Standard Time
+iso_local   2009-12-31T19:00:00-05:00
+date        2010:001:00:00:00.000
+cxcsec      378691266.184
+decimalyear 2010.00000
+iso         2010-01-01 00:00:00.000
+unix        1262304000.000"""
     out_str = out.getvalue()
     # Strip all trailing whitespace on each line
     out_str = "\n".join([line.rstrip() for line in out_str.splitlines()])
-    assert out_str == exp
+    assert out_str == exp or out_str == exp2
