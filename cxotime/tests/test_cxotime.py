@@ -366,6 +366,8 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
         pass
     elif val_type == "list":
         val = [val, val]
+    elif val_type == "empty":
+        val = []
     elif val_type == "array":
         val = np.array([val, val])
     else:

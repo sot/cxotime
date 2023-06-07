@@ -136,6 +136,7 @@ def convert_date_to_jd1_jd2(date):
     jd1, jd2 = convert_string_to_jd1_jd2(date, TimeYearDayTime)
     return jd1, jd2
 
+_greta_to_jd1_jd2_fun = np.frompyfunc(lambda x: f"{x:.9f}", 1, 1)
 
 def convert_greta_to_jd1_jd2(date):
     if not isinstance(date, np.ndarray):
@@ -143,7 +144,7 @@ def convert_greta_to_jd1_jd2(date):
 
     # Allow for numeric input but reformat as string
     if date.dtype.kind in ("f", "i"):
-        date = np.array([f"{x:.9f}" for x in date.flat]).reshape(date.shape)
+        date = _greta_to_jd1_jd2_fun(date.flat).astype(str).reshape(date.shape)
 
     jd1, jd2 = convert_string_to_jd1_jd2(date, TimeGreta)
     return jd1, jd2
@@ -160,17 +161,13 @@ def convert_maude_to_jd1_jd2(date):
     return jd1, jd2
 
 
+_date_to_greta_fun = np.frompyfunc(lambda x: f"{x[:4]}{x[5:8]}.{x[9:11]}{x[12:14]}{x[15:17]}{x[18:21]}", 1, 1)
 def convert_jd1_jd2_to_greta(jd1, jd2):
     date = convert_jd1_jd2_to_date(jd1, jd2)
     # Convert '1997:365:23:58:57.816' to '1997365.235857816'
     #          012345678901234567890
     if isinstance(date, np.ndarray):
-        out = np.array(
-            [
-                x[:4] + x[5:8] + "." + x[9:11] + x[12:14] + x[15:17] + x[18:21]
-                for x in date.flat
-            ]
-        )
+        out = np.array(_date_to_greta_fun(date))
         out.shape = date.shape
     else:
         x = date  # 15 ns
@@ -178,15 +175,11 @@ def convert_jd1_jd2_to_greta(jd1, jd2):
     return out
 
 
+_date_to_maude_fun = np.frompyfunc(lambda x: f"{x[:4]}{x[5:8]}{x[9:11]}{x[12:14]}{x[15:17]}{x[18:21]}", 1, 1)
 def convert_jd1_jd2_to_maude(jd1, jd2):
     date = convert_jd1_jd2_to_date(jd1, jd2)
     if isinstance(date, np.ndarray):
-        out = np.array(
-            [
-                x[:4] + x[5:8] + x[9:11] + x[12:14] + x[15:17] + x[18:21]
-                for x in date.flat
-            ]
-        )
+        out = np.array(_date_to_maude_fun(date))
         out = out.astype("i8")
         out.shape = date.shape
     else:
@@ -234,7 +227,15 @@ def convert_string_to_jd1_jd2(date, time_format_cls):
     return jd1, jd2
 
 
+def single_dtf2d(iy, im, id, ihr, imin, isec, ifracsec):
+    yday = datetime.datetime(iy, im, id).timetuple().tm_yday
+    return f"{iy:4d}:{yday:03d}:{ihr:02d}:{imin:02d}:{isec:02d}.{ifracsec:03d}"
+
+dtf2d = np.frompyfunc(single_dtf2d, 7, 1)
+
+
 def convert_jd1_jd2_to_date(jd1, jd2):
+
     iys, ims, ids, ihmsfs = erfa.d2dtf(b"TT", 3, jd1, jd2)
     ihrs = ihmsfs["h"]
     imins = ihmsfs["m"]
@@ -242,15 +243,8 @@ def convert_jd1_jd2_to_date(jd1, jd2):
     ifracs = ihmsfs["f"]
 
     if isinstance(jd1, np.ndarray):
-        dates = []
-        for iy, im, id, ihr, imin, isec, ifracsec in np.nditer(
-            [iys, ims, ids, ihrs, imins, isecs, ifracs], flags=["zerosize_ok"]
-        ):
-            yday = datetime.datetime(iy, im, id).timetuple().tm_yday
-            date = f"{iy:4d}:{yday:03d}:{ihr:02d}:{imin:02d}:{isec:02d}.{ifracsec:03d}"
-            dates.append(date)
-
-        out = np.array(dates).reshape(jd1.shape)
+        dates = dtf2d(iys, ims, ids, ihrs, imins, isecs, ifracs)
+        out = np.array(dates).reshape(jd1.shape).astype(str)
     else:
         yday = datetime.datetime(iys, ims, ids).timetuple().tm_yday
         out = f"{iys:4d}:{yday:03d}:{ihrs:02d}:{imins:02d}:{isecs:02d}.{ifracs:03d}"
