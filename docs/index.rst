@@ -128,13 +128,13 @@ any of the supported *fast* formats:
 
 For example::
 
-  >>> from cxotime import convert_time_format
-  >>> convert_time_format("2022:001:00:00:00.123", "greta")
-  '2022001.000000123'
-  >>> convert_time_format(100.123, "date")
- '1998:001:00:00:36.939'
-  >>> convert_time_format(2459580.5, "date", fmt_in="jd")
-  '2022:001:00:00:00.000'
+    >>> from cxotime import convert_time_format
+    >>> convert_time_format("2022:001:00:00:00.123", "greta")
+    '2022001.000000123'
+    >>> convert_time_format(100.123, "date")
+    '1998:001:00:00:36.939'
+    >>> convert_time_format(2459580.5, "date", fmt_in="jd")
+    '2022:001:00:00:00.000'
 
 Note that this function can be used to convert between any of the supported |CxoTime|
 formats, but it will internally use a |CxoTime| object so the performance will not be
@@ -189,9 +189,8 @@ command line script or as class method :meth:`~cxotime.CxoTime.print_conversions
     iso         2023-01-10 18:41:02.603
     unix        1673376062.603
 
-::
+or in python::
 
-    $ python
     >>> from cxotime import CxoTime
     >>> tm = CxoTime("2022-01-02 12:00:00.000")
     >>> tm.print_conversions()
