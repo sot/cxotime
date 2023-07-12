@@ -63,7 +63,6 @@
             
   <h1>Source code for cxotime.cxotime</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Licensed under a 3-clause BSD style license - see LICENSE.rst</span>
-<span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
@@ -72,7 +71,7 @@
 <span class="kn">import</span> <span class="nn">erfa</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
-<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeCxcSec</span><span class="p">,</span> <span class="n">TimeDecimalYear</span><span class="p">,</span> <span class="n">TimeYearDayTime</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeCxcSec</span><span class="p">,</span> <span class="n">TimeDecimalYear</span><span class="p">,</span> <span class="n">TimeJD</span><span class="p">,</span> <span class="n">TimeYearDayTime</span>
 <span class="kn">from</span> <span class="nn">astropy.utils</span> <span class="kn">import</span> <span class="n">iers</span>
 
 <span class="c1"># TODO: use npt.NDArray with numpy 1.21</span>
@@ -87,148 +86,6 @@
 <span class="c1"># For working in Chandra operations, possibly with no network access, we cannot</span>
 <span class="c1"># allow auto downloads.</span>
 <span class="n">iers</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">auto_download</span> <span class="o">=</span> <span class="kc">False</span>
-
-
-<div class="viewcode-block" id="date2secs"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.date2secs">[docs]</a><span class="k">def</span> <span class="nf">date2secs</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Fast conversion from Year Day-of-Year date(s) to CXC seconds</span>
-
-<span class="sd">    This is a specialized function that allows for fast conversion of a single</span>
-<span class="sd">    date or an array of dates to CXC seconds.  It is intended to be used ONLY</span>
-<span class="sd">    when the input date is known to be in the correct Year Day-of-Year format.</span>
-
-<span class="sd">    The main use case is for a single date or a few dates. For a single date</span>
-<span class="sd">    this function is about 10 times faster than the equivalent call to</span>
-<span class="sd">    ``CxoTime(date).secs``. For a large array of dates (more than about 100)</span>
-<span class="sd">    this function is not significantly faster.</span>
-
-<span class="sd">    This function will raise an exception if the input date is not in one of</span>
-<span class="sd">    these allowed formats:</span>
-
-<span class="sd">    - YYYY:DDD</span>
-<span class="sd">    - YYYY:DDD:HH:MM</span>
-<span class="sd">    - YYYY:DDD:HH:MM:SS</span>
-<span class="sd">    - YYYY:DDD:HH:MM:SS.sss</span>
-
-<span class="sd">    :param date: str, list of str, bytes, list of bytes, np.ndarray Input</span>
-<span class="sd">        date(s) in an allowed year-day-of-year date format</span>
-<span class="sd">    :returns: float, np.ndarray CXC seconds matching dimensions of input date(s)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># This code is adapted from the underlying code in astropy time, with some</span>
-    <span class="c1"># of the general-purpose handling and validation removed.</span>
-    <span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">_parse_times</span>
-    <span class="kn">from</span> <span class="nn">astropy.time.formats</span> <span class="kn">import</span> <span class="n">TimeYearDayTime</span>
-
-    <span class="c1"># Handle bytes or str input and convert to uint8.  We need to the</span>
-    <span class="c1"># dtype _parse_times.dt_u1 instead of uint8, since otherwise it is</span>
-    <span class="c1"># not possible to create a gufunc with structured dtype output.</span>
-    <span class="c1"># See note about ufunc type resolver in pyerfa/erfa/ufunc.c.templ.</span>
-    <span class="n">date</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">date</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;U&quot;</span><span class="p">:</span>
-        <span class="c1"># This assumes the input is pure ASCII.</span>
-        <span class="n">val1_uint32</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">view</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">,</span> <span class="n">date</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">//</span> <span class="mi">4</span><span class="p">))</span>
-        <span class="n">chars</span> <span class="o">=</span> <span class="n">val1_uint32</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">_parse_times</span><span class="o">.</span><span class="n">dt_u1</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">chars</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">view</span><span class="p">((</span><span class="n">_parse_times</span><span class="o">.</span><span class="n">dt_u1</span><span class="p">,</span> <span class="n">date</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span><span class="p">))</span>
-
-    <span class="c1"># Call the fast parsing ufunc.</span>
-    <span class="n">time_struct</span> <span class="o">=</span> <span class="n">TimeYearDayTime</span><span class="o">.</span><span class="n">_fast_parser</span><span class="p">(</span><span class="n">chars</span><span class="p">)</span>
-
-    <span class="c1"># In these ERFA calls ignore the return value since we know jd1, jd2 are OK.</span>
-    <span class="c1"># Checking the return value via np.any nearly doubles the function time.</span>
-
-    <span class="c1"># Convert time ISO date to jd1, jd2</span>
-    <span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">erfa</span><span class="o">.</span><span class="n">ufunc</span><span class="o">.</span><span class="n">dtf2d</span><span class="p">(</span>
-        <span class="sa">b</span><span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-        <span class="n">time_struct</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">],</span>
-        <span class="n">time_struct</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">],</span>
-        <span class="n">time_struct</span><span class="p">[</span><span class="s2">&quot;day&quot;</span><span class="p">],</span>
-        <span class="n">time_struct</span><span class="p">[</span><span class="s2">&quot;hour&quot;</span><span class="p">],</span>
-        <span class="n">time_struct</span><span class="p">[</span><span class="s2">&quot;minute&quot;</span><span class="p">],</span>
-        <span class="n">time_struct</span><span class="p">[</span><span class="s2">&quot;second&quot;</span><span class="p">],</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Transform to TT via TAI</span>
-    <span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">erfa</span><span class="o">.</span><span class="n">ufunc</span><span class="o">.</span><span class="n">utctai</span><span class="p">(</span><span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">)</span>
-    <span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">erfa</span><span class="o">.</span><span class="n">ufunc</span><span class="o">.</span><span class="n">taitt</span><span class="p">(</span><span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">)</span>
-
-    <span class="c1"># Fixed offsets taken from CxoTime(0.0).tt.jd1,2</span>
-    <span class="n">time_from_epoch1</span> <span class="o">=</span> <span class="p">(</span><span class="n">jd1</span> <span class="o">-</span> <span class="mf">2450814.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">86400.0</span>
-    <span class="n">time_from_epoch2</span> <span class="o">=</span> <span class="p">(</span><span class="n">jd2</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="mf">86400.0</span>
-
-    <span class="k">return</span> <span class="n">time_from_epoch1</span> <span class="o">+</span> <span class="n">time_from_epoch2</span></div>
-
-
-<div class="viewcode-block" id="secs2date"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.secs2date">[docs]</a><span class="k">def</span> <span class="nf">secs2date</span><span class="p">(</span><span class="n">secs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Fast conversion from CXC seconds to Year Day-of-Year date(s)</span>
-
-<span class="sd">    This is a specialized function that allows for fast conversion of one or</span>
-<span class="sd">    more CXC seconds times to Year Day-of-Year format.</span>
-
-<span class="sd">    The main use case is for a single date or a few dates. For a single date</span>
-<span class="sd">    this function is about 15-20 times faster than the equivalent call to</span>
-<span class="sd">    ``CxoTime(secs).date``. For a large array of dates (more than about 100)</span>
-<span class="sd">    this function is not significantly faster.</span>
-
-<span class="sd">    :param secs: float, list of float, np.ndarray</span>
-<span class="sd">        Input time(s) in CXC seconds</span>
-<span class="sd">    :returns: str, np.ndarray of str</span>
-<span class="sd">        Year Day-of-Year dates matching dimensions of input time(s)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># This code is adapted from the underlying code in astropy time, with some</span>
-    <span class="c1"># of the general-purpose handling and validation removed.</span>
-
-    <span class="c1"># For scalars use a specialized version that is about 30% faster.</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">secs</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">secs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">secs</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">():</span>
-        <span class="k">return</span> <span class="n">_secs2date_scalar</span><span class="p">(</span><span class="n">secs</span><span class="p">)</span>
-
-    <span class="n">secs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">secs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-    <span class="n">jd1</span> <span class="o">=</span> <span class="n">secs</span> <span class="o">/</span> <span class="mf">86400.0</span> <span class="o">+</span> <span class="mf">2450814.5</span>
-    <span class="n">jd2</span> <span class="o">=</span> <span class="mf">0.0</span>
-
-    <span class="c1"># In these ERFA calls ignore the return value since we know jd1, jd2 are OK.</span>
-    <span class="c1"># Checking the return value via np.any is quite slow.</span>
-    <span class="c1"># Transform TT to UTC via TAI</span>
-    <span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">erfa</span><span class="o">.</span><span class="n">ufunc</span><span class="o">.</span><span class="n">tttai</span><span class="p">(</span><span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">)</span>
-    <span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">erfa</span><span class="o">.</span><span class="n">ufunc</span><span class="o">.</span><span class="n">taiutc</span><span class="p">(</span><span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">)</span>
-
-    <span class="n">dates</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">iys</span><span class="p">,</span> <span class="n">ims</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">ihmsfs</span> <span class="o">=</span> <span class="n">erfa</span><span class="o">.</span><span class="n">d2dtf</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;TT&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">)</span>
-    <span class="n">ihrs</span> <span class="o">=</span> <span class="n">ihmsfs</span><span class="p">[</span><span class="s2">&quot;h&quot;</span><span class="p">]</span>
-    <span class="n">imins</span> <span class="o">=</span> <span class="n">ihmsfs</span><span class="p">[</span><span class="s2">&quot;m&quot;</span><span class="p">]</span>
-    <span class="n">isecs</span> <span class="o">=</span> <span class="n">ihmsfs</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span>
-    <span class="n">ifracs</span> <span class="o">=</span> <span class="n">ihmsfs</span><span class="p">[</span><span class="s2">&quot;f&quot;</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">iy</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">ihr</span><span class="p">,</span> <span class="n">imin</span><span class="p">,</span> <span class="n">isec</span><span class="p">,</span> <span class="n">ifracsec</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">iys</span><span class="p">,</span> <span class="n">ims</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">ihrs</span><span class="p">,</span> <span class="n">imins</span><span class="p">,</span> <span class="n">isecs</span><span class="p">,</span> <span class="n">ifracs</span><span class="p">],</span> <span class="n">flags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;zerosize_ok&quot;</span><span class="p">]</span>
-    <span class="p">):</span>
-        <span class="n">yday</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">iy</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()</span><span class="o">.</span><span class="n">tm_yday</span>
-        <span class="n">date</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">iy</span><span class="si">:</span><span class="s2">4d</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">yday</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ihr</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">imin</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">isec</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">ifracsec</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
-
-    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">secs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">out</span></div>
-
-
-<span class="k">def</span> <span class="nf">_secs2date_scalar</span><span class="p">(</span><span class="n">secs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Internal version of secs2date for scalar input</span>
-
-<span class="sd">    Same as secs2date but with the array handling removed. This is around 30%</span>
-<span class="sd">    faster.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">jd1</span> <span class="o">=</span> <span class="n">secs</span> <span class="o">/</span> <span class="mf">86400.0</span> <span class="o">+</span> <span class="mf">2450814.5</span>
-    <span class="n">jd2</span> <span class="o">=</span> <span class="mf">0.0</span>
-
-    <span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">erfa</span><span class="o">.</span><span class="n">ufunc</span><span class="o">.</span><span class="n">tttai</span><span class="p">(</span><span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">)</span>
-    <span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">erfa</span><span class="o">.</span><span class="n">ufunc</span><span class="o">.</span><span class="n">taiutc</span><span class="p">(</span><span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">)</span>
-
-    <span class="n">iy</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">ihmsfs</span> <span class="o">=</span> <span class="n">erfa</span><span class="o">.</span><span class="n">d2dtf</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;TT&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span><span class="p">)</span>
-    <span class="n">ihr</span> <span class="o">=</span> <span class="n">ihmsfs</span><span class="p">[</span><span class="s2">&quot;h&quot;</span><span class="p">]</span>
-    <span class="n">imin</span> <span class="o">=</span> <span class="n">ihmsfs</span><span class="p">[</span><span class="s2">&quot;m&quot;</span><span class="p">]</span>
-    <span class="n">isec</span> <span class="o">=</span> <span class="n">ihmsfs</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span>
-    <span class="n">ifracsec</span> <span class="o">=</span> <span class="n">ihmsfs</span><span class="p">[</span><span class="s2">&quot;f&quot;</span><span class="p">]</span>
-    <span class="n">yday</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">iy</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()</span><span class="o">.</span><span class="n">tm_yday</span>
-    <span class="n">date</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">iy</span><span class="si">:</span><span class="s2">4d</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">yday</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ihr</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">imin</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">isec</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">ifracsec</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">&quot;</span>
-
-    <span class="k">return</span> <span class="n">date</span>
 
 
 <div class="viewcode-block" id="CxoTime"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.CxoTime">[docs]</a><span class="k">class</span> <span class="nc">CxoTime</span><span class="p">(</span><span class="n">Time</span><span class="p">):</span>
@@ -297,9 +154,20 @@
                 <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;cannot supply keyword arguments with no time value&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">CxoTime</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="c1"># If input is already a CxoTime instance and no other kwargs just return</span>
+            <span class="c1"># the instance. Note that copy=False is the default.</span>
+            <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">CxoTime</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="c1"># If input is already a CxoTime instance and no other kwargs (which</span>
+            <span class="c1"># implies copy=False) then no other initialization is needed.</span>
+            <span class="k">return</span>
+
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Compatibility with DateTime and allows kwarg default of None with</span>
             <span class="c1"># input casting like `date = CxoTime(date)`.</span>
@@ -442,13 +310,33 @@
         <span class="k">return</span> <span class="n">out</span></div></div>
 
 
+<span class="n">TimeJD</span><span class="o">.</span><span class="n">convert_doc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;jd&quot;</span><span class="p">,</span>
+    <span class="n">descr_short</span><span class="o">=</span><span class="s2">&quot;Julian Date&quot;</span><span class="p">,</span>
+    <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;Julian Date (numeric)&quot;</span><span class="p">,</span>
+    <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;Julian Date (numeric)&quot;</span><span class="p">,</span>
+    <span class="n">input_type</span><span class="o">=</span><span class="s2">&quot;float, int, list, ndarray&quot;</span><span class="p">,</span>
+    <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;float, ndarray[float]&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
 <div class="viewcode-block" id="TimeSecs"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeSecs">[docs]</a><span class="k">class</span> <span class="nc">TimeSecs</span><span class="p">(</span><span class="n">TimeCxcSec</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.</span>
 <span class="sd">    For example, 63072064.184 is midnight on January 1, 2000.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;secs&quot;</span></div>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;secs&quot;</span>
+
+    <span class="c1"># Documentation inputs for convert functions</span>
+    <span class="n">convert_doc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
+        <span class="n">descr_short</span><span class="o">=</span><span class="s2">&quot;CXC seconds&quot;</span><span class="p">,</span>
+        <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;CXC seconds (numeric)&quot;</span><span class="p">,</span>
+        <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;CXC seconds (numeric)&quot;</span><span class="p">,</span>
+        <span class="n">input_type</span><span class="o">=</span><span class="s2">&quot;float, int, list, ndarray&quot;</span><span class="p">,</span>
+        <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;float, ndarray[float]&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimeDate"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeDate">[docs]</a><span class="k">class</span> <span class="nc">TimeDate</span><span class="p">(</span><span class="n">TimeYearDayTime</span><span class="p">):</span>
@@ -475,6 +363,20 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;date&quot;</span>
+
+    <span class="c1"># Documentation inputs for convert functions</span>
+    <span class="n">convert_doc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+        <span class="n">descr_short</span><span class="o">=</span><span class="s2">&quot;Date (Year, day-of-year, time)&quot;</span><span class="p">,</span>
+        <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    - YYYY:DDD:HH:MM:SS.sss</span>
+<span class="s2">    - YYYY:DDD:HH:MM:SS</span>
+<span class="s2">    - YYYY:DDD:HH:MM</span>
+<span class="s2">    - YYYY:DDD&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;YYYY:DDD:HH:MM:SS.sss&quot;</span><span class="p">,</span>
+        <span class="n">input_type</span><span class="o">=</span><span class="s2">&quot;str, bytes, float, list, ndarray&quot;</span><span class="p">,</span>
+        <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;str, ndarray[str]&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
 <div class="viewcode-block" id="TimeDate.to_value"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeDate.to_value">[docs]</a>    <span class="k">def</span> <span class="nf">to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">==</span> <span class="s2">&quot;utc&quot;</span><span class="p">:</span>
@@ -523,6 +425,16 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;greta&quot;</span>
+
+    <span class="c1"># Documentation inputs for convert functions</span>
+    <span class="n">convert_doc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+        <span class="n">descr_short</span><span class="o">=</span><span class="s2">&quot;GRETA date&quot;</span><span class="p">,</span>
+        <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;YYYYDDD.HHMMSSsss (str or float)&quot;</span><span class="p">,</span>
+        <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;YYYYDDD.HHMMSSsss (str)&quot;</span><span class="p">,</span>
+        <span class="n">input_type</span><span class="o">=</span><span class="s2">&quot;str, bytes, float, list, np.ndarray&quot;</span><span class="p">,</span>
+        <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;str, np.ndarray[str]&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">subfmts</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s2">&quot;date_hms&quot;</span><span class="p">,</span> <span class="s2">&quot;%Y%j%H%M%S&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}</span><span class="s2">&quot;</span><span class="p">),</span>
@@ -580,7 +492,7 @@
 
 <div class="viewcode-block" id="TimeMaude"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeMaude">[docs]</a><span class="k">class</span> <span class="nc">TimeMaude</span><span class="p">(</span><span class="n">TimeDate</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Date as a 64-bit integer in format YYYYDDDhhmmsss, where sss is number of</span>
+<span class="sd">    Date as a 64-bit integer in format YYYYDDDHHMMSSsss, where sss is number of</span>
 <span class="sd">    milliseconds.</span>
 
 <span class="sd">    This can be input as an integer or string, but the output is always integer.</span>
@@ -589,6 +501,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;maude&quot;</span>
+    <span class="n">convert_doc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+        <span class="n">descr_short</span><span class="o">=</span><span class="s2">&quot;MAUDE date&quot;</span><span class="p">,</span>
+        <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;YYYYDDDHHMMSSsss (str or int)&quot;</span><span class="p">,</span>
+        <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;YYYYDDD.HHMMSSsss (int)&quot;</span><span class="p">,</span>
+        <span class="n">input_type</span><span class="o">=</span><span class="s2">&quot;str, bytes, int, list, ndarray&quot;</span><span class="p">,</span>
+        <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;int, ndarray[int]&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">subfmts</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s2">&quot;date_hms&quot;</span><span class="p">,</span> <span class="s2">&quot;%Y%j%H%M%S&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}</span><span class="s2">&quot;</span><span class="p">),</span>

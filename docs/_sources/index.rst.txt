@@ -32,28 +32,6 @@ greta     YYYYDDD.hhmmsssss (string)                   utc
 maude     YYYYDDDhhmmsssss (integer)                   utc
 ========= ===========================================  =======
 
-
-Compatibility with DateTime
----------------------------
-
-The key differences between |CxoTime| and DateTime_ are:
-
-- In |CxoTime| the date '2000:001' is '2000:001:00:00:00' instead of
-  '2000:001:12:00:00' in DateTime_ (prior to version 4.0).  In most cases this
-  interpretation is more rational and expected.
-
-- In |CxoTime| the date '2001-01-01T00:00:00' is UTC by default, while in
-  DateTime_ that is interpreted as TT by default.  This is triggered by
-  the ``T`` in the middle.  A date like '2001-01-01 00:00:00' defaults
-  to UTC in both |CxoTime| and DateTime_.
-
-- In |CxoTime| the difference of two dates is a TimeDelta_ object
-  which is transformable to any time units.  In DateTime_ the difference
-  of two dates is a floating point value in days.
-
-- Conversely, starting with |CxoTime| one can add or subtract a TimeDelta_ or
-  any quantity with time units.
-
 The standard built-in Time formats that are available in |CxoTime| are:
 
 ===========  ==============================
@@ -78,11 +56,8 @@ yday         2000:001:00:00:00.000
 ===========  ==============================
 
 
-Examples
---------
-
 Basic initialization
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 ::
 
   >>> from cxotime import CxoTime
@@ -109,7 +84,7 @@ Basic initialization
   'date'
 
 Guessing and specifying the format
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------
 
 Generally speaking ``CxoTime`` will successfully guess the format for
 string-based times. However this requires some time, so if you know the
@@ -125,36 +100,140 @@ argument.
    :maxdepth: 2
 
 
-Fast conversion between Date and CXC seconds
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Fast conversion between formats
+-------------------------------
 
-For fast conversion of an input date or dates in Year Day-of-Year date format,
-the function :func:`~cxotime.cxotime.date2secs` can be used.
+Converting between time formats (e.g. from CXC seconds to Year Day-of-Year) is
+easily done with the |CxoTime| class, but this involves some overhead and is
+relatively slow for scalar values or small arrays (less than around 100
+elements). For applications where this conversion time ends up being significant,
+the `cxotime` package provides a different interface that is typically at least
+10x faster for scalar values or small arrays.
 
-This is a specialized function similar to the legacy ``Chandra.Time.date2secs``
-that allows for fast conversion of a single date or an array of dates to CXC
-seconds.  It is intended to be used ONLY when the input date is known to be in
-the correct Year Day-of-Year format.
+For fast conversion of an input date or dates to a different format there are
+two options that are described in the next two sections.
 
-The main use case is for a single date or a few dates. For a single date this
-function is about 10 times faster than the equivalent call to
-``CxoTime(date).secs``. For a large array of dates (more than about 100) this
-function  is not significantly faster.
+``convert_time_format``
+^^^^^^^^^^^^^^^^^^^^^^^
 
-This function will raise an exception if the input date is not in one of
-these allowed formats:
+The first option is a generalized time format conversion function
+:func:`~cxotime.convert.convert_time_format` that can be used to convert between
+any of the supported *fast* formats:
 
-- YYYY:DDD
-- YYYY:DDD:HH:MM
-- YYYY:DDD:HH:MM:SS
-- YYYY:DDD:HH:MM:SS.sss
+- `secs`: CXC seconds
+- `date`: Year Day-of-Year
+- `greta`: GRETA format (input can be string, float or int)
+- `maude`: MAUDE format (input can be string or int)
+- `jd`: Julian Day (requires `fmt_in="jd"` to identity this format)
 
-Conversely, for fast conversion from CXC seconds to Year Day-of-Year date, the
-function :func:`~cxotime.cxotime.secs2date` can be used. For scalar inputs this
-is 15-20 times faster than the equivalent call to ``CxoTime(secs).date``.
+For example::
+
+    >>> from cxotime import convert_time_format
+    >>> convert_time_format("2022:001:00:00:00.123", "greta")
+    '2022001.000000123'
+    >>> convert_time_format(100.123, "date")
+    '1998:001:00:00:36.939'
+    >>> convert_time_format(2459580.5, "date", fmt_in="jd")
+    '2022:001:00:00:00.000'
+
+Note that this function can be used to convert between any of the supported |CxoTime|
+formats, but it will internally use a |CxoTime| object so the performance will not be
+improved. For example::
+
+    >>> convert_time_format(2022.123, fmt_out="date", fmt_in="frac_year")
+    '2022:045:21:28:48.000'
+
+    # Exactly equivalent to:
+    >>> CxoTime(2022.123, format="frac_year").date
+    '2022:045:21:28:48.000'
+
+Convenience functions like ``secs2date``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For historical compatibility and for succinct code, direct conversion between any two
+of the "fast" formats is also available via convenience functions. These have the name
+``<fmt_in>2<fmt_out>`` where ``fmt_in`` and ``fmt_out`` are the input and output formats.
+Examples include :func:`~cxotime.convert.date2secs`, :func:`~cxotime.convert.secs2greta`,
+and :func:`~cxotime.convert.greta2jd`.
+
+::
+    >>> from cxotime import secs2greta
+    >>> secs2greta([100, 1000])
+    array(['1998001.000036816', '1998001.001536816'], dtype='<U17')
+
+
+Print common time conversions
+-----------------------------
+
+The `cxotime` package has functionality to convert a time betweeen a variety of common
+time formats. This convenience function is available in two ways, either as a
+command line script or as class method :meth:`~cxotime.CxoTime.print_conversions`::
+
+    $ cxotime 2022:002:12:00:00
+    local       2022 Sun Jan 02 07:00:00 AM EST
+    iso_local   2022-01-02T07:00:00-05:00
+    date        2022:002:12:00:00.000
+    cxcsec      757512069.184
+    decimalyear 2022.00411
+    iso         2022-01-02 12:00:00.000
+    unix        1641124800.000
+
+::
+
+    $ cxotime  # Print current time
+    local       2023 Tue Jan 10 01:41:02 PM EST
+    iso_local   2023-01-10T13:41:02.603000-05:00
+    date        2023:010:18:41:02.603
+    cxcsec      789763331.787
+    decimalyear 2023.02679
+    iso         2023-01-10 18:41:02.603
+    unix        1673376062.603
+
+or in python::
+
+    >>> from cxotime import CxoTime
+    >>> tm = CxoTime("2022-01-02 12:00:00.000")
+    >>> tm.print_conversions()
+    local       2022 Sun Jan 02 07:00:00 AM EST
+    iso_local   2022-01-02T07:00:00-05:00
+    date        2022:002:12:00:00.000
+    cxcsec      757512069.184
+    decimalyear 2022.00411
+    iso         2022-01-02 12:00:00.000
+    unix        1641124800.000
+
+Compatibility with DateTime
+---------------------------
+
+The key differences between |CxoTime| and DateTime_ are:
+
+- In |CxoTime| the date '2000:001' is '2000:001:00:00:00' instead of
+  '2000:001:12:00:00' in DateTime_ (prior to version 4.0).  In most cases this
+  interpretation is more rational and expected.
+
+- In |CxoTime| the date '2001-01-01T00:00:00' is UTC by default, while in
+  DateTime_ that is interpreted as TT by default.  This is triggered by
+  the ``T`` in the middle.  A date like '2001-01-01 00:00:00' defaults
+  to UTC in both |CxoTime| and DateTime_.
+
+- In |CxoTime| the difference of two dates is a TimeDelta_ object
+  which is transformable to any time units.  In DateTime_ the difference
+  of two dates is a floating point value in days.
+
+- Conversely, starting with |CxoTime| one can add or subtract a TimeDelta_ or
+  any quantity with time units.
 
 API docs
 --------
 
+Cxotime
+^^^^^^^
+
 .. automodule:: cxotime.cxotime
+   :members:
+
+Converters
+^^^^^^^^^^
+
+.. automodule:: cxotime.convert
    :members:
