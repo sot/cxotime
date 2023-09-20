@@ -419,7 +419,7 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
     exp_kind = np.asarray(exp).dtype.kind
     val_kind = np.asarray(val).dtype.kind
 
-    assert type(exp) == type(out)
+    assert type(exp) is type(out)
     if exp_kind == "f":
         assert np.allclose(exp, out, rtol=1e-12)
     else:
@@ -434,7 +434,7 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
         # exp_kind == ... test because e.g. you can input greta as a float but this
         # format cannot be auto detected.
         out2 = convert_time_format(val, fmt_out)
-        assert type(out) == type(out2)
+        assert type(out) is type(out2)
         assert np.all(out == out2)
 
     # Test the convenience functions like date2secs
@@ -445,5 +445,5 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
     ):
         func = globals()[f"{fmt_in}2{fmt_out}"]
         out3 = func(val)
-        assert type(out) == type(out3)
+        assert type(out) is type(out3)
         assert np.all(out == out3)
