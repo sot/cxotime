@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,9 +10,8 @@
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-astropy.css" />
     
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <script type="text/javascript" src="../../_static/sidebar.js"></script>
     <script type="text/javascript" src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -89,7 +88,7 @@
 
 
 <div class="viewcode-block" id="CxoTime"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.CxoTime">[docs]</a><span class="k">class</span> <span class="nc">CxoTime</span><span class="p">(</span><span class="n">Time</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Time class for Chandra analysis that is based on ``astropy.time.Time``.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Time class for Chandra analysis that is based on ``astropy.time.Time``.</span>
 
 <span class="sd">    The CXO-specific time formats which are added to the astropy ``Time`` class</span>
 <span class="sd">    are shown in the table below.  Like ``DateTime``, the ``CxoTime`` class</span>
@@ -229,14 +228,14 @@
 
         <span class="nb">super</span><span class="p">(</span><span class="n">CxoTime</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="CxoTime.now"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.CxoTime.now">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">now</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">()</span></div>
 
     <span class="n">now</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="vm">__doc__</span>
 
 <div class="viewcode-block" id="CxoTime.print_conversions"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.CxoTime.print_conversions">[docs]</a>    <span class="k">def</span> <span class="nf">print_conversions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print a table of conversions to a standard set of formats.</span>
 
 <span class="sd">        Example::</span>
@@ -280,7 +279,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CxoTime.get_conversions"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.CxoTime.get_conversions">[docs]</a>    <span class="k">def</span> <span class="nf">get_conversions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a dict of conversions to a standard set of formats.</span>
 
 <span class="sd">        Example::</span>
@@ -321,7 +320,7 @@
 
 
 <div class="viewcode-block" id="TimeSecs"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeSecs">[docs]</a><span class="k">class</span> <span class="nc">TimeSecs</span><span class="p">(</span><span class="n">TimeCxcSec</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.</span>
 <span class="sd">    For example, 63072064.184 is midnight on January 1, 2000.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -340,7 +339,7 @@
 
 
 <div class="viewcode-block" id="TimeDate"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeDate">[docs]</a><span class="k">class</span> <span class="nc">TimeDate</span><span class="p">(</span><span class="n">TimeYearDayTime</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Year, day-of-year and time as &quot;YYYY:DOY:HH:MM:SS.sss...&quot; in UTC.</span>
 
 <span class="sd">    The day-of-year (DOY) goes from 001 to 365 (366 in leap years).</span>
@@ -387,14 +386,14 @@
     <span class="n">value</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">to_value</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TimeDate.set_jds"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeDate.set_jds">[docs]</a>    <span class="k">def</span> <span class="nf">set_jds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val1</span><span class="p">,</span> <span class="n">val2</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Parse the time strings contained in val1 and set jd1, jd2&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse the time strings contained in val1 and set jd1, jd2&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">val2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cannot supply val2 for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> format&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">jd1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jd2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_jds_fast</span><span class="p">(</span><span class="n">val1</span><span class="p">,</span> <span class="n">val2</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="TimeFracYear"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeFracYear">[docs]</a><span class="k">class</span> <span class="nc">TimeFracYear</span><span class="p">(</span><span class="n">TimeDecimalYear</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Time as a decimal year, with integer values corresponding to midnight</span>
 <span class="sd">    of the first day of each year.  For example 2000.5 corresponds to the</span>
 <span class="sd">    ISO time &#39;2000-07-02 00:00:00&#39;.</span>
@@ -414,7 +413,7 @@
 
 
 <div class="viewcode-block" id="TimeGreta"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeGreta">[docs]</a><span class="k">class</span> <span class="nc">TimeGreta</span><span class="p">(</span><span class="n">TimeDate</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Date as a string in format &#39;YYYYDDD.hhmmsssss&#39;, where sssss is number of</span>
 <span class="sd">    milliseconds.</span>
 
@@ -491,7 +490,7 @@
 
 
 <div class="viewcode-block" id="TimeMaude"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeMaude">[docs]</a><span class="k">class</span> <span class="nc">TimeMaude</span><span class="p">(</span><span class="n">TimeDate</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Date as a 64-bit integer in format YYYYDDDHHMMSSsss, where sss is number of</span>
 <span class="sd">    milliseconds.</span>
 
@@ -587,7 +586,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2015, Tom Aldcroft.<br/>
-    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 4.2.0. &nbsp;
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 6.1.3. &nbsp;
   </p>
 </footer>
   </body>
