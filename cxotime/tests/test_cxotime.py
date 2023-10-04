@@ -4,6 +4,7 @@ Simple test of CxoTime.  The base Time object is extremely well
 tested, so this simply confirms that the add-on in CxoTime works.
 """
 import io
+import time
 
 import astropy.units as u
 import numpy as np
@@ -309,24 +310,35 @@ def test_get_conversions():
     t = CxoTime("2010:001:00:00:00")
     out = t.get_conversions()
     exp = {
-        "local": "2009 Thu Dec 31 07:00:00 PM EST",
-        "iso_local": "2009-12-31T19:00:00-05:00",
-        "date": "2010:001:00:00:00.000",
-        "cxcsec": 378691266.184,
-        "decimalyear": 2010.0,
-        "iso": "2010-01-01 00:00:00.000",
-        "unix": 1262304000.0,
+        "EST": {
+            "local": "2009 Thu Dec 31 07:00:00 PM EST",
+            "iso_local": "2009-12-31T19:00:00-05:00",
+            "date": "2010:001:00:00:00.000",
+            "cxcsec": 378691266.184,
+            "decimalyear": 2010.0,
+            "iso": "2010-01-01 00:00:00.000",
+            "unix": 1262304000.0,
+        },
+        "Eastern Standard Time": {
+            "local": "2009 Thu Dec 31 07:00:00 PM Eastern Standard Time",
+            "iso_local": "2009-12-31T19:00:00-05:00",
+            "date": "2010:001:00:00:00.000",
+            "cxcsec": 378691266.184,
+            "decimalyear": 2010.0,
+            "iso": "2010-01-01 00:00:00.000",
+            "unix": 1262304000.0,
+        },
+        "GMT": {
+            "local": "2010 Fri Jan 01 12:00:00 AM GMT",
+            "iso_local": "2010-01-01T00:00:00+00:00",
+            "date": "2010:001:00:00:00.000",
+            "cxcsec": 378691266.184,
+            "decimalyear": 2010.0,
+            "iso": "2010-01-01 00:00:00.000",
+            "unix": 1262304000.0,
+        },
     }
-    exp2 = {
-        "local": "2009 Thu Dec 31 07:00:00 PM Eastern Standard Time",
-        "iso_local": "2009-12-31T19:00:00-05:00",
-        "date": "2010:001:00:00:00.000",
-        "cxcsec": 378691266.184,
-        "decimalyear": 2010.0,
-        "iso": "2010-01-01 00:00:00.000",
-        "unix": 1262304000.0,
-    }
-    assert out == exp or out == exp2
+    assert out == exp[time.tzname[0]]
 
 
 @pytest.mark.parametrize(
@@ -335,26 +347,39 @@ def test_get_conversions():
 def test_print_time_conversions(date):
     out = io.StringIO()
     print_time_conversions.main(date, file=out)
-    exp = """\
-local       2009 Thu Dec 31 07:00:00 PM EST
-iso_local   2009-12-31T19:00:00-05:00
-date        2010:001:00:00:00.000
-cxcsec      378691266.184
-decimalyear 2010.00000
-iso         2010-01-01 00:00:00.000
-unix        1262304000.000"""
-    exp2 = """\
-local       2009 Thu Dec 31 07:00:00 PM Eastern Standard Time
-iso_local   2009-12-31T19:00:00-05:00
-date        2010:001:00:00:00.000
-cxcsec      378691266.184
-decimalyear 2010.00000
-iso         2010-01-01 00:00:00.000
-unix        1262304000.000"""
+    exp = {
+        "EST": """\
+            local       2009 Thu Dec 31 07:00:00 PM EST
+            iso_local   2009-12-31T19:00:00-05:00
+            date        2010:001:00:00:00.000
+            cxcsec      378691266.184
+            decimalyear 2010.00000
+            iso         2010-01-01 00:00:00.000
+            unix        1262304000.000""",
+        "Eastern Standard Time": """\
+            local       2009 Thu Dec 31 07:00:00 PM Eastern Standard Time
+            iso_local   2009-12-31T19:00:00-05:00
+            date        2010:001:00:00:00.000
+            cxcsec      378691266.184
+            decimalyear 2010.00000
+            iso         2010-01-01 00:00:00.000
+            unix        1262304000.000""",
+        "GMT": """\
+            local       2010 Fri Jan 01 12:00:00 AM GMT
+            iso_local   2010-01-01T00:00:00+00:00
+            date        2010:001:00:00:00.000
+            cxcsec      378691266.184
+            decimalyear 2010.00000
+            iso         2010-01-01 00:00:00.000
+            unix        1262304000.000""",
+    }
+    exp = {
+        k: "\n".join([line.strip() for line in v.splitlines()]) for k, v in exp.items()
+    }
     out_str = out.getvalue()
     # Strip all trailing whitespace on each line
     out_str = "\n".join([line.rstrip() for line in out_str.splitlines()])
-    assert out_str == exp or out_str == exp2
+    assert out_str == exp[time.tzname[0]]
 
 
 inputs = [
@@ -394,7 +419,7 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
     exp_kind = np.asarray(exp).dtype.kind
     val_kind = np.asarray(val).dtype.kind
 
-    assert type(exp) == type(out)
+    assert type(exp) is type(out)
     if exp_kind == "f":
         assert np.allclose(exp, out, rtol=1e-12)
     else:
@@ -409,7 +434,7 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
         # exp_kind == ... test because e.g. you can input greta as a float but this
         # format cannot be auto detected.
         out2 = convert_time_format(val, fmt_out)
-        assert type(out) == type(out2)
+        assert type(out) is type(out2)
         assert np.all(out == out2)
 
     # Test the convenience functions like date2secs
@@ -420,5 +445,5 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
     ):
         func = globals()[f"{fmt_in}2{fmt_out}"]
         out3 = func(val)
-        assert type(out) == type(out3)
+        assert type(out) is type(out3)
         assert np.all(out == out3)
