@@ -36,6 +36,11 @@ def convert_time_format(val, fmt_out, *, fmt_in=None):
     val_out : str
         Time string in output format
     """
+    # If this is already a CxoTime object then return the attribute without all the
+    # conversion machinery.
+    if isinstance(val, CxoTime):
+        return getattr(val, fmt_out)
+
     jd1, jd2 = None, None
     if fmt_in is None:
         # Get the format. For some formats the jd1/jd2 values are generated as a
