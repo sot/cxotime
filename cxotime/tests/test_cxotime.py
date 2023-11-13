@@ -447,3 +447,9 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
         out3 = func(val)
         assert type(out) is type(out3)
         assert np.all(out == out3)
+
+
+def test_convert_time_format_obj():
+    """Explicit test of convert_time_format for CxoTime object"""
+    tm = CxoTime(100.0)
+    assert tm.date == convert_time_format(tm, "date")
