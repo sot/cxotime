@@ -324,6 +324,6 @@ for fmt1 in CONVERT_FORMATS:
                 f"lambda {input_name}: "
                 f"convert_time_format({input_name}, fmt_in='{fmt1}', fmt_out='{fmt2}')"
             )
-            func = globals()[name] = eval(func_str)
+            func = globals()[name] = eval(func_str)  # noqa: PGH001
             func.__doc__ = make_docstring(fmt1, fmt2)
-            __all__.append(name)
+            __all__.append(name)  # noqa: PYI056
