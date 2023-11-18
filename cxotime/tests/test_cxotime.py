@@ -416,14 +416,10 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
     exp = getattr(CxoTime(val, format=fmt_in), fmt_out)
     out = convert_time_format(val, fmt_out, fmt_in=fmt_in)
 
-    exp_kind = np.asarray(exp).dtype.kind
     val_kind = np.asarray(val).dtype.kind
 
     assert type(exp) is type(out)
-    if exp_kind == "f":
-        assert np.allclose(exp, out, rtol=1e-12)
-    else:
-        assert np.all(exp == out)
+    assert np.all(exp == out)
 
     if (
         fmt_in in cxotime.convert.CONVERT_FORMATS
