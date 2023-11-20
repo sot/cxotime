@@ -4,6 +4,7 @@ import sys
 
 import erfa
 import numpy as np
+from astropy.time.core import day_frac
 from astropy.time.formats import TIME_FORMATS, TimeYearDayTime, _parse_times
 
 from .cxotime import CxoTime, TimeGreta, TimeMaude
@@ -264,12 +265,14 @@ def convert_jd1_jd2_to_date(jd1, jd2):
 
 
 def convert_secs_to_jd1_jd2(secs):
-    jd2 = 0.0
-    try:
-        jd1 = secs / 86400.0 + 2450814.5
-    except TypeError:
-        # For a list input
-        jd1 = np.array(secs, dtype=np.float64) / 86400.0 + 2450814.5
+    if not isinstance(secs, (float, np.ndarray)):
+        secs = np.asarray(secs, dtype=float)
+
+    day, frac = day_frac(secs, 0.0, divisor=86400.0)
+
+    # CxoTime("1998:001:00:00:00.000").jd1,2
+    jd1 = 2450814.0 + day
+    jd2 = 0.5 + frac
 
     # In these ERFA calls ignore the return value since we know jd1, jd2 are OK.
     # Checking the return value via np.any is quite slow.
