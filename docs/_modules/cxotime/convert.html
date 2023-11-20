@@ -67,6 +67,7 @@
 
 <span class="kn">import</span> <span class="nn">erfa</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.time.core</span> <span class="kn">import</span> <span class="n">day_frac</span>
 <span class="kn">from</span> <span class="nn">astropy.time.formats</span> <span class="kn">import</span> <span class="n">TIME_FORMATS</span><span class="p">,</span> <span class="n">TimeYearDayTime</span><span class="p">,</span> <span class="n">_parse_times</span>
 
 <span class="kn">from</span> <span class="nn">.cxotime</span> <span class="kn">import</span> <span class="n">CxoTime</span><span class="p">,</span> <span class="n">TimeGreta</span><span class="p">,</span> <span class="n">TimeMaude</span>
@@ -99,6 +100,11 @@
 <span class="sd">    val_out : str</span>
 <span class="sd">        Time string in output format</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># If this is already a CxoTime object then return the attribute without all the</span>
+    <span class="c1"># conversion machinery.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">CxoTime</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">fmt_out</span><span class="p">)</span>
+
     <span class="n">jd1</span><span class="p">,</span> <span class="n">jd2</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">fmt_in</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Get the format. For some formats the jd1/jd2 values are generated as a</span>
@@ -322,12 +328,14 @@
 
 
 <span class="k">def</span> <span class="nf">convert_secs_to_jd1_jd2</span><span class="p">(</span><span class="n">secs</span><span class="p">):</span>
-    <span class="n">jd2</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">jd1</span> <span class="o">=</span> <span class="n">secs</span> <span class="o">/</span> <span class="mf">86400.0</span> <span class="o">+</span> <span class="mf">2450814.5</span>
-    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-        <span class="c1"># For a list input</span>
-        <span class="n">jd1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">secs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">/</span> <span class="mf">86400.0</span> <span class="o">+</span> <span class="mf">2450814.5</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">secs</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="n">secs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">secs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="n">day</span><span class="p">,</span> <span class="n">frac</span> <span class="o">=</span> <span class="n">day_frac</span><span class="p">(</span><span class="n">secs</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">divisor</span><span class="o">=</span><span class="mf">86400.0</span><span class="p">)</span>
+
+    <span class="c1"># CxoTime(&quot;1998:001:00:00:00.000&quot;).jd1,2</span>
+    <span class="n">jd1</span> <span class="o">=</span> <span class="mf">2450814.0</span> <span class="o">+</span> <span class="n">day</span>
+    <span class="n">jd2</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="n">frac</span>
 
     <span class="c1"># In these ERFA calls ignore the return value since we know jd1, jd2 are OK.</span>
     <span class="c1"># Checking the return value via np.any is quite slow.</span>
