@@ -289,7 +289,10 @@ def make_docstring(fmt_in, fmt_out):
     doc_in = fmt_in_cls.convert_doc
     fmt_out_cls = TIME_FORMATS[fmt_out]
     doc_out = fmt_out_cls.convert_doc
-    equiv = f"CxoTime({doc_in['input_name']}, format='{fmt_in_cls.name}').{fmt_out_cls.name}"
+    equiv = (
+        f"CxoTime({doc_in['input_name']},"
+        f" format='{fmt_in_cls.name}').{fmt_out_cls.name}"
+    )
     out = f"""\
     Convert {doc_in['descr_short']} to {doc_out['descr_short']}.
 
@@ -329,6 +332,6 @@ for fmt1 in CONVERT_FORMATS:
                 f"lambda {input_name}: "
                 f"convert_time_format({input_name}, fmt_in='{fmt1}', fmt_out='{fmt2}')"
             )
-            func = globals()[name] = eval(func_str)
+            func = globals()[name] = eval(func_str)  # noqa: PGH001
             func.__doc__ = make_docstring(fmt1, fmt2)
-            __all__.append(name)
+            __all__.append(name)  # noqa: PYI056

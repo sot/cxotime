@@ -246,33 +246,33 @@ class CxoTime(Time):
         return out
 
 
-TimeJD.convert_doc = dict(
-    input_name="jd",
-    descr_short="Julian Date",
-    input_format="Julian Date (numeric)",
-    output_format="Julian Date (numeric)",
-    input_type="float, int, list, ndarray",
-    output_type="float, ndarray[float]",
-)
+TimeJD.convert_doc = {
+    "input_name": "jd",
+    "descr_short": "Julian Date",
+    "input_format": "Julian Date (numeric)",
+    "output_format": "Julian Date (numeric)",
+    "input_type": "float, int, list, ndarray",
+    "output_type": "float, ndarray[float]",
+}
 
 
 class TimeSecs(TimeCxcSec):
-    """
-    Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.
+    """Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.
+
     For example, 63072064.184 is midnight on January 1, 2000.
     """
 
     name = "secs"
 
     # Documentation inputs for convert functions
-    convert_doc = dict(
-        input_name="time",
-        descr_short="CXC seconds",
-        input_format="CXC seconds (numeric)",
-        output_format="CXC seconds (numeric)",
-        input_type="float, int, list, ndarray",
-        output_type="float, ndarray[float]",
-    )
+    convert_doc = {
+        "input_name": "time",
+        "descr_short": "CXC seconds",
+        "input_format": "CXC seconds (numeric)",
+        "output_format": "CXC seconds (numeric)",
+        "input_type": "float, int, list, ndarray",
+        "output_type": "float, ndarray[float]",
+    }
 
 
 class TimeDate(TimeYearDayTime):
@@ -301,18 +301,18 @@ class TimeDate(TimeYearDayTime):
     name = "date"
 
     # Documentation inputs for convert functions
-    convert_doc = dict(
-        input_name="date",
-        descr_short="Date (Year, day-of-year, time)",
-        input_format="""
+    convert_doc = {
+        "input_name": "date",
+        "descr_short": "Date (Year, day-of-year, time)",
+        "input_format": """
     - YYYY:DDD:HH:MM:SS.sss
     - YYYY:DDD:HH:MM:SS
     - YYYY:DDD:HH:MM
     - YYYY:DDD""",
-        output_format="YYYY:DDD:HH:MM:SS.sss",
-        input_type="str, bytes, float, list, ndarray",
-        output_type="str, ndarray[str]",
-    )
+        "output_format": "YYYY:DDD:HH:MM:SS.sss",
+        "input_type": "str, bytes, float, list, ndarray",
+        "output_type": "str, ndarray[str]",
+    }
 
     def to_value(self, parent=None, **kwargs):
         if self.scale == "utc":
@@ -330,10 +330,10 @@ class TimeDate(TimeYearDayTime):
 
 
 class TimeFracYear(TimeDecimalYear):
-    """
-    Time as a decimal year, with integer values corresponding to midnight
-    of the first day of each year.  For example 2000.5 corresponds to the
-    ISO time '2000-07-02 00:00:00'.
+    """Time as a decimal year.
+
+    Integer values corresponding to midnight of the first day of each year.  For example
+    2000.5 corresponds to the ISO time '2000-07-02 00:00:00'.
 
     Time value is always in UTC regardless of time object scale.
     """
@@ -350,12 +350,11 @@ class TimeFracYear(TimeDecimalYear):
 
 
 class TimeGreta(TimeDate):
-    """
-    Date as a string in format 'YYYYDDD.hhmmsssss', where sssss is number of
-    milliseconds.
+    """Date as string in format 'YYYYDDD.hhmmsssss'.
 
-    This can be input as a float, integer or string, but the output is always
-    string.
+    Here sssss is the number of millisec.
+
+    This can be input as a float, integer or string, but the output is always string.
 
     Time value is always in UTC regardless of time object scale.
     """
@@ -363,14 +362,14 @@ class TimeGreta(TimeDate):
     name = "greta"
 
     # Documentation inputs for convert functions
-    convert_doc = dict(
-        input_name="date",
-        descr_short="GRETA date",
-        input_format="YYYYDDD.HHMMSSsss (str or float)",
-        output_format="YYYYDDD.HHMMSSsss (str)",
-        input_type="str, bytes, float, list, np.ndarray",
-        output_type="str, np.ndarray[str]",
-    )
+    convert_doc = {
+        "input_name": "date",
+        "descr_short": "GRETA date",
+        "input_format": "YYYYDDD.HHMMSSsss (str or float)",
+        "output_format": "YYYYDDD.HHMMSSsss (str)",
+        "input_type": "str, bytes, float, list, np.ndarray",
+        "output_type": "str, np.ndarray[str]",
+    }
 
     subfmts = (
         ("date_hms", "%Y%j%H%M%S", "{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}"),
@@ -391,14 +390,14 @@ class TimeGreta(TimeDate):
 
     # Before: yr mon  doy     hour      minute    second    frac
 
-    fast_parser_pars = dict(
-        delims=(0, 0, 0, ord("."), 0, 0, 0),
-        starts=(0, -1, 4, 7, 10, 12, 14),
-        stops=(3, -1, 6, 9, 11, 13, -1),
+    fast_parser_pars = {
+        "delims": (0, 0, 0, ord("."), 0, 0, 0),
+        "starts": (0, -1, 4, 7, 10, 12, 14),
+        "stops": (3, -1, 6, 9, 11, 13, -1),
         # Break before:  y  m  d  h  m  s  f
-        break_allowed=(0, 0, 0, 1, 0, 1, 1),
-        has_day_of_year=1,
-    )
+        "break_allowed": (0, 0, 0, 1, 0, 1, 1),
+        "has_day_of_year": 1,
+    }
 
     def _check_val_type(self, val1, val2):
         if val2 is not None:
@@ -427,9 +426,9 @@ class TimeGreta(TimeDate):
 
 
 class TimeMaude(TimeDate):
-    """
-    Date as a 64-bit integer in format YYYYDDDHHMMSSsss, where sss is number of
-    milliseconds.
+    """Date as a 64-bit integer in format YYYYDDDHHMMSSsss.
+
+    Here sss is number of milliseconds.
 
     This can be input as an integer or string, but the output is always integer.
 
@@ -437,14 +436,14 @@ class TimeMaude(TimeDate):
     """
 
     name = "maude"
-    convert_doc = dict(
-        input_name="date",
-        descr_short="MAUDE date",
-        input_format="YYYYDDDHHMMSSsss (str or int)",
-        output_format="YYYYDDD.HHMMSSsss (int)",
-        input_type="str, bytes, int, list, ndarray",
-        output_type="int, ndarray[int]",
-    )
+    convert_doc = {
+        "input_name": "date",
+        "descr_short": "MAUDE date",
+        "input_format": "YYYYDDDHHMMSSsss (str or int)",
+        "output_format": "YYYYDDD.HHMMSSsss (int)",
+        "input_type": "str, bytes, int, list, ndarray",
+        "output_type": "int, ndarray[int]",
+    }
 
     subfmts = (
         ("date_hms", "%Y%j%H%M%S", "{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}"),
@@ -464,15 +463,15 @@ class TimeMaude(TimeDate):
     # stops: position where component ends (-1 => continue to end of string)
 
     # Before: yr mon  doy     hour      minute    second    frac
-    fast_parser_pars = dict(
-        use_fast_parser=True,
-        delims=(0, 0, 0, 0, 0, 0, 0),
-        starts=(0, -1, 4, 7, 9, 11, 13),
-        stops=(3, -1, 6, 8, 10, 12, -1),
+    fast_parser_pars = {
+        "use_fast_parser": True,
+        "delims": (0, 0, 0, 0, 0, 0, 0),
+        "starts": (0, -1, 4, 7, 9, 11, 13),
+        "stops": (3, -1, 6, 8, 10, 12, -1),
         # Break before:  y  m  d  h  m  s  f,
-        break_allowed=(0, 0, 0, 1, 0, 1, 1),
-        has_day_of_year=1,
-    )
+        "break_allowed": (0, 0, 0, 1, 0, 1, 1),
+        "has_day_of_year": 1,
+    }
 
     def _check_val_type(self, val1, val2):
         if val2 is not None:

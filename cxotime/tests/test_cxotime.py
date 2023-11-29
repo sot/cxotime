@@ -118,7 +118,12 @@ def test_cxotime_vs_datetime():
         np.array(["2000:001", "2015:181:23:59:60.500", "2015:180:01:02:03.456"])
     ).secs
     dts = DateTime(secs)
-    vals = dict(date=dts.date, secs=dts.secs, greta=dts.greta, frac_year=dts.frac_year)
+    vals = {
+        "date": dts.date,
+        "secs": dts.secs,
+        "greta": dts.greta,
+        "frac_year": dts.frac_year,
+    }
 
     fmts = list(vals.keys())
     for in_fmt in fmts:
@@ -396,7 +401,7 @@ inputs = [
     ("iso", "2001-01-01 02:03:04.123", "U"),
 ]
 
-test_fmts = set([fmt_name for fmt_name, val, fmt_kind in inputs])
+test_fmts = {fmt_name for fmt_name, val, fmt_kind in inputs}
 
 
 @pytest.mark.parametrize("fmt_val", inputs)
