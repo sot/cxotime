@@ -3,8 +3,8 @@ import ska_helpers
 from astropy import units
 from astropy.time import TimeDelta
 
-from .convert import *
-from .cxotime import CxoTime, CxoTimeLike
+from .convert import *  # noqa: F401, F403
+from .cxotime import *  # noqa: F401, F403
 
 __version__ = ska_helpers.get_version(__package__)
 

@@ -5,6 +5,7 @@ tested, so this simply confirms that the add-on in CxoTime works.
 """
 import io
 import time
+from dataclasses import dataclass
 
 import astropy.units as u
 import numpy as np
@@ -17,6 +18,7 @@ import cxotime.convert
 # Test that cxotime.__init__ imports the CxoTime class and all converters like date2secs
 from cxotime import (  # noqa: F401
     CxoTime,
+    CxoTimeDescriptor,
     convert_time_format,
     date2greta,
     date2jd,
@@ -454,3 +456,65 @@ def test_convert_time_format_obj():
     """Explicit test of convert_time_format for CxoTime object"""
     tm = CxoTime(100.0)
     assert tm.date == convert_time_format(tm, "date")
+
+
+def test_cxotime_descriptor_not_required_no_default():
+    @dataclass
+    class MyClass:
+        time: CxoTime | None = CxoTimeDescriptor()
+
+    obj = MyClass()
+    assert obj.time is None
+
+    obj = MyClass(time="2020:001")
+    assert isinstance(obj.time, CxoTime)
+    assert obj.time.value == "2020:001:00:00:00.000"
+    assert obj.time.format == "date"
+
+    tm = CxoTime(100.0)
+    assert tm.format == "secs"
+
+    # Initialize with CxoTime object
+    obj = MyClass(time=tm)
+    assert isinstance(obj.time, CxoTime)
+    assert obj.time.value == 100.0
+
+    # CxoTime does not copy an existing CxoTime object for speed
+    assert obj.time is tm
+
+
+def test_cxotime_descriptor_is_required():
+    @dataclass
+    class MyClass:
+        time: CxoTime = CxoTimeDescriptor(required=True)
+
+    obj = MyClass(time="2020-01-01")
+    assert obj.time.date == "2020:001:00:00:00.000"
+
+    with pytest.raises(
+        ValueError,
+        match="cannot set required attribute 'time' to None",
+    ):
+        MyClass()
+
+
+def test_cxotime_descriptor_has_default():
+    @dataclass
+    class MyClass:
+        time: CxoTime = CxoTimeDescriptor(default="2020-01-01")
+
+    obj = MyClass()
+    assert obj.time.value == "2020-01-01 00:00:00.000"
+
+    obj = MyClass(time="2023:100")
+    assert obj.time.value == "2023:100:00:00:00.000"
+
+
+def test_cxotime_descriptor_is_required_has_default_exception():
+    with pytest.raises(
+        ValueError, match="cannot set both 'required' and 'default' arguments"
+    ):
+
+        @dataclass
+        class MyClass1:
+            time: CxoTime = CxoTimeDescriptor(default=100.0, required=True)

@@ -9,6 +9,10 @@ import numpy as np
 import numpy.typing as npt
 from astropy.time import Time, TimeCxcSec, TimeDecimalYear, TimeJD, TimeYearDayTime
 from astropy.utils import iers
+from ska_helpers.utils import TypedDescriptor
+
+__all__ = ["CxoTime", "CxoTimeLike", "CxoTimeDescriptor"]
+
 
 # TODO: use npt.NDArray with numpy 1.21
 CxoTimeLike = Union["CxoTime", str, float, int, np.ndarray, npt.ArrayLike, None]
@@ -498,3 +502,40 @@ class TimeMaude(TimeDate):
         return out
 
     value = property(to_value)
+
+
+class CxoTimeDescriptor(TypedDescriptor):
+    """Descriptor for an attribute that is CxoTime (in date format) or None if not set.
+
+    This allows setting the attribute with any ``CxoTimeLike`` value.
+
+    Note that setting this descriptor to ``None`` will set the attribute to ``None``,
+    which is different than ``CxoTime(None)`` which returns the current time. To set
+    an attribute to the current time, set it with ``CxoTime.now()``.
+
+    Parameters
+    ----------
+    default : CxoTimeLike, optional
+        Default value for the attribute which is provide to the ``CxoTime`` constructor.
+        If not specified or ``None``, the default for the attribute is ``None``.
+    required : bool, optional
+        If ``True``, the attribute is required to be set explicitly when the object
+        is created. If ``False`` the default value is used if the attribute is not set.
+
+    Examples
+    --------
+    >>> from dataclasses import dataclass
+    >>> from cxotime import CxoTime, CxoTimeDescriptor
+    >>> @dataclass
+    ... class MyClass:
+    ...     start: CxoTime | None = CxoTimeDescriptor()
+    ...     stop: CxoTime | None = CxoTimeDescriptor()
+    ...
+    >>> obj = MyClass("2023:100")
+    >>> obj.start
+    <CxoTime object: scale='utc' format='date' value=2023:100:00:00:00.000>
+    >>> obj.stop is None
+    True
+    """
+
+    cls = CxoTime
