@@ -83,15 +83,16 @@ def test_cxotime_now(now_method):
         CxoTime(scale="utc")
 
 
-def test_cxotime_now_by_none():
-    ct_now = CxoTime(None)
+@pytest.mark.parametrize("arg0", [None, CxoTime.NOW])
+def test_cxotime_now_by_arg(arg0):
+    ct_now = CxoTime(arg0)
     t_now = Time.now()
     assert abs((ct_now - t_now).to_value(u.s)) < 0.1
 
     with pytest.raises(
         ValueError, match="cannot supply keyword arguments with no time value"
     ):
-        CxoTime(None, scale="utc")
+        CxoTime(arg0, scale="utc")
 
 
 def test_cxotime_from_datetime():
@@ -518,3 +519,21 @@ def test_cxotime_descriptor_is_required_has_default_exception():
         @dataclass
         class MyClass1:
             time: CxoTime = CxoTimeDescriptor(default=100.0, required=True)
+
+
+def test_cxotime_descriptor_with_NOW():
+    @dataclass
+    class MyData:
+        stop: CxoTime = CxoTimeDescriptor(default=CxoTime.NOW)
+
+    # Make a new object and check that the stop time is approximately the current time.
+    obj1 = MyData()
+    assert (CxoTime.now() - obj1.stop).sec < 0.1
+
+    # Wait for a second and make a new object and check that the stop time is 1 second
+    # later. This proves the NOW sentinel is evaluated at object creation time not class
+    # definition time.
+    time.sleep(1.0)
+    obj2 = MyData()
+    dt = obj2.stop - obj1.stop
+    assert round(dt.sec, 1) == 1.0

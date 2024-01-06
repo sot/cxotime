@@ -84,13 +84,18 @@ class CxoTime(Time):
 
     """
 
+    # Sentinel object for CxoTime(CxoTime.NOW) to return the current time. See e.g.
+    # https://python-patterns.guide/python/sentinel-object/.
+    NOW = object()
+
     def __new__(cls, *args, **kwargs):
-        # Handle the case of `CxoTime()` which returns the current time. This is
-        # for compatibility with DateTime.
-        if not args or (len(args) == 1 and args[0] is None):
+        # Handle the case of `CxoTime()`, `CxoTime(None)`, or `CxoTime(CxoTime.NOW)`,
+        # all of which return the current time. This is for compatibility with DateTime.
+        if not args or (len(args) == 1 and (args[0] is None or args[0] is CxoTime.NOW)):
             if not kwargs:
                 # Stub in a value for `val` so super()__new__ can run since `val`
-                # is a required positional arg.
+                # is a required positional arg. NOTE that this change to args here does
+                # not affect the args in the call to __init__() below.
                 args = (None,)
             else:
                 raise ValueError("cannot supply keyword arguments with no time value")
@@ -108,7 +113,7 @@ class CxoTime(Time):
             # implies copy=False) then no other initialization is needed.
             return
 
-        if len(args) == 1 and args[0] is None:
+        if len(args) == 1 and (args[0] is None or args[0] is CxoTime.NOW):
             # Compatibility with DateTime and allows kwarg default of None with
             # input casting like `date = CxoTime(date)`.
             args = ()

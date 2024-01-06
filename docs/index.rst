@@ -202,6 +202,48 @@ or in python::
     iso         2022-01-02 12:00:00.000
     unix        1641124800.000
 
+CxoTime.NOW sentinel
+--------------------
+
+The |CxoTime| class has a special sentinel value ``CxoTime.NOW`` which can be used
+to specify the current time.  This is useful for example when defining a function that
+has accepts a CxoTime-like argument that defaults to the current time.
+
+.. note:: Prior to introduction of ``CxoTime.NOW``, the standard idiom was to specify
+    ``None`` as the argument default to indicate the current time.  This is still
+    supported but is strongly discouraged for new code.
+
+For example::
+
+    >>> from cxotime import CxoTime
+    >>> def my_func(stop=CxoTime.NOW):
+    ...     stop = CxoTime(stop)
+    ...     print(stop)
+    ...
+    >>> my_func()
+    2024:006:11:37:41.930
+
+This can also be used in a `dataclass
+<https://docs.python.org/3/library/dataclasses.html>`_ to specify an attribute that is
+optional and defaults to the current time when the object is created::
+
+    >>> import time
+    >>> from dataclasses import dataclass
+    >>> from cxotime import CxoTime, CxoTimeDescriptor
+    >>> @dataclass
+    ... class MyData:
+    ...     start: CxoTime = CxoTimeDescriptor(required=True)
+    ...     stop: CxoTime = CxoTimeDescriptor(default=CxoTime.NOW)
+    ...
+    >>> obj1 = MyData("2022:001")
+    >>> print(obj1.start)
+    2022:001:00:00:00.000
+    >>> time.sleep(2)
+    >>> obj2 = MyData("2022:001")
+    >>> dt = obj2.stop - obj1.stop
+    >>> round(dt.sec, 2)
+    2.0
+
 Compatibility with DateTime
 ---------------------------
 
