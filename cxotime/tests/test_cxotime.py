@@ -493,7 +493,7 @@ def test_cxotime_descriptor_is_required():
 
     with pytest.raises(
         ValueError,
-        match="cannot set required attribute 'time' to None",
+        match="attribute 'time' is required and cannot be set to None",
     ):
         MyClass()
 
