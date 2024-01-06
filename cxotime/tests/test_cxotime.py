@@ -530,10 +530,15 @@ def test_cxotime_descriptor_with_NOW():
     obj1 = MyData()
     assert (CxoTime.now() - obj1.stop).sec < 0.1
 
-    # Wait for a second and make a new object and check that the stop time is 1 second
-    # later. This proves the NOW sentinel is evaluated at object creation time not class
-    # definition time.
-    time.sleep(1.0)
+    # Wait for 0.5 second and make a new object and check that the stop time is 0.5
+    # second later. This proves the NOW sentinel is evaluated at object creation time
+    # not class definition time.
+    time.sleep(0.5)
     obj2 = MyData()
+    dt = obj2.stop - obj1.stop
+    assert round(dt.sec, 1) == 0.5
+
+    time.sleep(0.5)
+    obj2.stop = CxoTime.NOW
     dt = obj2.stop - obj1.stop
     assert round(dt.sec, 1) == 1.0

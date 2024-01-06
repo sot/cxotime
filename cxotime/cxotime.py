@@ -515,8 +515,10 @@ class CxoTimeDescriptor(TypedDescriptor):
     This allows setting the attribute with any ``CxoTimeLike`` value.
 
     Note that setting this descriptor to ``None`` will set the attribute to ``None``,
-    which is different than ``CxoTime(None)`` which returns the current time. To set
-    an attribute to the current time, set it with ``CxoTime.now()``.
+    which is different than ``CxoTime(None)`` which returns the current time.
+
+    To set an attribute to the current time, use ``CxoTime.NOW``, either as the default
+    or when setting the attribute.
 
     Parameters
     ----------
@@ -524,8 +526,8 @@ class CxoTimeDescriptor(TypedDescriptor):
         Default value for the attribute which is provide to the ``CxoTime`` constructor.
         If not specified or ``None``, the default for the attribute is ``None``.
     required : bool, optional
-        If ``True``, the attribute is required to be set explicitly when the object
-        is created. If ``False`` the default value is used if the attribute is not set.
+        If ``True``, the attribute is required to be set explicitly when the object is
+        created. If ``False`` the default value is used if the attribute is not set.
 
     Examples
     --------
@@ -534,13 +536,13 @@ class CxoTimeDescriptor(TypedDescriptor):
     >>> @dataclass
     ... class MyClass:
     ...     start: CxoTime | None = CxoTimeDescriptor()
-    ...     stop: CxoTime | None = CxoTimeDescriptor()
+    ...     stop: CxoTime = CxoTimeDescriptor(default=CxoTime.NOW)
     ...
-    >>> obj = MyClass("2023:100")
+    >>> obj = MyClass("2023:100")  # Example run at 2024:006:12:02:35
     >>> obj.start
     <CxoTime object: scale='utc' format='date' value=2023:100:00:00:00.000>
-    >>> obj.stop is None
-    True
+    >>> obj.stop
+    <CxoTime object: scale='utc' format='date' value=2024:006:12:02:35.000>
     """
 
     cls = CxoTime
