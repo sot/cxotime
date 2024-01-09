@@ -9,6 +9,10 @@ import numpy as np
 import numpy.typing as npt
 from astropy.time import Time, TimeCxcSec, TimeDecimalYear, TimeJD, TimeYearDayTime
 from astropy.utils import iers
+from ska_helpers.utils import TypedDescriptor
+
+__all__ = ["CxoTime", "CxoTimeLike", "CxoTimeDescriptor"]
+
 
 # TODO: use npt.NDArray with numpy 1.21
 CxoTimeLike = Union["CxoTime", str, float, int, np.ndarray, npt.ArrayLike, None]
@@ -80,13 +84,18 @@ class CxoTime(Time):
 
     """
 
+    # Sentinel object for CxoTime(CxoTime.NOW) to return the current time. See e.g.
+    # https://python-patterns.guide/python/sentinel-object/.
+    NOW = object()
+
     def __new__(cls, *args, **kwargs):
-        # Handle the case of `CxoTime()` which returns the current time. This is
-        # for compatibility with DateTime.
-        if not args or (len(args) == 1 and args[0] is None):
+        # Handle the case of `CxoTime()`, `CxoTime(None)`, or `CxoTime(CxoTime.NOW)`,
+        # all of which return the current time. This is for compatibility with DateTime.
+        if not args or (len(args) == 1 and (args[0] is None or args[0] is CxoTime.NOW)):
             if not kwargs:
                 # Stub in a value for `val` so super()__new__ can run since `val`
-                # is a required positional arg.
+                # is a required positional arg. NOTE that this change to args here does
+                # not affect the args in the call to __init__() below.
                 args = (None,)
             else:
                 raise ValueError("cannot supply keyword arguments with no time value")
@@ -104,7 +113,7 @@ class CxoTime(Time):
             # implies copy=False) then no other initialization is needed.
             return
 
-        if len(args) == 1 and args[0] is None:
+        if len(args) == 1 and (args[0] is None or args[0] is CxoTime.NOW):
             # Compatibility with DateTime and allows kwarg default of None with
             # input casting like `date = CxoTime(date)`.
             args = ()
@@ -498,3 +507,42 @@ class TimeMaude(TimeDate):
         return out
 
     value = property(to_value)
+
+
+class CxoTimeDescriptor(TypedDescriptor):
+    """Descriptor for an attribute that is CxoTime (in date format) or None if not set.
+
+    This allows setting the attribute with any ``CxoTimeLike`` value.
+
+    Note that setting this descriptor to ``None`` will set the attribute to ``None``,
+    which is different than ``CxoTime(None)`` which returns the current time.
+
+    To set an attribute to the current time, use ``CxoTime.NOW``, either as the default
+    or when setting the attribute.
+
+    Parameters
+    ----------
+    default : CxoTimeLike, optional
+        Default value for the attribute which is provide to the ``CxoTime`` constructor.
+        If not specified or ``None``, the default for the attribute is ``None``.
+    required : bool, optional
+        If ``True``, the attribute is required to be set explicitly when the object is
+        created. If ``False`` the default value is used if the attribute is not set.
+
+    Examples
+    --------
+    >>> from dataclasses import dataclass
+    >>> from cxotime import CxoTime, CxoTimeDescriptor
+    >>> @dataclass
+    ... class MyClass:
+    ...     start: CxoTime | None = CxoTimeDescriptor()
+    ...     stop: CxoTime = CxoTimeDescriptor(default=CxoTime.NOW)
+    ...
+    >>> obj = MyClass("2023:100")  # Example run at 2024:006:12:02:35
+    >>> obj.start
+    <CxoTime object: scale='utc' format='date' value=2023:100:00:00:00.000>
+    >>> obj.stop
+    <CxoTime object: scale='utc' format='date' value=2024:006:12:02:35.000>
+    """
+
+    cls = CxoTime
