@@ -72,6 +72,10 @@
 <span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
 <span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span><span class="p">,</span> <span class="n">TimeCxcSec</span><span class="p">,</span> <span class="n">TimeDecimalYear</span><span class="p">,</span> <span class="n">TimeJD</span><span class="p">,</span> <span class="n">TimeYearDayTime</span>
 <span class="kn">from</span> <span class="nn">astropy.utils</span> <span class="kn">import</span> <span class="n">iers</span>
+<span class="kn">from</span> <span class="nn">ska_helpers.utils</span> <span class="kn">import</span> <span class="n">TypedDescriptor</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CxoTime&quot;</span><span class="p">,</span> <span class="s2">&quot;CxoTimeLike&quot;</span><span class="p">,</span> <span class="s2">&quot;CxoTimeDescriptor&quot;</span><span class="p">]</span>
+
 
 <span class="c1"># TODO: use npt.NDArray with numpy 1.21</span>
 <span class="n">CxoTimeLike</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;CxoTime&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
@@ -143,13 +147,18 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># Sentinel object for CxoTime(CxoTime.NOW) to return the current time. See e.g.</span>
+    <span class="c1"># https://python-patterns.guide/python/sentinel-object/.</span>
+    <span class="n">NOW</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="c1"># Handle the case of `CxoTime()` which returns the current time. This is</span>
-        <span class="c1"># for compatibility with DateTime.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Handle the case of `CxoTime()`, `CxoTime(None)`, or `CxoTime(CxoTime.NOW)`,</span>
+        <span class="c1"># all of which return the current time. This is for compatibility with DateTime.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="n">CxoTime</span><span class="o">.</span><span class="n">NOW</span><span class="p">)):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">:</span>
                 <span class="c1"># Stub in a value for `val` so super()__new__ can run since `val`</span>
-                <span class="c1"># is a required positional arg.</span>
+                <span class="c1"># is a required positional arg. NOTE that this change to args here does</span>
+                <span class="c1"># not affect the args in the call to __init__() below.</span>
                 <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;cannot supply keyword arguments with no time value&quot;</span><span class="p">)</span>
@@ -167,7 +176,7 @@
             <span class="c1"># implies copy=False) then no other initialization is needed.</span>
             <span class="k">return</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="n">CxoTime</span><span class="o">.</span><span class="n">NOW</span><span class="p">):</span>
             <span class="c1"># Compatibility with DateTime and allows kwarg default of None with</span>
             <span class="c1"># input casting like `date = CxoTime(date)`.</span>
             <span class="n">args</span> <span class="o">=</span> <span class="p">()</span>
@@ -309,36 +318,36 @@
         <span class="k">return</span> <span class="n">out</span></div></div>
 
 
-<span class="n">TimeJD</span><span class="o">.</span><span class="n">convert_doc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-    <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;jd&quot;</span><span class="p">,</span>
-    <span class="n">descr_short</span><span class="o">=</span><span class="s2">&quot;Julian Date&quot;</span><span class="p">,</span>
-    <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;Julian Date (numeric)&quot;</span><span class="p">,</span>
-    <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;Julian Date (numeric)&quot;</span><span class="p">,</span>
-    <span class="n">input_type</span><span class="o">=</span><span class="s2">&quot;float, int, list, ndarray&quot;</span><span class="p">,</span>
-    <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;float, ndarray[float]&quot;</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="n">TimeJD</span><span class="o">.</span><span class="n">convert_doc</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;input_name&quot;</span><span class="p">:</span> <span class="s2">&quot;jd&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;descr_short&quot;</span><span class="p">:</span> <span class="s2">&quot;Julian Date&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;input_format&quot;</span><span class="p">:</span> <span class="s2">&quot;Julian Date (numeric)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;output_format&quot;</span><span class="p">:</span> <span class="s2">&quot;Julian Date (numeric)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;input_type&quot;</span><span class="p">:</span> <span class="s2">&quot;float, int, list, ndarray&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;output_type&quot;</span><span class="p">:</span> <span class="s2">&quot;float, ndarray[float]&quot;</span><span class="p">,</span>
+<span class="p">}</span>
 
 
-<div class="viewcode-block" id="TimeSecs"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeSecs">[docs]</a><span class="k">class</span> <span class="nc">TimeSecs</span><span class="p">(</span><span class="n">TimeCxcSec</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.</span>
+<span class="k">class</span> <span class="nc">TimeSecs</span><span class="p">(</span><span class="n">TimeCxcSec</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Chandra X-ray Center seconds from 1998-01-01 00:00:00 TT.</span>
+
 <span class="sd">    For example, 63072064.184 is midnight on January 1, 2000.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;secs&quot;</span>
 
     <span class="c1"># Documentation inputs for convert functions</span>
-    <span class="n">convert_doc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
-        <span class="n">descr_short</span><span class="o">=</span><span class="s2">&quot;CXC seconds&quot;</span><span class="p">,</span>
-        <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;CXC seconds (numeric)&quot;</span><span class="p">,</span>
-        <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;CXC seconds (numeric)&quot;</span><span class="p">,</span>
-        <span class="n">input_type</span><span class="o">=</span><span class="s2">&quot;float, int, list, ndarray&quot;</span><span class="p">,</span>
-        <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;float, ndarray[float]&quot;</span><span class="p">,</span>
-    <span class="p">)</span></div>
+    <span class="n">convert_doc</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;input_name&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;descr_short&quot;</span><span class="p">:</span> <span class="s2">&quot;CXC seconds&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;input_format&quot;</span><span class="p">:</span> <span class="s2">&quot;CXC seconds (numeric)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;output_format&quot;</span><span class="p">:</span> <span class="s2">&quot;CXC seconds (numeric)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;input_type&quot;</span><span class="p">:</span> <span class="s2">&quot;float, int, list, ndarray&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;output_type&quot;</span><span class="p">:</span> <span class="s2">&quot;float, ndarray[float]&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
 
 
-<div class="viewcode-block" id="TimeDate"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeDate">[docs]</a><span class="k">class</span> <span class="nc">TimeDate</span><span class="p">(</span><span class="n">TimeYearDayTime</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">TimeDate</span><span class="p">(</span><span class="n">TimeYearDayTime</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Year, day-of-year and time as &quot;YYYY:DOY:HH:MM:SS.sss...&quot; in UTC.</span>
 
@@ -364,61 +373,60 @@
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;date&quot;</span>
 
     <span class="c1"># Documentation inputs for convert functions</span>
-    <span class="n">convert_doc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
-        <span class="n">descr_short</span><span class="o">=</span><span class="s2">&quot;Date (Year, day-of-year, time)&quot;</span><span class="p">,</span>
-        <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">convert_doc</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;input_name&quot;</span><span class="p">:</span> <span class="s2">&quot;date&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;descr_short&quot;</span><span class="p">:</span> <span class="s2">&quot;Date (Year, day-of-year, time)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;input_format&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    - YYYY:DDD:HH:MM:SS.sss</span>
 <span class="s2">    - YYYY:DDD:HH:MM:SS</span>
 <span class="s2">    - YYYY:DDD:HH:MM</span>
 <span class="s2">    - YYYY:DDD&quot;&quot;&quot;</span><span class="p">,</span>
-        <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;YYYY:DDD:HH:MM:SS.sss&quot;</span><span class="p">,</span>
-        <span class="n">input_type</span><span class="o">=</span><span class="s2">&quot;str, bytes, float, list, ndarray&quot;</span><span class="p">,</span>
-        <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;str, ndarray[str]&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+        <span class="s2">&quot;output_format&quot;</span><span class="p">:</span> <span class="s2">&quot;YYYY:DDD:HH:MM:SS.sss&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;input_type&quot;</span><span class="p">:</span> <span class="s2">&quot;str, bytes, float, list, ndarray&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;output_type&quot;</span><span class="p">:</span> <span class="s2">&quot;str, ndarray[str]&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
 
-<div class="viewcode-block" id="TimeDate.to_value"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeDate.to_value">[docs]</a>    <span class="k">def</span> <span class="nf">to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">==</span> <span class="s2">&quot;utc&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">utc</span><span class="o">.</span><span class="n">_time</span><span class="o">.</span><span class="n">value</span></div>
+            <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">utc</span><span class="o">.</span><span class="n">_time</span><span class="o">.</span><span class="n">value</span>
 
     <span class="n">value</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">to_value</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TimeDate.set_jds"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeDate.set_jds">[docs]</a>    <span class="k">def</span> <span class="nf">set_jds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val1</span><span class="p">,</span> <span class="n">val2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_jds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val1</span><span class="p">,</span> <span class="n">val2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse the time strings contained in val1 and set jd1, jd2&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">val2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cannot supply val2 for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> format&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">jd1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jd2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_jds_fast</span><span class="p">(</span><span class="n">val1</span><span class="p">,</span> <span class="n">val2</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jd1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jd2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_jds_fast</span><span class="p">(</span><span class="n">val1</span><span class="p">,</span> <span class="n">val2</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="TimeFracYear"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeFracYear">[docs]</a><span class="k">class</span> <span class="nc">TimeFracYear</span><span class="p">(</span><span class="n">TimeDecimalYear</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Time as a decimal year, with integer values corresponding to midnight</span>
-<span class="sd">    of the first day of each year.  For example 2000.5 corresponds to the</span>
-<span class="sd">    ISO time &#39;2000-07-02 00:00:00&#39;.</span>
+<span class="k">class</span> <span class="nc">TimeFracYear</span><span class="p">(</span><span class="n">TimeDecimalYear</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Time as a decimal year.</span>
+
+<span class="sd">    Integer values corresponding to midnight of the first day of each year.  For example</span>
+<span class="sd">    2000.5 corresponds to the ISO time &#39;2000-07-02 00:00:00&#39;.</span>
 
 <span class="sd">    Time value is always in UTC regardless of time object scale.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;frac_year&quot;</span>
 
-<div class="viewcode-block" id="TimeFracYear.to_value"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeFracYear.to_value">[docs]</a>    <span class="k">def</span> <span class="nf">to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">==</span> <span class="s2">&quot;utc&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">utc</span><span class="o">.</span><span class="n">_time</span><span class="o">.</span><span class="n">value</span></div>
+            <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">utc</span><span class="o">.</span><span class="n">_time</span><span class="o">.</span><span class="n">value</span>
 
-    <span class="n">value</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">to_value</span><span class="p">)</span></div>
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">to_value</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="TimeGreta"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeGreta">[docs]</a><span class="k">class</span> <span class="nc">TimeGreta</span><span class="p">(</span><span class="n">TimeDate</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Date as a string in format &#39;YYYYDDD.hhmmsssss&#39;, where sssss is number of</span>
-<span class="sd">    milliseconds.</span>
+<span class="k">class</span> <span class="nc">TimeGreta</span><span class="p">(</span><span class="n">TimeDate</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Date as string in format &#39;YYYYDDD.hhmmsssss&#39;.</span>
 
-<span class="sd">    This can be input as a float, integer or string, but the output is always</span>
-<span class="sd">    string.</span>
+<span class="sd">    Here sssss is the number of millisec.</span>
+
+<span class="sd">    This can be input as a float, integer or string, but the output is always string.</span>
 
 <span class="sd">    Time value is always in UTC regardless of time object scale.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -426,14 +434,14 @@
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;greta&quot;</span>
 
     <span class="c1"># Documentation inputs for convert functions</span>
-    <span class="n">convert_doc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
-        <span class="n">descr_short</span><span class="o">=</span><span class="s2">&quot;GRETA date&quot;</span><span class="p">,</span>
-        <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;YYYYDDD.HHMMSSsss (str or float)&quot;</span><span class="p">,</span>
-        <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;YYYYDDD.HHMMSSsss (str)&quot;</span><span class="p">,</span>
-        <span class="n">input_type</span><span class="o">=</span><span class="s2">&quot;str, bytes, float, list, np.ndarray&quot;</span><span class="p">,</span>
-        <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;str, np.ndarray[str]&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="n">convert_doc</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;input_name&quot;</span><span class="p">:</span> <span class="s2">&quot;date&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;descr_short&quot;</span><span class="p">:</span> <span class="s2">&quot;GRETA date&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;input_format&quot;</span><span class="p">:</span> <span class="s2">&quot;YYYYDDD.HHMMSSsss (str or float)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;output_format&quot;</span><span class="p">:</span> <span class="s2">&quot;YYYYDDD.HHMMSSsss (str)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;input_type&quot;</span><span class="p">:</span> <span class="s2">&quot;str, bytes, float, list, np.ndarray&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;output_type&quot;</span><span class="p">:</span> <span class="s2">&quot;str, np.ndarray[str]&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
 
     <span class="n">subfmts</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s2">&quot;date_hms&quot;</span><span class="p">,</span> <span class="s2">&quot;%Y%j%H%M%S&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}</span><span class="s2">&quot;</span><span class="p">),</span>
@@ -454,14 +462,14 @@
 
     <span class="c1"># Before: yr mon  doy     hour      minute    second    frac</span>
 
-    <span class="n">fast_parser_pars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">delims</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-        <span class="n">starts</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span>
-        <span class="n">stops</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">fast_parser_pars</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;delims&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="s2">&quot;starts&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span>
+        <span class="s2">&quot;stops&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
         <span class="c1"># Break before:  y  m  d  h  m  s  f</span>
-        <span class="n">break_allowed</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="n">has_day_of_year</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="p">)</span>
+        <span class="s2">&quot;break_allowed&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;has_day_of_year&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_check_val_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val1</span><span class="p">,</span> <span class="n">val2</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">val2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -477,22 +485,22 @@
 
         <span class="k">return</span> <span class="n">val1</span><span class="p">,</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="TimeGreta.to_value"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeGreta.to_value">[docs]</a>    <span class="k">def</span> <span class="nf">to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">==</span> <span class="s2">&quot;utc&quot;</span><span class="p">:</span>
             <span class="n">out1</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">out1</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">utc</span><span class="o">.</span><span class="n">_time</span><span class="o">.</span><span class="n">value</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[:</span><span class="mi">7</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">13</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">14</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">out1</span><span class="o">.</span><span class="n">flat</span><span class="p">])</span>
         <span class="n">out</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">out1</span><span class="o">.</span><span class="n">shape</span>
-        <span class="k">return</span> <span class="n">out</span></div>
+        <span class="k">return</span> <span class="n">out</span>
 
-    <span class="n">value</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">to_value</span><span class="p">)</span></div>
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">to_value</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="TimeMaude"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeMaude">[docs]</a><span class="k">class</span> <span class="nc">TimeMaude</span><span class="p">(</span><span class="n">TimeDate</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Date as a 64-bit integer in format YYYYDDDHHMMSSsss, where sss is number of</span>
-<span class="sd">    milliseconds.</span>
+<span class="k">class</span> <span class="nc">TimeMaude</span><span class="p">(</span><span class="n">TimeDate</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Date as a 64-bit integer in format YYYYDDDHHMMSSsss.</span>
+
+<span class="sd">    Here sss is number of milliseconds.</span>
 
 <span class="sd">    This can be input as an integer or string, but the output is always integer.</span>
 
@@ -500,14 +508,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;maude&quot;</span>
-    <span class="n">convert_doc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
-        <span class="n">descr_short</span><span class="o">=</span><span class="s2">&quot;MAUDE date&quot;</span><span class="p">,</span>
-        <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;YYYYDDDHHMMSSsss (str or int)&quot;</span><span class="p">,</span>
-        <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;YYYYDDD.HHMMSSsss (int)&quot;</span><span class="p">,</span>
-        <span class="n">input_type</span><span class="o">=</span><span class="s2">&quot;str, bytes, int, list, ndarray&quot;</span><span class="p">,</span>
-        <span class="n">output_type</span><span class="o">=</span><span class="s2">&quot;int, ndarray[int]&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="n">convert_doc</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;input_name&quot;</span><span class="p">:</span> <span class="s2">&quot;date&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;descr_short&quot;</span><span class="p">:</span> <span class="s2">&quot;MAUDE date&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;input_format&quot;</span><span class="p">:</span> <span class="s2">&quot;YYYYDDDHHMMSSsss (str or int)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;output_format&quot;</span><span class="p">:</span> <span class="s2">&quot;YYYYDDD.HHMMSSsss (int)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;input_type&quot;</span><span class="p">:</span> <span class="s2">&quot;str, bytes, int, list, ndarray&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;output_type&quot;</span><span class="p">:</span> <span class="s2">&quot;int, ndarray[int]&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
 
     <span class="n">subfmts</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s2">&quot;date_hms&quot;</span><span class="p">,</span> <span class="s2">&quot;%Y%j%H%M%S&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{year:d}{yday:03d}{hour:02d}{min:02d}{sec:02d}</span><span class="s2">&quot;</span><span class="p">),</span>
@@ -527,15 +535,15 @@
     <span class="c1"># stops: position where component ends (-1 =&gt; continue to end of string)</span>
 
     <span class="c1"># Before: yr mon  doy     hour      minute    second    frac</span>
-    <span class="n">fast_parser_pars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">use_fast_parser</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">delims</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-        <span class="n">starts</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span>
-        <span class="n">stops</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">fast_parser_pars</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;use_fast_parser&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;delims&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="s2">&quot;starts&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span>
+        <span class="s2">&quot;stops&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
         <span class="c1"># Break before:  y  m  d  h  m  s  f,</span>
-        <span class="n">break_allowed</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="n">has_day_of_year</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="p">)</span>
+        <span class="s2">&quot;break_allowed&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;has_day_of_year&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_check_val_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val1</span><span class="p">,</span> <span class="n">val2</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">val2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -551,7 +559,7 @@
 
         <span class="k">return</span> <span class="n">val1</span><span class="p">,</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="TimeMaude.to_value"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.TimeMaude.to_value">[docs]</a>    <span class="k">def</span> <span class="nf">to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">==</span> <span class="s2">&quot;utc&quot;</span><span class="p">:</span>
             <span class="n">out</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
@@ -559,9 +567,48 @@
         <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[:</span><span class="mi">13</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">14</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">flat</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;i8&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">out</span></div>
+        <span class="k">return</span> <span class="n">out</span>
 
-    <span class="n">value</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">to_value</span><span class="p">)</span></div>
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">to_value</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CxoTimeDescriptor"><a class="viewcode-back" href="../../index.html#cxotime.cxotime.CxoTimeDescriptor">[docs]</a><span class="k">class</span> <span class="nc">CxoTimeDescriptor</span><span class="p">(</span><span class="n">TypedDescriptor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Descriptor for an attribute that is CxoTime (in date format) or None if not set.</span>
+
+<span class="sd">    This allows setting the attribute with any ``CxoTimeLike`` value.</span>
+
+<span class="sd">    Note that setting this descriptor to ``None`` will set the attribute to ``None``,</span>
+<span class="sd">    which is different than ``CxoTime(None)`` which returns the current time.</span>
+
+<span class="sd">    To set an attribute to the current time, use ``CxoTime.NOW``, either as the default</span>
+<span class="sd">    or when setting the attribute.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    default : CxoTimeLike, optional</span>
+<span class="sd">        Default value for the attribute which is provide to the ``CxoTime`` constructor.</span>
+<span class="sd">        If not specified or ``None``, the default for the attribute is ``None``.</span>
+<span class="sd">    required : bool, optional</span>
+<span class="sd">        If ``True``, the attribute is required to be set explicitly when the object is</span>
+<span class="sd">        created. If ``False`` the default value is used if the attribute is not set.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from dataclasses import dataclass</span>
+<span class="sd">    &gt;&gt;&gt; from cxotime import CxoTime, CxoTimeDescriptor</span>
+<span class="sd">    &gt;&gt;&gt; @dataclass</span>
+<span class="sd">    ... class MyClass:</span>
+<span class="sd">    ...     start: CxoTime | None = CxoTimeDescriptor()</span>
+<span class="sd">    ...     stop: CxoTime = CxoTimeDescriptor(default=CxoTime.NOW)</span>
+<span class="sd">    ...</span>
+<span class="sd">    &gt;&gt;&gt; obj = MyClass(&quot;2023:100&quot;)  # Example run at 2024:006:12:02:35</span>
+<span class="sd">    &gt;&gt;&gt; obj.start</span>
+<span class="sd">    &lt;CxoTime object: scale=&#39;utc&#39; format=&#39;date&#39; value=2023:100:00:00:00.000&gt;</span>
+<span class="sd">    &gt;&gt;&gt; obj.stop</span>
+<span class="sd">    &lt;CxoTime object: scale=&#39;utc&#39; format=&#39;date&#39; value=2024:006:12:02:35.000&gt;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">cls</span> <span class="o">=</span> <span class="n">CxoTime</span></div>
 </pre></div>
 
             <div class="clearer"></div>

@@ -352,7 +352,10 @@
     <span class="n">doc_in</span> <span class="o">=</span> <span class="n">fmt_in_cls</span><span class="o">.</span><span class="n">convert_doc</span>
     <span class="n">fmt_out_cls</span> <span class="o">=</span> <span class="n">TIME_FORMATS</span><span class="p">[</span><span class="n">fmt_out</span><span class="p">]</span>
     <span class="n">doc_out</span> <span class="o">=</span> <span class="n">fmt_out_cls</span><span class="o">.</span><span class="n">convert_doc</span>
-    <span class="n">equiv</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;CxoTime(</span><span class="si">{</span><span class="n">doc_in</span><span class="p">[</span><span class="s1">&#39;input_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, format=&#39;</span><span class="si">{</span><span class="n">fmt_in_cls</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;).</span><span class="si">{</span><span class="n">fmt_out_cls</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">equiv</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;CxoTime(</span><span class="si">{</span><span class="n">doc_in</span><span class="p">[</span><span class="s1">&#39;input_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">,&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot; format=&#39;</span><span class="si">{</span><span class="n">fmt_in_cls</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;).</span><span class="si">{</span><span class="n">fmt_out_cls</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
 <span class="s2">    Convert </span><span class="si">{</span><span class="n">doc_in</span><span class="p">[</span><span class="s1">&#39;descr_short&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">doc_out</span><span class="p">[</span><span class="s1">&#39;descr_short&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.</span>
 
@@ -392,9 +395,9 @@
                 <span class="sa">f</span><span class="s2">&quot;lambda </span><span class="si">{</span><span class="n">input_name</span><span class="si">}</span><span class="s2">: &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;convert_time_format(</span><span class="si">{</span><span class="n">input_name</span><span class="si">}</span><span class="s2">, fmt_in=&#39;</span><span class="si">{</span><span class="n">fmt1</span><span class="si">}</span><span class="s2">&#39;, fmt_out=&#39;</span><span class="si">{</span><span class="n">fmt2</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
             <span class="p">)</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">func_str</span><span class="p">)</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">func_str</span><span class="p">)</span>  <span class="c1"># noqa: PGH001</span>
             <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">make_docstring</span><span class="p">(</span><span class="n">fmt1</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">)</span>
-            <span class="n">__all__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">__all__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># noqa: PYI056</span>
 </pre></div>
 
             <div class="clearer"></div>
