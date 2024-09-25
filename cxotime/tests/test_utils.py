@@ -27,8 +27,6 @@ from cxotime import CxoTime, get_range_in_chunks
     ],
 )
 def test_get_range_in_chunks(start, stop, dt_max, expected_len, expected_values):
-    start = CxoTime(start)
-    stop = CxoTime(stop)
     result = get_range_in_chunks(start, stop, dt_max)
 
     # Confirm that the time intervals are uniform if there is any interval
