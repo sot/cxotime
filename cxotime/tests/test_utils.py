@@ -43,7 +43,7 @@ def test_get_range_in_chunks(start, stop, dt_max, expected_len, expected_values)
 
     # And confirm that the result is as expected
     assert len(result) == expected_len
-    assert all(a == CxoTime(b) for a, b in zip(result, expected_values))
+    assert all(a == CxoTime(b) for a, b in zip(result, expected_values, strict=False))
 
 
 # Add a test of a negative time range
@@ -54,7 +54,7 @@ def test_get_range_in_chunks_negative():
     result = get_range_in_chunks(start, stop, dt_max)
     assert len(result) == 5
     expected_values = ["2000:005", "2000:004", "2000:003", "2000:002", "2000:001"]
-    assert all(a == CxoTime(b) for a, b in zip(result, expected_values))
+    assert all(a == CxoTime(b) for a, b in zip(result, expected_values, strict=False))
 
 
 # Add a test that shows that the time range is covered even if the time range is less than dt_max
@@ -64,7 +64,9 @@ def test_get_range_in_chunks_small():
     dt_max = 30 * u.day
     result = get_range_in_chunks(start, stop, dt_max)
     assert len(result) == 2
-    assert all(a == CxoTime(b) for a, b in zip(result, ["2020:001", "2020:005"]))
+    assert all(
+        a == CxoTime(b) for a, b in zip(result, ["2020:001", "2020:005"], strict=False)
+    )
 
 
 # Add a test that shows we get an error if dt_max is zero
