@@ -9,14 +9,14 @@ def get_range_in_chunks(start: CxoTimeLike, stop: CxoTimeLike, dt_max: u.Quantit
     """
     Get uniform time chunks for a given time range.
 
-    Output times are spaced uniformly spaced by up to ``dt_max`` and cover the time
+    Output times are uniformly spaced by up to ``dt_max`` and cover the time
     range from ``start`` to ``stop``.
 
     Parameters
     ----------
-    start : CxoTime
+    start : CxoTimeLike
         Start time of the time range.
-    stop : CxoTime
+    stop : CxoTimeLike
         Stop time of the time range.
     dt_max : u.Quantity (timelike)
         Maximum time interval for each chunk.
