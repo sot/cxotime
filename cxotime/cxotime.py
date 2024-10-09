@@ -4,6 +4,7 @@ import warnings
 from copy import copy
 from typing import Union
 
+import astropy.units as u
 import erfa
 import numpy as np
 import numpy.typing as npt
@@ -173,6 +174,63 @@ class CxoTime(Time):
             args = (np.asarray(args[0], dtype="S"),) + args[1:]
 
         super(CxoTime, self).__init__(*args, **kwargs)
+
+    # Make a classmethod that replaces utils.get_range_in_chunks
+    @classmethod
+    def linspace(
+        cls,
+        start: CxoTimeLike,
+        stop: CxoTimeLike,
+        num: int | None = None,
+        step_max: u.Quantity | None = None,
+    ):
+        # This method will use the linspace method if num is defined
+        # or the step_max method if step_max is defined
+        """
+        Get uniform time chunks for a given time range.
+
+        Output times either divide the time range into ``num`` chunks or are
+        uniformly spaced by up to ``step_max``, and cover the time
+        range from ``start`` to ``stop``.
+
+        Parameters
+        ----------
+        start : CxoTimeLike
+            Start time of the time range.
+        stop : CxoTimeLike
+            Stop time of the time range.
+        num : int | None
+            Number of time bins.
+        step_max : u.Quantity (timelike)
+            Maximum time interval for each chunk.
+
+        Returns
+        -------
+        CxoTime
+            CxoTime with time bin edges for each chunk.
+        """
+        start = CxoTime(start)
+        stop = CxoTime(stop)
+
+        if num is not None and step_max is not None:
+            raise ValueError("Only one of num or step_max can be defined")
+
+        if num is not None:
+            times = np.linspace(start, stop, num + 1)
+        else:
+            # Require that step_max is a positive nonzero quantity
+            if step_max <= 0 * u.s:
+                raise ValueError("step_max must be positive nonzero")
+
+            # Let this work if start > stop, but flip the sign of dt_max
+            if start > stop:
+                step_max = -step_max
+
+            # Calculate chunks to cover time range, handling edge case of start == stop
+            n_chunk = max(np.ceil(float((stop - start) / step_max)), 1)
+            dt = (stop - start) / n_chunk
+            times = start + np.arange(n_chunk + 1) * dt
+        return times
 
     @classmethod
     def now(cls):
