@@ -5,7 +5,6 @@ from astropy.time import TimeDelta
 
 from .convert import *  # noqa: F401, F403
 from .cxotime import *  # noqa: F401, F403
-from .utils import get_range_in_chunks
 
 __version__ = ska_helpers.get_version(__package__)
 
