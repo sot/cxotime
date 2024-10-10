@@ -216,6 +216,8 @@ class CxoTime(Time):
             raise ValueError("Only one of num or step_max can be defined")
 
         if num is not None:
+            if num <= 0:
+                raise ValueError("num must be positive nonzero")
             times = np.linspace(start, stop, num + 1)
         else:
             # Require that step_max is a positive nonzero quantity
