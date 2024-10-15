@@ -175,7 +175,6 @@ class CxoTime(Time):
 
         super(CxoTime, self).__init__(*args, **kwargs)
 
-    # Make a classmethod that replaces utils.get_range_in_chunks
     @classmethod
     def linspace(
         cls,
@@ -184,12 +183,10 @@ class CxoTime(Time):
         num: int | None = None,
         step_max: u.Quantity | None = None,
     ):
-        # This method will use the linspace method if num is defined
-        # or the step_max method if step_max is defined
         """
-        Get uniform time chunks for a given time range.
+        Get a uniform time series that covers the given time range.
 
-        Output times either divide the time range into ``num`` chunks or are
+        Output times either divide the time range into ``num`` intervals or are
         uniformly spaced by up to ``step_max``, and cover the time
         range from ``start`` to ``stop``.
 
