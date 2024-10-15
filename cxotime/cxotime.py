@@ -202,7 +202,7 @@ class CxoTime(Time):
         num : int | None
             Number of time bins.
         step_max : u.Quantity (timelike)
-            Maximum time interval for each chunk.
+            Maximum time interval for each chunk.  Should be positive nonzero.
 
         Returns
         -------
@@ -215,23 +215,19 @@ class CxoTime(Time):
         if num is not None and step_max is not None:
             raise ValueError("Only one of num or step_max can be defined")
 
-        if num is not None:
-            if num <= 0:
-                raise ValueError("num must be positive nonzero")
-            times = np.linspace(start, stop, num + 1)
-        else:
-            # Require that step_max is a positive nonzero quantity
+        if step_max is not None:
+            # Require that step_max is positive nonzero
             if step_max <= 0 * u.s:
                 raise ValueError("step_max must be positive nonzero")
 
-            # Let this work if start > stop, but flip the sign of dt_max
-            if start > stop:
-                step_max = -step_max
-
             # Calculate chunks to cover time range, handling edge case of start == stop
-            n_chunk = max(np.ceil(float((stop - start) / step_max)), 1)
-            dt = (stop - start) / n_chunk
-            times = start + np.arange(n_chunk + 1) * dt
+            num = int(max(np.ceil(abs(float((stop - start) / step_max))), 1))
+
+        if num <= 0:
+            raise ValueError("num must be positive nonzero int")
+
+        times = np.linspace(start, stop, num + 1)
+
         return times
 
     @classmethod
