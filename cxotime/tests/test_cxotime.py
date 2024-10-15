@@ -3,6 +3,7 @@
 Simple test of CxoTime.  The base Time object is extremely well
 tested, so this simply confirms that the add-on in CxoTime works.
 """
+
 import io
 import time
 from dataclasses import dataclass

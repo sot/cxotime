@@ -4,6 +4,7 @@ import warnings
 from copy import copy
 from typing import Union
 
+import astropy.units as u
 import erfa
 import numpy as np
 import numpy.typing as npt
@@ -173,6 +174,58 @@ class CxoTime(Time):
             args = (np.asarray(args[0], dtype="S"),) + args[1:]
 
         super(CxoTime, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def linspace(
+        cls,
+        start: CxoTimeLike,
+        stop: CxoTimeLike,
+        num: int | None = None,
+        step_max: u.Quantity | None = None,
+    ):
+        """
+        Get a uniform time series that covers the given time range.
+
+        Output times either divide the time range into ``num`` intervals or are
+        uniformly spaced by up to ``step_max``, and cover the time
+        range from ``start`` to ``stop``.
+
+        Parameters
+        ----------
+        start : CxoTimeLike
+            Start time of the time range.
+        stop : CxoTimeLike
+            Stop time of the time range.
+        num : int | None
+            Number of time bins.
+        step_max : u.Quantity (timelike)
+            Maximum time interval step..  Should be positive nonzero.
+
+        Returns
+        -------
+        CxoTime
+            CxoTime with time bin edges for each interval.
+        """
+        start = CxoTime(start)
+        stop = CxoTime(stop)
+
+        if (num is None) == (step_max is None):
+            raise ValueError("exactly one of num and step_max must be defined")
+
+        if step_max is not None:
+            # Require that step_max is positive nonzero
+            if step_max <= 0 * u.s:
+                raise ValueError("step_max must be positive nonzero")
+
+            # Calculate chunks to cover time range, handling edge case of start == stop
+            num = int(max(np.ceil(abs(float((stop - start) / step_max))), 1))
+
+        if num <= 0:
+            raise ValueError("num must be positive nonzero int")
+
+        times = np.linspace(start, stop, num + 1)
+
+        return times
 
     @classmethod
     def now(cls):
