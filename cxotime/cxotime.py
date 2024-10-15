@@ -199,12 +199,12 @@ class CxoTime(Time):
         num : int | None
             Number of time bins.
         step_max : u.Quantity (timelike)
-            Maximum time interval for each chunk.  Should be positive nonzero.
+            Maximum time interval step..  Should be positive nonzero.
 
         Returns
         -------
         CxoTime
-            CxoTime with time bin edges for each chunk.
+            CxoTime with time bin edges for each interval.
         """
         start = CxoTime(start)
         stop = CxoTime(stop)
