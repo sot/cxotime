@@ -209,8 +209,8 @@ class CxoTime(Time):
         start = CxoTime(start)
         stop = CxoTime(stop)
 
-        if num is not None and step_max is not None:
-            raise ValueError("Only one of num or step_max can be defined")
+        if (num is None) == (step_max is None):
+            raise ValueError("exactly one of num and step_max must be defined")
 
         if step_max is not None:
             # Require that step_max is positive nonzero

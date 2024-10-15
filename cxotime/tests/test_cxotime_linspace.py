@@ -187,3 +187,21 @@ def test_linspace_num_3():
     # There are very small numerical differences between the expected and actual values
     # so this test uses allclose instead of ==.
     assert np.allclose(CxoTime(result).secs, CxoTime(expected).secs)
+
+
+def test_missing_args():
+    start = "2015:001"
+    stop = "2015:002"
+    with pytest.raises(
+        ValueError, match="exactly one of num and step_max must be defined"
+    ):
+        CxoTime.linspace(start, stop)
+
+
+def test_too_many_args():
+    start = "2015:001"
+    stop = "2015:002"
+    with pytest.raises(
+        ValueError, match="exactly one of num and step_max must be defined"
+    ):
+        CxoTime.linspace(start, stop, 1, 2)
