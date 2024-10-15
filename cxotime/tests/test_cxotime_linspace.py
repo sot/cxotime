@@ -81,7 +81,6 @@ def test_linspace_negative_range():
     assert np.all(result == CxoTime(expected_values))
 
 
-# Add a test that shows that the time range is covered even if the time range is less than dt_max
 def test_linspace_big_step():
     """Test that the result is correct when the step is larger than the range."""
     start = CxoTime("2020:001")
