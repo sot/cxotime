@@ -1,18 +1,17 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Chandra-specific astropy Time class &#8212; cxotime 0.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/bootstrap-astropy.css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-astropy.css?v=f4f7060c" />
     
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/documentation_options.js?v=2709fde1"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script type="text/javascript" src="_static/sidebar.js"></script>
     <script type="text/javascript" src="_static/copybutton.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -61,7 +60,7 @@
           <div class="body" role="main">
             
   <section id="chandra-specific-astropy-time-class">
-<h1>Chandra-specific astropy Time class<a class="headerlink" href="#chandra-specific-astropy-time-class" title="Permalink to this heading">¶</a></h1>
+<h1>Chandra-specific astropy Time class<a class="headerlink" href="#chandra-specific-astropy-time-class" title="Link to this heading">¶</a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">cxotime</span></code> package provides a <a class="reference internal" href="#cxotime.cxotime.CxoTime" title="cxotime.cxotime.CxoTime"><code class="xref py py-class docutils literal notranslate"><span class="pre">CxoTime</span></code></a> class which provides Chandra-specific
 functionality while deriving from the <a class="reference external" href="http://docs.astropy.org/en/stable/api/astropy.time.Time.html#astropy.time.Time">Time</a> class of the <a class="reference external" href="http://docs.astropy.org/en/stable/time/index.html">astropytime</a> package.
 The <a class="reference external" href="http://docs.astropy.org/en/stable/time/index.html">astropytime</a> package provides robust 128-bit time representation,
@@ -159,7 +158,7 @@ the native <a class="reference external" href="http://docs.astropy.org/en/stable
 </tbody>
 </table>
 <section id="basic-initialization">
-<h2>Basic initialization<a class="headerlink" href="#basic-initialization" title="Permalink to this heading">¶</a></h2>
+<h2>Basic initialization<a class="headerlink" href="#basic-initialization" title="Link to this heading">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cxotime</span> <span class="kn">import</span> <span class="n">CxoTime</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">CxoTime</span><span class="p">(</span><span class="mf">100.0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">date</span>
@@ -186,7 +185,7 @@ the native <a class="reference external" href="http://docs.astropy.org/en/stable
 </div>
 </section>
 <section id="guessing-and-specifying-the-format">
-<h2>Guessing and specifying the format<a class="headerlink" href="#guessing-and-specifying-the-format" title="Permalink to this heading">¶</a></h2>
+<h2>Guessing and specifying the format<a class="headerlink" href="#guessing-and-specifying-the-format" title="Link to this heading">¶</a></h2>
 <p>Generally speaking <code class="docutils literal notranslate"><span class="pre">CxoTime</span></code> will successfully guess the format for
 string-based times. However this requires some time, so if you know the
 format in advance then it is recommended to provide this via the <code class="docutils literal notranslate"><span class="pre">format</span></code>
@@ -200,7 +199,7 @@ argument.</p>
 </div>
 </section>
 <section id="fast-conversion-between-formats">
-<h2>Fast conversion between formats<a class="headerlink" href="#fast-conversion-between-formats" title="Permalink to this heading">¶</a></h2>
+<h2>Fast conversion between formats<a class="headerlink" href="#fast-conversion-between-formats" title="Link to this heading">¶</a></h2>
 <p>Converting between time formats (e.g. from CXC seconds to Year Day-of-Year) is
 easily done with the <a class="reference internal" href="#cxotime.cxotime.CxoTime" title="cxotime.cxotime.CxoTime"><code class="xref py py-class docutils literal notranslate"><span class="pre">CxoTime</span></code></a> class, but this involves some overhead and is
 relatively slow for scalar values or small arrays (less than around 100
@@ -210,7 +209,7 @@ the <cite>cxotime</cite> package provides a different interface that is typicall
 <p>For fast conversion of an input date or dates to a different format there are
 two options that are described in the next two sections.</p>
 <section id="convert-time-format">
-<h3><code class="docutils literal notranslate"><span class="pre">convert_time_format</span></code><a class="headerlink" href="#convert-time-format" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">convert_time_format</span></code><a class="headerlink" href="#convert-time-format" title="Link to this heading">¶</a></h3>
 <p>The first option is a generalized time format conversion function
 <a class="reference internal" href="#cxotime.convert.convert_time_format" title="cxotime.convert.convert_time_format"><code class="xref py py-func docutils literal notranslate"><span class="pre">convert_time_format()</span></code></a> that can be used to convert between
 any of the supported <em>fast</em> formats:</p>
@@ -244,7 +243,7 @@ improved. For example:</p>
 </div>
 </section>
 <section id="convenience-functions-like-secs2date">
-<h3>Convenience functions like <code class="docutils literal notranslate"><span class="pre">secs2date</span></code><a class="headerlink" href="#convenience-functions-like-secs2date" title="Permalink to this heading">¶</a></h3>
+<h3>Convenience functions like <code class="docutils literal notranslate"><span class="pre">secs2date</span></code><a class="headerlink" href="#convenience-functions-like-secs2date" title="Link to this heading">¶</a></h3>
 <p>For historical compatibility and for succinct code, direct conversion between any two
 of the “fast” formats is also available via convenience functions. These have the name
 <code class="docutils literal notranslate"><span class="pre">&lt;fmt_in&gt;2&lt;fmt_out&gt;</span></code> where <code class="docutils literal notranslate"><span class="pre">fmt_in</span></code> and <code class="docutils literal notranslate"><span class="pre">fmt_out</span></code> are the input and output formats.
@@ -261,7 +260,7 @@ and <a class="reference internal" href="#cxotime.convert.greta2jd" title="cxotim
 </section>
 </section>
 <section id="print-common-time-conversions">
-<h2>Print common time conversions<a class="headerlink" href="#print-common-time-conversions" title="Permalink to this heading">¶</a></h2>
+<h2>Print common time conversions<a class="headerlink" href="#print-common-time-conversions" title="Link to this heading">¶</a></h2>
 <p>The <cite>cxotime</cite> package has functionality to convert a time betweeen a variety of common
 time formats. This convenience function is available in two ways, either as a
 command line script or as class method <code class="xref py py-meth docutils literal notranslate"><span class="pre">print_conversions()</span></code>:</p>
@@ -300,7 +299,7 @@ unix        1673376062.603
 </div>
 </section>
 <section id="cxotime-now-sentinel">
-<h2>CxoTime.NOW sentinel<a class="headerlink" href="#cxotime-now-sentinel" title="Permalink to this heading">¶</a></h2>
+<h2>CxoTime.NOW sentinel<a class="headerlink" href="#cxotime-now-sentinel" title="Link to this heading">¶</a></h2>
 <p>The <a class="reference internal" href="#cxotime.cxotime.CxoTime" title="cxotime.cxotime.CxoTime"><code class="xref py py-class docutils literal notranslate"><span class="pre">CxoTime</span></code></a> class has a special sentinel value <code class="docutils literal notranslate"><span class="pre">CxoTime.NOW</span></code> which can be used
 to specify the current time.  This is useful for example when defining a function that
 has accepts a CxoTime-like argument that defaults to the current time.</p>
@@ -342,7 +341,7 @@ optional and defaults to the current time when the object is created:</p>
 </div>
 </section>
 <section id="compatibility-with-datetime">
-<h2>Compatibility with DateTime<a class="headerlink" href="#compatibility-with-datetime" title="Permalink to this heading">¶</a></h2>
+<h2>Compatibility with DateTime<a class="headerlink" href="#compatibility-with-datetime" title="Link to this heading">¶</a></h2>
 <p>The key differences between <a class="reference internal" href="#cxotime.cxotime.CxoTime" title="cxotime.cxotime.CxoTime"><code class="xref py py-class docutils literal notranslate"><span class="pre">CxoTime</span></code></a> and <a class="reference external" href="http://cxc.harvard.edu/mta/ASPECT/tool_doc/pydocs/Chandra.Time.html">DateTime</a> are:</p>
 <ul class="simple">
 <li><p>In <a class="reference internal" href="#cxotime.cxotime.CxoTime" title="cxotime.cxotime.CxoTime"><code class="xref py py-class docutils literal notranslate"><span class="pre">CxoTime</span></code></a> the date ‘2000:001’ is ‘2000:001:00:00:00’ instead of
@@ -360,12 +359,12 @@ any quantity with time units.</p></li>
 </ul>
 </section>
 <section id="api-docs">
-<h2>API docs<a class="headerlink" href="#api-docs" title="Permalink to this heading">¶</a></h2>
+<h2>API docs<a class="headerlink" href="#api-docs" title="Link to this heading">¶</a></h2>
 <section id="module-cxotime.cxotime">
-<span id="cxotime"></span><h3>Cxotime<a class="headerlink" href="#module-cxotime.cxotime" title="Permalink to this heading">¶</a></h3>
+<span id="cxotime"></span><h3>Cxotime<a class="headerlink" href="#module-cxotime.cxotime" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="cxotime.cxotime.CxoTime">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cxotime.cxotime.</span></span><span class="sig-name descname"><span class="pre">CxoTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/cxotime.html#CxoTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.cxotime.CxoTime" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cxotime.cxotime.</span></span><span class="sig-name descname"><span class="pre">CxoTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/cxotime.html#CxoTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.cxotime.CxoTime" title="Link to this definition">¶</a></dt>
 <dd><p>Time class for Chandra analysis that is based on <code class="docutils literal notranslate"><span class="pre">astropy.time.Time</span></code>.</p>
 <p>The CXO-specific time formats which are added to the astropy <code class="docutils literal notranslate"><span class="pre">Time</span></code> class
 are shown in the table below.  Like <code class="docutils literal notranslate"><span class="pre">DateTime</span></code>, the <code class="docutils literal notranslate"><span class="pre">CxoTime</span></code> class
@@ -466,7 +465,7 @@ to UTC in both <code class="docutils literal notranslate"><span class="pre">CxoT
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="cxotime.cxotime.CxoTime.get_conversions">
-<span class="sig-name descname"><span class="pre">get_conversions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/cxotime.html#CxoTime.get_conversions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.cxotime.CxoTime.get_conversions" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_conversions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/cxotime.html#CxoTime.get_conversions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.cxotime.CxoTime.get_conversions" title="Link to this definition">¶</a></dt>
 <dd><p>Get a dict of conversions to a standard set of formats.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cxotime</span> <span class="kn">import</span> <span class="n">CxoTime</span>
@@ -484,16 +483,45 @@ to UTC in both <code class="docutils literal notranslate"><span class="pre">CxoT
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="cxotime.cxotime.CxoTime.linspace">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cxotime.cxotime.CxoTime" title="cxotime.cxotime.CxoTime"><span class="pre">CxoTime</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cxotime.cxotime.CxoTime" title="cxotime.cxotime.CxoTime"><span class="pre">CxoTime</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Quantity</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/cxotime.html#CxoTime.linspace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.cxotime.CxoTime.linspace" title="Link to this definition">¶</a></dt>
+<dd><p>Get a uniform time series that covers the given time range.</p>
+<p>Output times either divide the time range into <code class="docutils literal notranslate"><span class="pre">num</span></code> intervals or are
+uniformly spaced by up to <code class="docutils literal notranslate"><span class="pre">step_max</span></code>, and cover the time
+range from <code class="docutils literal notranslate"><span class="pre">start</span></code> to <code class="docutils literal notranslate"><span class="pre">stop</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>start</strong><span class="classifier">CxoTimeLike</span></dt><dd><p>Start time of the time range.</p>
+</dd>
+<dt><strong>stop</strong><span class="classifier">CxoTimeLike</span></dt><dd><p>Stop time of the time range.</p>
+</dd>
+<dt><strong>num</strong><span class="classifier">int | None</span></dt><dd><p>Number of time bins.</p>
+</dd>
+<dt><strong>step_max</strong><span class="classifier">u.Quantity (timelike)</span></dt><dd><p>Maximum time interval step..  Should be positive nonzero.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>CxoTime</dt><dd><p>CxoTime with time bin edges for each interval.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="cxotime.cxotime.CxoTime.now">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">now</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/cxotime.html#CxoTime.now"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.cxotime.CxoTime.now" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">now</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/cxotime.html#CxoTime.now"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.cxotime.CxoTime.now" title="Link to this definition">¶</a></dt>
 <dd><p>Creates a new object corresponding to the instant in time this
 method is called.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>“Now” is determined using the <cite>~datetime.datetime.utcnow</cite>
+<p>“Now” is determined using the <cite>~datetime.datetime.now</cite>
 function, so its accuracy and precision is determined by that
 function.  Generally that means it is set by the accuracy of
-your system clock.</p>
+your system clock. The timezone is set to UTC.</p>
 </div>
 <dl class="field-list">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -508,7 +536,7 @@ such a subclass) at the current time.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cxotime.cxotime.CxoTime.print_conversions">
-<span class="sig-name descname"><span class="pre">print_conversions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file=&lt;_io.TextIOWrapper</span> <span class="pre">name='&lt;stdout&gt;'</span> <span class="pre">mode='w'</span> <span class="pre">encoding='utf-8'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/cxotime.html#CxoTime.print_conversions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.cxotime.CxoTime.print_conversions" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">print_conversions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file=&lt;_io.TextIOWrapper</span> <span class="pre">name='&lt;stdout&gt;'</span> <span class="pre">mode='w'</span> <span class="pre">encoding='utf-8'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/cxotime.html#CxoTime.print_conversions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.cxotime.CxoTime.print_conversions" title="Link to this definition">¶</a></dt>
 <dd><p>Print a table of conversions to a standard set of formats.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cxotime</span> <span class="kn">import</span> <span class="n">CxoTime</span>
@@ -535,7 +563,7 @@ File-like object to write output (default=sys.stdout).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="cxotime.cxotime.CxoTimeDescriptor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cxotime.cxotime.</span></span><span class="sig-name descname"><span class="pre">CxoTimeDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/cxotime.html#CxoTimeDescriptor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.cxotime.CxoTimeDescriptor" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cxotime.cxotime.</span></span><span class="sig-name descname"><span class="pre">CxoTimeDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/cxotime.html#CxoTimeDescriptor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.cxotime.CxoTimeDescriptor" title="Link to this definition">¶</a></dt>
 <dd><p>Descriptor for an attribute that is CxoTime (in date format) or None if not set.</p>
 <p>This allows setting the attribute with any <code class="docutils literal notranslate"><span class="pre">CxoTimeLike</span></code> value.</p>
 <p>Note that setting this descriptor to <code class="docutils literal notranslate"><span class="pre">None</span></code> will set the attribute to <code class="docutils literal notranslate"><span class="pre">None</span></code>,
@@ -571,7 +599,7 @@ created. If <code class="docutils literal notranslate"><span class="pre">False</
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cxotime.cxotime.CxoTimeDescriptor.cls">
-<span class="sig-name descname"><span class="pre">cls</span></span><a class="headerlink" href="#cxotime.cxotime.CxoTimeDescriptor.cls" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">cls</span></span><a class="headerlink" href="#cxotime.cxotime.CxoTimeDescriptor.cls" title="Link to this definition">¶</a></dt>
 <dd><p>alias of <a class="reference internal" href="#cxotime.cxotime.CxoTime" title="cxotime.cxotime.CxoTime"><code class="xref py py-class docutils literal notranslate"><span class="pre">CxoTime</span></code></a></p>
 </dd></dl>
 
@@ -579,10 +607,10 @@ created. If <code class="docutils literal notranslate"><span class="pre">False</
 
 </section>
 <section id="module-cxotime.convert">
-<span id="converters"></span><h3>Converters<a class="headerlink" href="#module-cxotime.convert" title="Permalink to this heading">¶</a></h3>
+<span id="converters"></span><h3>Converters<a class="headerlink" href="#module-cxotime.convert" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.convert_time_format">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">convert_time_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt_out</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/convert.html#convert_time_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.convert.convert_time_format" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">convert_time_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt_out</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/convert.html#convert_time_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.convert.convert_time_format" title="Link to this definition">¶</a></dt>
 <dd><p>Convert a time to a different format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -606,7 +634,7 @@ created. If <code class="docutils literal notranslate"><span class="pre">False</
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.date2greta">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">date2greta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.date2greta" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">date2greta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.date2greta" title="Link to this definition">¶</a></dt>
 <dd><p>Convert Date (Year, day-of-year, time) to GRETA date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='date').greta</span></code> but potentially 10x faster.</p>
 <p>Format in: 
@@ -633,7 +661,7 @@ Format out: YYYYDDD.HHMMSSsss (str)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.date2jd">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">date2jd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.date2jd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">date2jd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.date2jd" title="Link to this definition">¶</a></dt>
 <dd><p>Convert Date (Year, day-of-year, time) to Julian Date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='date').jd</span></code> but potentially 10x faster.</p>
 <p>Format in: 
@@ -660,7 +688,7 @@ Format out: Julian Date (numeric)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.date2maude">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">date2maude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.date2maude" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">date2maude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.date2maude" title="Link to this definition">¶</a></dt>
 <dd><p>Convert Date (Year, day-of-year, time) to MAUDE date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='date').maude</span></code> but potentially 10x faster.</p>
 <p>Format in: 
@@ -687,7 +715,7 @@ Format out: YYYYDDD.HHMMSSsss (int)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.date2secs">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">date2secs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.date2secs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">date2secs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.date2secs" title="Link to this definition">¶</a></dt>
 <dd><p>Convert Date (Year, day-of-year, time) to CXC seconds.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='date').secs</span></code> but potentially 10x faster.</p>
 <p>Format in: 
@@ -714,7 +742,7 @@ Format out: CXC seconds (numeric)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.greta2date">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">greta2date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.greta2date" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">greta2date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.greta2date" title="Link to this definition">¶</a></dt>
 <dd><p>Convert GRETA date to Date (Year, day-of-year, time).</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='greta').date</span></code> but potentially 10x faster.</p>
 <p>Format in: YYYYDDD.HHMMSSsss (str or float)
@@ -737,7 +765,7 @@ Format out: YYYY:DDD:HH:MM:SS.sss</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.greta2jd">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">greta2jd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.greta2jd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">greta2jd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.greta2jd" title="Link to this definition">¶</a></dt>
 <dd><p>Convert GRETA date to Julian Date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='greta').jd</span></code> but potentially 10x faster.</p>
 <p>Format in: YYYYDDD.HHMMSSsss (str or float)
@@ -760,7 +788,7 @@ Format out: Julian Date (numeric)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.greta2maude">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">greta2maude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.greta2maude" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">greta2maude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.greta2maude" title="Link to this definition">¶</a></dt>
 <dd><p>Convert GRETA date to MAUDE date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='greta').maude</span></code> but potentially 10x faster.</p>
 <p>Format in: YYYYDDD.HHMMSSsss (str or float)
@@ -783,7 +811,7 @@ Format out: YYYYDDD.HHMMSSsss (int)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.greta2secs">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">greta2secs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.greta2secs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">greta2secs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.greta2secs" title="Link to this definition">¶</a></dt>
 <dd><p>Convert GRETA date to CXC seconds.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='greta').secs</span></code> but potentially 10x faster.</p>
 <p>Format in: YYYYDDD.HHMMSSsss (str or float)
@@ -806,7 +834,7 @@ Format out: CXC seconds (numeric)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.jd2date">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">jd2date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.jd2date" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">jd2date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.jd2date" title="Link to this definition">¶</a></dt>
 <dd><p>Convert Julian Date to Date (Year, day-of-year, time).</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(jd,</span> <span class="pre">format='jd').date</span></code> but potentially 10x faster.</p>
 <p>Format in: Julian Date (numeric)
@@ -829,7 +857,7 @@ Format out: YYYY:DDD:HH:MM:SS.sss</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.jd2greta">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">jd2greta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.jd2greta" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">jd2greta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.jd2greta" title="Link to this definition">¶</a></dt>
 <dd><p>Convert Julian Date to GRETA date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(jd,</span> <span class="pre">format='jd').greta</span></code> but potentially 10x faster.</p>
 <p>Format in: Julian Date (numeric)
@@ -852,7 +880,7 @@ Format out: YYYYDDD.HHMMSSsss (str)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.jd2maude">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">jd2maude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.jd2maude" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">jd2maude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.jd2maude" title="Link to this definition">¶</a></dt>
 <dd><p>Convert Julian Date to MAUDE date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(jd,</span> <span class="pre">format='jd').maude</span></code> but potentially 10x faster.</p>
 <p>Format in: Julian Date (numeric)
@@ -875,7 +903,7 @@ Format out: YYYYDDD.HHMMSSsss (int)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.jd2secs">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">jd2secs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.jd2secs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">jd2secs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.jd2secs" title="Link to this definition">¶</a></dt>
 <dd><p>Convert Julian Date to CXC seconds.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(jd,</span> <span class="pre">format='jd').secs</span></code> but potentially 10x faster.</p>
 <p>Format in: Julian Date (numeric)
@@ -898,7 +926,7 @@ Format out: CXC seconds (numeric)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.maude2date">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">maude2date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.maude2date" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">maude2date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.maude2date" title="Link to this definition">¶</a></dt>
 <dd><p>Convert MAUDE date to Date (Year, day-of-year, time).</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='maude').date</span></code> but potentially 10x faster.</p>
 <p>Format in: YYYYDDDHHMMSSsss (str or int)
@@ -921,7 +949,7 @@ Format out: YYYY:DDD:HH:MM:SS.sss</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.maude2greta">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">maude2greta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.maude2greta" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">maude2greta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.maude2greta" title="Link to this definition">¶</a></dt>
 <dd><p>Convert MAUDE date to GRETA date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='maude').greta</span></code> but potentially 10x faster.</p>
 <p>Format in: YYYYDDDHHMMSSsss (str or int)
@@ -944,7 +972,7 @@ Format out: YYYYDDD.HHMMSSsss (str)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.maude2jd">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">maude2jd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.maude2jd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">maude2jd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.maude2jd" title="Link to this definition">¶</a></dt>
 <dd><p>Convert MAUDE date to Julian Date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='maude').jd</span></code> but potentially 10x faster.</p>
 <p>Format in: YYYYDDDHHMMSSsss (str or int)
@@ -967,7 +995,7 @@ Format out: Julian Date (numeric)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.maude2secs">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">maude2secs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.maude2secs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">maude2secs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.maude2secs" title="Link to this definition">¶</a></dt>
 <dd><p>Convert MAUDE date to CXC seconds.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(date,</span> <span class="pre">format='maude').secs</span></code> but potentially 10x faster.</p>
 <p>Format in: YYYYDDDHHMMSSsss (str or int)
@@ -990,13 +1018,13 @@ Format out: CXC seconds (numeric)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.print_time_conversions">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">print_time_conversions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/convert.html#print_time_conversions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.convert.print_time_conversions" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">print_time_conversions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cxotime/convert.html#print_time_conversions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cxotime.convert.print_time_conversions" title="Link to this definition">¶</a></dt>
 <dd><p>Interface to entry_point script <code class="docutils literal notranslate"><span class="pre">cxotime</span></code> to print time conversions</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.secs2date">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">secs2date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.secs2date" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">secs2date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.secs2date" title="Link to this definition">¶</a></dt>
 <dd><p>Convert CXC seconds to Date (Year, day-of-year, time).</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(time,</span> <span class="pre">format='secs').date</span></code> but potentially 10x faster.</p>
 <p>Format in: CXC seconds (numeric)
@@ -1019,7 +1047,7 @@ Format out: YYYY:DDD:HH:MM:SS.sss</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.secs2greta">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">secs2greta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.secs2greta" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">secs2greta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.secs2greta" title="Link to this definition">¶</a></dt>
 <dd><p>Convert CXC seconds to GRETA date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(time,</span> <span class="pre">format='secs').greta</span></code> but potentially 10x faster.</p>
 <p>Format in: CXC seconds (numeric)
@@ -1042,7 +1070,7 @@ Format out: YYYYDDD.HHMMSSsss (str)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.secs2jd">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">secs2jd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.secs2jd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">secs2jd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.secs2jd" title="Link to this definition">¶</a></dt>
 <dd><p>Convert CXC seconds to Julian Date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(time,</span> <span class="pre">format='secs').jd</span></code> but potentially 10x faster.</p>
 <p>Format in: CXC seconds (numeric)
@@ -1065,7 +1093,7 @@ Format out: Julian Date (numeric)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cxotime.convert.secs2maude">
-<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">secs2maude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.secs2maude" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cxotime.convert.</span></span><span class="sig-name descname"><span class="pre">secs2maude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.convert.secs2maude" title="Link to this definition">¶</a></dt>
 <dd><p>Convert CXC seconds to MAUDE date.</p>
 <p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">CxoTime(time,</span> <span class="pre">format='secs').maude</span></code> but potentially 10x faster.</p>
 <p>Format in: CXC seconds (numeric)
@@ -1113,6 +1141,7 @@ Format out: YYYYDDD.HHMMSSsss (int)</p>
 <li><a class="reference internal" href="#module-cxotime.cxotime">Cxotime</a><ul>
 <li><a class="reference internal" href="#cxotime.cxotime.CxoTime"><code class="docutils literal notranslate"><span class="pre">CxoTime</span></code></a><ul>
 <li><a class="reference internal" href="#cxotime.cxotime.CxoTime.get_conversions"><code class="docutils literal notranslate"><span class="pre">CxoTime.get_conversions()</span></code></a></li>
+<li><a class="reference internal" href="#cxotime.cxotime.CxoTime.linspace"><code class="docutils literal notranslate"><span class="pre">CxoTime.linspace()</span></code></a></li>
 <li><a class="reference internal" href="#cxotime.cxotime.CxoTime.now"><code class="docutils literal notranslate"><span class="pre">CxoTime.now()</span></code></a></li>
 <li><a class="reference internal" href="#cxotime.cxotime.CxoTime.print_conversions"><code class="docutils literal notranslate"><span class="pre">CxoTime.print_conversions()</span></code></a></li>
 </ul>
@@ -1178,7 +1207,7 @@ Format out: YYYYDDD.HHMMSSsss (int)</p>
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2015, Tom Aldcroft.<br/>
-    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 6.1.3. &nbsp;
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 7.2.6. &nbsp;
   </p>
 </footer>
   </body>
