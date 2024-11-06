@@ -190,6 +190,10 @@ class CxoTime(Time):
         uniformly spaced by up to ``step_max``, and cover the time
         range from ``start`` to ``stop``.
 
+        Note that returned intervals may be larger than ``step_max`` by floating point error.
+        If calling code requires that all the intervals be less than a value, ``step_max`` should
+        be set to a value at least slightly smaller than the desired maximum value.
+
         Parameters
         ----------
         start : CxoTimeLike
@@ -199,7 +203,7 @@ class CxoTime(Time):
         num : int | None
             Number of time bins.
         step_max : u.Quantity (timelike)
-            Maximum time interval step..  Should be positive nonzero.
+            Maximum time interval step. Should be positive nonzero.
 
         Returns
         -------
