@@ -199,7 +199,7 @@ class CxoTime(Time):
         num : int | None
             Number of time bins.
         step_max : u.Quantity (timelike)
-            Maximum time interval step..  Should be positive nonzero.
+            Maximum time interval step.  Should be positive nonzero.
 
         Returns
         -------
@@ -224,6 +224,14 @@ class CxoTime(Time):
             raise ValueError("num must be positive nonzero int")
 
         times = np.linspace(start, stop, num + 1)
+
+        if step_max is not None:
+            # confirm that all the time deltas are less than or equal to step_max
+            deltas_lt = [t <= step_max for t in np.diff(times)]
+            if np.any(deltas_lt):
+                # increase num and try again
+                num += 1
+                times = np.linspace(start, stop, num + 1)
 
         return times
 

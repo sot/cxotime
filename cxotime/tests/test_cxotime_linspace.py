@@ -15,9 +15,12 @@ def run_linspace_step_test(start, stop, dt_max, expected_len, expected_values):
         dt_max, abs(CxoTime(stop) - CxoTime(start))
     )
 
-    # Confirm that all the intervals are the same duration
+    # Confirm that all the intervals are the basically the same duration
     interval1 = result[1] - result[0]
     assert all(np.isclose((result[1:] - result[:-1]).sec, interval1.sec))
+
+    # And that they are all less than or equal to dt_max
+    assert all((result[1:] - result[:-1]) <= dt_max)
 
     # Confirm that the time range is covered
     assert result[0] == start
@@ -26,6 +29,54 @@ def run_linspace_step_test(start, stop, dt_max, expected_len, expected_values):
     # And confirm that the result is as expected
     assert len(result) == expected_len
     assert np.allclose(CxoTime(result).secs, CxoTime(expected_values).secs)
+
+
+def test_linspace_step_bug():
+    """Test that the steps are equal to or less than the maximum step for one case
+    described in https://github.com/sot/cxotime/issues/45 . For this case, the
+    maximum step is 1 minute and the range is 30 minutes. One would expect 30
+    intervals, but due to tiny numeric issues with np.linspace, we need an extra
+    interval to avoid having any intervals just over the step_max."""
+    run_linspace_step_test(
+        "2023:001:00:00:01.000",
+        "2023:001:00:30:01.000",
+        1 * u.min,
+        32,
+        [
+            "2023:001:00:00:01.000",
+            "2023:001:00:00:59.065",
+            "2023:001:00:01:57.129",
+            "2023:001:00:02:55.194",
+            "2023:001:00:03:53.258",
+            "2023:001:00:04:51.323",
+            "2023:001:00:05:49.387",
+            "2023:001:00:06:47.452",
+            "2023:001:00:07:45.516",
+            "2023:001:00:08:43.581",
+            "2023:001:00:09:41.645",
+            "2023:001:00:10:39.710",
+            "2023:001:00:11:37.774",
+            "2023:001:00:12:35.839",
+            "2023:001:00:13:33.903",
+            "2023:001:00:14:31.968",
+            "2023:001:00:15:30.032",
+            "2023:001:00:16:28.097",
+            "2023:001:00:17:26.161",
+            "2023:001:00:18:24.226",
+            "2023:001:00:19:22.290",
+            "2023:001:00:20:20.355",
+            "2023:001:00:21:18.419",
+            "2023:001:00:22:16.484",
+            "2023:001:00:23:14.548",
+            "2023:001:00:24:12.613",
+            "2023:001:00:25:10.677",
+            "2023:001:00:26:08.742",
+            "2023:001:00:27:06.806",
+            "2023:001:00:28:04.871",
+            "2023:001:00:29:02.935",
+            "2023:001:00:30:01.000",
+        ],
+    )
 
 
 def test_linspace_step_with_zero_range():
