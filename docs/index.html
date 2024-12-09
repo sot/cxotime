@@ -489,6 +489,9 @@ to UTC in both <code class="docutils literal notranslate"><span class="pre">CxoT
 <p>Output times either divide the time range into <code class="docutils literal notranslate"><span class="pre">num</span></code> intervals or are
 uniformly spaced by up to <code class="docutils literal notranslate"><span class="pre">step_max</span></code>, and cover the time
 range from <code class="docutils literal notranslate"><span class="pre">start</span></code> to <code class="docutils literal notranslate"><span class="pre">stop</span></code>.</p>
+<p>Note that returned intervals may be larger than <code class="docutils literal notranslate"><span class="pre">step_max</span></code> by floating point error.
+If calling code requires that all the intervals be less than a value, <code class="docutils literal notranslate"><span class="pre">step_max</span></code> should
+be set to a value at least slightly smaller than the desired maximum value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -498,7 +501,7 @@ range from <code class="docutils literal notranslate"><span class="pre">start</s
 </dd>
 <dt><strong>num</strong><span class="classifier">int | None</span></dt><dd><p>Number of time bins.</p>
 </dd>
-<dt><strong>step_max</strong><span class="classifier">u.Quantity (timelike)</span></dt><dd><p>Maximum time interval step..  Should be positive nonzero.</p>
+<dt><strong>step_max</strong><span class="classifier">u.Quantity (timelike)</span></dt><dd><p>Maximum time interval step. Should be positive nonzero.</p>
 </dd>
 </dl>
 </dd>

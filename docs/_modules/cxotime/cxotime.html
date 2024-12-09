@@ -256,6 +256,10 @@
 <span class="sd">        uniformly spaced by up to ``step_max``, and cover the time</span>
 <span class="sd">        range from ``start`` to ``stop``.</span>
 
+<span class="sd">        Note that returned intervals may be larger than ``step_max`` by floating point error.</span>
+<span class="sd">        If calling code requires that all the intervals be less than a value, ``step_max`` should</span>
+<span class="sd">        be set to a value at least slightly smaller than the desired maximum value.</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        start : CxoTimeLike</span>
@@ -265,7 +269,7 @@
 <span class="sd">        num : int | None</span>
 <span class="sd">            Number of time bins.</span>
 <span class="sd">        step_max : u.Quantity (timelike)</span>
-<span class="sd">            Maximum time interval step..  Should be positive nonzero.</span>
+<span class="sd">            Maximum time interval step. Should be positive nonzero.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
