@@ -278,7 +278,7 @@ class CxoTime(Time):
         out["value"].info.format = "<s"
 
         # Remove the header and print
-        lines = out.pformat_all()[2:]
+        lines = out.pformat()[2:]
         print("\n".join(lines), file=file)
 
     def get_conversions(self):
