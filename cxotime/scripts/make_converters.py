@@ -2,7 +2,7 @@
 
 This script is run by hand to update the converters.py file in the cxotime package::
 
-  $ python -m cxotime.make_converters > cxotime/converters.py
+  $ python -m cxotime.scripts.make_converters > cxotime/converters.py
 
 This is a one-time operation if a new converter is added to convert.py. The file may
 need to be ruff formatted.
