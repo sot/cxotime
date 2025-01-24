@@ -191,8 +191,8 @@ of the "fast" formats is also available via convenience functions. These have th
 
 The full list of available functions is shown in :mod:`cxotime.converters`.
 
-Examples include :func:`~cxotime.convert.date2secs`, :func:`~cxotime.convert.secs2greta`,
-and :func:`~cxotime.convert.greta2jd`.
+Examples include :func:`~cxotime.converters.date2secs`,
+:func:`~cxotime.converters.secs2greta`, and :func:`~cxotime.converters.greta2jd`.
 
 >>> from cxotime import secs2greta
 >>> secs2greta([100, 1000])
