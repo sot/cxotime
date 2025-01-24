@@ -5,7 +5,7 @@ import sys
 import erfa
 import numpy as np
 from astropy.time.core import day_frac
-from astropy.time.formats import TIME_FORMATS, TimeYearDayTime, _parse_times
+from astropy.time.formats import TimeYearDayTime, _parse_times
 
 from .cxotime import CxoTime, TimeGreta, TimeMaude
 
@@ -282,38 +282,6 @@ def convert_secs_to_jd1_jd2(secs):
     return jd1, jd2
 
 
-def make_docstring(fmt_in, fmt_out):
-    import textwrap
-
-    fmt_in_cls = TIME_FORMATS[fmt_in]
-    doc_in = fmt_in_cls.convert_doc
-    fmt_out_cls = TIME_FORMATS[fmt_out]
-    doc_out = fmt_out_cls.convert_doc
-    equiv = (
-        f"CxoTime({doc_in['input_name']},"
-        f" format='{fmt_in_cls.name}').{fmt_out_cls.name}"
-    )
-    out = f"""\
-    Convert {doc_in['descr_short']} to {doc_out['descr_short']}.
-
-    This is equivalent to ``{equiv}`` but potentially 10x faster.
-
-    Format in: {doc_in['input_format']}
-    Format out: {doc_out['output_format']}
-
-    Parameters
-    ----------
-    {doc_in['input_name']} : {doc_in['input_type']}
-        {doc_in['descr_short']}
-
-    Returns
-    -------
-    {doc_out['input_name']} : {doc_out['output_type']}
-        {doc_out['descr_short']}
-    """
-    return textwrap.dedent(out)
-
-
 # Define shortcuts for converters like date2secs or greta2date.
 # Accept each value of globals if it matches the pattern convert_jd1_jd2_to_...
 CONVERT_FORMATS = [
@@ -321,17 +289,3 @@ CONVERT_FORMATS = [
     for fmt in list(globals())
     if (m := re.match(r"convert_jd1_jd2_to_(\w+)", fmt))
 ]
-
-
-for fmt1 in CONVERT_FORMATS:
-    input_name = TIME_FORMATS[fmt1].convert_doc["input_name"]
-    for fmt2 in CONVERT_FORMATS:
-        if fmt1 != fmt2:
-            name = f"{fmt1}2{fmt2}"
-            func_str = (
-                f"lambda {input_name}: "
-                f"convert_time_format({input_name}, fmt_in='{fmt1}', fmt_out='{fmt2}')"
-            )
-            func = globals()[name] = eval(func_str)  # noqa: PGH001
-            func.__doc__ = make_docstring(fmt1, fmt2)
-            __all__.append(name)  # noqa: PYI056
