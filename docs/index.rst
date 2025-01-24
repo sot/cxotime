@@ -264,18 +264,3 @@ The key differences between |CxoTime| and DateTime_ are:
 
 - Conversely, starting with |CxoTime| one can add or subtract a TimeDelta_ or
   any quantity with time units.
-
-API docs
---------
-
-Cxotime
-^^^^^^^
-
-.. automodule:: cxotime.cxotime
-   :members:
-
-Converters
-^^^^^^^^^^
-
-.. automodule:: cxotime.convert
-   :members:
