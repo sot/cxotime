@@ -1,4 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
+import os
 import sys
 import warnings
 from copy import copy
@@ -131,8 +132,9 @@ class CxoTime(Time):
                 if kwargs.setdefault("format", "date") != "date":
                     raise ValueError("must use format 'date' for DateTime input")
         else:
-            # For `CxoTime()`` return the current time in `date` format.
-            args = (Time.now().yday,)
+            # For `CxoTime()`` return the current time in `date` format or the value
+            # of the envionment variable CXOTIME_NOW if set.
+            args = (os.environ.get("CXOTIME_NOW", Time.now().yday),)
 
         # If format is supplied and is a DateTime format then require scale='utc'.
         fmt = kwargs.get("format")

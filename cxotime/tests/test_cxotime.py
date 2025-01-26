@@ -460,6 +460,29 @@ def test_convert_time_format_obj():
     assert tm.date == convert_time_format(tm, "date")
 
 
+def test_with_object_input():
+    """Check CxoTime fails when called with an object() that is not CxoTime.NOW"""
+    with pytest.raises(ValueError):
+        CxoTime(object())
+
+
+@pytest.mark.parametrize("fmt", ["date", "iso", "greta"])
+def test_cxotime_now_env_var(monkeypatch, fmt):
+    """Check instantiating with CxoTime.NOW results in current time."""
+    # These two commands should run within a 2 sec of each other, even on the slowest
+    # machine.
+    tm = CxoTime("2015:160:02:24:01.250")
+    date = tm.date
+    monkeypatch.setenv("CXOTIME_NOW", getattr(tm, fmt))
+    assert CxoTime(CxoTime.NOW).date == date
+    assert CxoTime(None).date == date
+    assert CxoTime().date == date
+    assert CxoTime.now().date == date
+
+    # Ensure that env var does not disrupt normal operation
+    assert CxoTime("2025:001:00:00:01.250").date == "2025:001:00:00:01.250"
+
+
 def test_cxotime_descriptor_not_required_no_default():
     @dataclass
     class MyClass:
