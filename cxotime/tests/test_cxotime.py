@@ -527,9 +527,11 @@ def test_cxotime_descriptor_with_NOW():
     class MyData:
         stop: CxoTime = CxoTimeDescriptor(default=CxoTime.NOW)
 
+    dt_max = 0.2  # sec. Apparently on VM Windows there can be long delays.
+
     # Make a new object and check that the stop time is approximately the current time.
     obj1 = MyData()
-    assert (CxoTime.now() - obj1.stop).sec < 0.1
+    assert abs((CxoTime.now() - obj1.stop).sec) < dt_max
 
     # Wait for 0.5 second and make a new object and check that the stop time is 0.5
     # second later. This proves the NOW sentinel is evaluated at object creation time
@@ -537,9 +539,9 @@ def test_cxotime_descriptor_with_NOW():
     time.sleep(0.5)
     obj2 = MyData()
     dt = obj2.stop - obj1.stop
-    assert round(dt.sec, 1) == 0.5
+    assert abs(dt.sec - 0.5) < dt_max
 
     time.sleep(0.5)
     obj2.stop = CxoTime.NOW
     dt = obj2.stop - obj1.stop
-    assert round(dt.sec, 1) == 1.0
+    assert abs(dt.sec - 1.0) < dt_max
