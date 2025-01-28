@@ -469,8 +469,6 @@ def test_with_object_input():
 @pytest.mark.parametrize("fmt", ["date", "iso", "greta"])
 def test_cxotime_now_env_var(monkeypatch, fmt):
     """Check instantiating with CxoTime.NOW results in current time."""
-    # These two commands should run within a 2 sec of each other, even on the slowest
-    # machine.
     tm = CxoTime("2015:160:02:24:01.250")
     date = tm.date
     monkeypatch.setenv("CXOTIME_NOW", getattr(tm, fmt))
