@@ -230,10 +230,36 @@ method:
  'local': '2022 Sun Jan 02 07:00:00 AM EST',
  'unix': 1641124800.0}
 
-CxoTime.NOW
------------
+Handling current time
+---------------------
 
-The |CxoTime| class has a special value ``CxoTime.NOW`` which signifies the current time
+For convenience and compatibility with the DateTime_ class, |CxoTime| provides several
+equivalent ways to specify the current time:
+
+>>> CxoTime.now()  # Preferred method since it is explicit
+>>> CxoTime()
+>>> CxoTime(None)
+>>> CxoTime(CxoTime.NOW)
+
+See below for situations where you should use ``CxoTime.NOW``.
+
+``CXOTIME_NOW`` environment variable
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The ``CXOTIME_NOW`` environment variable can be used to override the default current
+time.  This is useful for testing or for running Ska Python code that needs to be
+reproducible.
+
+For example, to set the current time to 2022-01-01 00:00:00.000:
+
+>>> import os
+>>> os.environ['CXOTIME_NOW'] = '2022-01-01 00:00:00.000'
+>>> CxoTime.now().date
+'2022:001:00:00:00.000'
+
+``CxoTime.NOW`` sentinel
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The |CxoTime| class has a special attribute ``CxoTime.NOW`` which signifies the current time
 when used to initialize a |CxoTime| object.  This is commonly useful for example when
 defining a function that has accepts a CxoTime-like argument that defaults to the
 current time.
@@ -244,34 +270,37 @@ current time.
 
 For example:
 
->>> from cxotime import CxoTime
->>> def my_func(stop=CxoTime.NOW):
+>>> import os
+>>> from cxotime import CxoTime, CxoTimeLike
+>>> os.environ['CXOTIME_NOW'] = '2022-01-01 00:00:00.000'
+>>> def my_func(stop: CxoTimeLike=CxoTime.NOW):
 ...     stop = CxoTime(stop)
 ...     print(stop)
 ...
 >>> my_func()
-2024:006:11:37:41.930
+2022-01-01 00:00:00.000
 
 This can also be used in a `dataclass
 <https://docs.python.org/3/library/dataclasses.html>`_ to specify an attribute that is
-optional and defaults to the current time when the object is created::
+optional and defaults to the current time when the object is created:
 
-    >>> import time
-    >>> from dataclasses import dataclass
-    >>> from cxotime import CxoTime, CxoTimeDescriptor
-    >>> @dataclass
-    ... class MyData:
-    ...     start: CxoTime = CxoTimeDescriptor(required=True)
-    ...     stop: CxoTime = CxoTimeDescriptor(default=CxoTime.NOW)
-    ...
-    >>> obj1 = MyData("2022:001")
-    >>> print(obj1.start)
-    2022:001:00:00:00.000
-    >>> time.sleep(2)
-    >>> obj2 = MyData("2022:001")
-    >>> dt = obj2.stop - obj1.stop
-    >>> round(dt.sec, 2)
-    2.0
+>>> import time
+>>> from dataclasses import dataclass
+>>> from cxotime import CxoTime, CxoTimeDescriptor
+>>> @dataclass
+... class MyData:
+...     start: CxoTime = CxoTimeDescriptor(required=True)
+...     stop: CxoTime = CxoTimeDescriptor(default=CxoTime.NOW)
+...
+>>> obj1 = MyData("2022:001")
+>>> obj1.start
+'2022:001:00:00:00.000'
+>>> time.sleep(2)
+>>> obj2 = MyData("2022:001")
+>>> dt = obj2.stop - obj1.stop
+>>> round(dt.sec, 1)
+2.0
+
 
 Compatibility with DateTime
 ---------------------------

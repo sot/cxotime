@@ -460,6 +460,27 @@ def test_convert_time_format_obj():
     assert tm.date == convert_time_format(tm, "date")
 
 
+def test_with_object_input():
+    """Check CxoTime fails when called with an object() that is not CxoTime.NOW"""
+    with pytest.raises(ValueError):
+        CxoTime(object())
+
+
+@pytest.mark.parametrize("fmt", ["date", "iso", "greta"])
+def test_cxotime_now_env_var(monkeypatch, fmt):
+    """Check instantiating with CxoTime.NOW results in current time."""
+    tm = CxoTime("2015:160:02:24:01.250")
+    date = tm.date
+    monkeypatch.setenv("CXOTIME_NOW", getattr(tm, fmt))
+    assert CxoTime(CxoTime.NOW).date == date
+    assert CxoTime(None).date == date
+    assert CxoTime().date == date
+    assert CxoTime.now().date == date
+
+    # Ensure that env var does not disrupt normal operation
+    assert CxoTime("2025:001:00:00:01.250").date == "2025:001:00:00:01.250"
+
+
 def test_cxotime_descriptor_not_required_no_default():
     @dataclass
     class MyClass:
@@ -527,9 +548,11 @@ def test_cxotime_descriptor_with_NOW():
     class MyData:
         stop: CxoTime = CxoTimeDescriptor(default=CxoTime.NOW)
 
+    dt_max = 0.2  # sec. Apparently on VM Windows there can be long delays.
+
     # Make a new object and check that the stop time is approximately the current time.
     obj1 = MyData()
-    assert (CxoTime.now() - obj1.stop).sec < 0.1
+    assert abs((CxoTime.now() - obj1.stop).sec) < dt_max
 
     # Wait for 0.5 second and make a new object and check that the stop time is 0.5
     # second later. This proves the NOW sentinel is evaluated at object creation time
@@ -537,9 +560,9 @@ def test_cxotime_descriptor_with_NOW():
     time.sleep(0.5)
     obj2 = MyData()
     dt = obj2.stop - obj1.stop
-    assert round(dt.sec, 1) == 0.5
+    assert abs(dt.sec - 0.5) < dt_max
 
     time.sleep(0.5)
     obj2.stop = CxoTime.NOW
     dt = obj2.stop - obj1.stop
-    assert round(dt.sec, 1) == 1.0
+    assert abs(dt.sec - 1.0) < dt_max
