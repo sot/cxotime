@@ -1,0 +1,37 @@
+cxotime.greta2date
+==================
+
+.. py:function:: cxotime.greta2date(date)
+
+   
+   Convert GRETA date to Date (Year, day-of-year, time).
+
+   This is equivalent to ``CxoTime(date, format='greta').date`` but potentially 10x faster.
+
+   Format in: YYYYDDD.HHMMSSsss (str or float)
+   Format out: YYYY:DDD:HH:MM:SS.sss
+
+   :Parameters:
+
+       **date** : str, bytes, float, list, np.ndarray
+           GRETA date
+
+
+
+   :Returns:
+
+       **date** : str, ndarray[str]
+           Date (Year, day-of-year, time)
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

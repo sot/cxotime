@@ -1,0 +1,29 @@
+cxotime.scripts.print_time_conversions.main
+===========================================
+
+.. py:function:: cxotime.scripts.print_time_conversions.main(date=None, file=sys.stdout)
+
+   
+   Interface to entry_point script ``cxotime`` to print time conversions.
+
+   :param date: str, float, optional
+       Date for time conversion if sys.argv[1] is not provided. Mostly for testing.
+   :param file: file-like, optional
+       File-like object to write output (default=sys.stdout). Mostly for testing.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

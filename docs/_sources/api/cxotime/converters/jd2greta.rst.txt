@@ -1,0 +1,37 @@
+cxotime.converters.jd2greta
+===========================
+
+.. py:function:: cxotime.converters.jd2greta(jd)
+
+   
+   Convert Julian Date to GRETA date.
+
+   This is equivalent to ``CxoTime(jd, format='jd').greta`` but potentially 10x faster.
+
+   Format in: Julian Date (numeric)
+   Format out: YYYYDDD.HHMMSSsss (str)
+
+   :Parameters:
+
+       **jd** : float, int, list, ndarray
+           Julian Date
+
+
+
+   :Returns:
+
+       **date** : str, np.ndarray[str]
+           GRETA date
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

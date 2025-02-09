@@ -1,0 +1,37 @@
+cxotime.converters.secs2greta
+=============================
+
+.. py:function:: cxotime.converters.secs2greta(time)
+
+   
+   Convert CXC seconds to GRETA date.
+
+   This is equivalent to ``CxoTime(time, format='secs').greta`` but potentially 10x faster.
+
+   Format in: CXC seconds (numeric)
+   Format out: YYYYDDD.HHMMSSsss (str)
+
+   :Parameters:
+
+       **time** : float, int, list, ndarray
+           CXC seconds
+
+
+
+   :Returns:
+
+       **date** : str, np.ndarray[str]
+           GRETA date
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

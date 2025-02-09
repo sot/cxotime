@@ -1,0 +1,37 @@
+cxotime.scripts.make_converters
+===============================
+
+.. py:module:: cxotime.scripts.make_converters
+
+.. autoapi-nested-parse::
+
+   Make cxotime/converters.py from functions in convert.py.
+
+   This script is run by hand to update the converters.py file in the cxotime package::
+
+     $ python -m cxotime.scripts.make_converters > cxotime/converters.py
+
+   This is a one-time operation if a new converter is added to convert.py. The file may
+   need to be ruff formatted.
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   /api/cxotime/scripts/make_converters/make_docstring
+   /api/cxotime/scripts/make_converters/main
+
+.. autoapisummary::
+
+   cxotime.scripts.make_converters.make_docstring
+   cxotime.scripts.make_converters.main
+
+
+

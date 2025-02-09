@@ -1,0 +1,37 @@
+cxotime.converters.greta2maude
+==============================
+
+.. py:function:: cxotime.converters.greta2maude(date)
+
+   
+   Convert GRETA date to MAUDE date.
+
+   This is equivalent to ``CxoTime(date, format='greta').maude`` but potentially 10x faster.
+
+   Format in: YYYYDDD.HHMMSSsss (str or float)
+   Format out: YYYYDDD.HHMMSSsss (int)
+
+   :Parameters:
+
+       **date** : str, bytes, float, list, np.ndarray
+           GRETA date
+
+
+
+   :Returns:
+
+       **date** : int, ndarray[int]
+           MAUDE date
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

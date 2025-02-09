@@ -1,0 +1,37 @@
+cxotime.maude2jd
+================
+
+.. py:function:: cxotime.maude2jd(date)
+
+   
+   Convert MAUDE date to Julian Date.
+
+   This is equivalent to ``CxoTime(date, format='maude').jd`` but potentially 10x faster.
+
+   Format in: YYYYDDDHHMMSSsss (str or int)
+   Format out: Julian Date (numeric)
+
+   :Parameters:
+
+       **date** : str, bytes, int, list, ndarray
+           MAUDE date
+
+
+
+   :Returns:
+
+       **jd** : float, ndarray[float]
+           Julian Date
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

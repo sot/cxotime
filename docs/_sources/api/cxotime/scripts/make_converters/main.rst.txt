@@ -1,0 +1,25 @@
+cxotime.scripts.make_converters.main
+====================================
+
+.. py:function:: cxotime.scripts.make_converters.main()
+
+   
+   Make the converters.py file.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

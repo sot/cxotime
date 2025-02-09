@@ -1,0 +1,37 @@
+cxotime.converters.secs2maude
+=============================
+
+.. py:function:: cxotime.converters.secs2maude(time)
+
+   
+   Convert CXC seconds to MAUDE date.
+
+   This is equivalent to ``CxoTime(time, format='secs').maude`` but potentially 10x faster.
+
+   Format in: CXC seconds (numeric)
+   Format out: YYYYDDD.HHMMSSsss (int)
+
+   :Parameters:
+
+       **time** : float, int, list, ndarray
+           CXC seconds
+
+
+
+   :Returns:
+
+       **date** : int, ndarray[int]
+           MAUDE date
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

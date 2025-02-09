@@ -1,0 +1,25 @@
+cxotime.test
+============
+
+.. py:function:: cxotime.test(*args, **kwargs)
+
+   
+   Run py.test unit tests.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

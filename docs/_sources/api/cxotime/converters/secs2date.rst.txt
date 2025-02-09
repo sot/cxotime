@@ -1,0 +1,37 @@
+cxotime.converters.secs2date
+============================
+
+.. py:function:: cxotime.converters.secs2date(time)
+
+   
+   Convert CXC seconds to Date (Year, day-of-year, time).
+
+   This is equivalent to ``CxoTime(time, format='secs').date`` but potentially 10x faster.
+
+   Format in: CXC seconds (numeric)
+   Format out: YYYY:DDD:HH:MM:SS.sss
+
+   :Parameters:
+
+       **time** : float, int, list, ndarray
+           CXC seconds
+
+
+
+   :Returns:
+
+       **date** : str, ndarray[str]
+           Date (Year, day-of-year, time)
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

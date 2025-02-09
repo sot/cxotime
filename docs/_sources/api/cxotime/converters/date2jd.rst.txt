@@ -1,0 +1,41 @@
+cxotime.converters.date2jd
+==========================
+
+.. py:function:: cxotime.converters.date2jd(date)
+
+   
+   Convert Date (Year, day-of-year, time) to Julian Date.
+
+   This is equivalent to ``CxoTime(date, format='date').jd`` but potentially 10x faster.
+
+   Format in:
+   - YYYY:DDD:HH:MM:SS.sss
+   - YYYY:DDD:HH:MM:SS
+   - YYYY:DDD:HH:MM
+   - YYYY:DDD
+   Format out: Julian Date (numeric)
+
+   :Parameters:
+
+       **date** : str, bytes, float, list, ndarray
+           Date (Year, day-of-year, time)
+
+
+
+   :Returns:
+
+       **jd** : float, ndarray[float]
+           Julian Date
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

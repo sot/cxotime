@@ -1,0 +1,25 @@
+cxotime.scripts.make_converters.make_docstring
+==============================================
+
+.. py:function:: cxotime.scripts.make_converters.make_docstring(fmt_in, fmt_out)
+
+   
+   Make a docstring for a converter function.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

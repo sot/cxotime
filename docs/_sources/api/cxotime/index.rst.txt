@@ -1,0 +1,93 @@
+cxotime
+=======
+
+.. py:module:: cxotime
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /api/cxotime/convert/index
+   /api/cxotime/converters/index
+   /api/cxotime/cxotime/index
+   /api/cxotime/scripts/index
+   /api/cxotime/tests/index
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   /api/cxotime/CxoTime
+   /api/cxotime/CxoTimeDescriptor
+
+.. autoapisummary::
+
+   cxotime.CxoTime
+   cxotime.CxoTimeDescriptor
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   /api/cxotime/print_time_conversions
+   /api/cxotime/convert_time_format
+   /api/cxotime/secs2greta
+   /api/cxotime/secs2maude
+   /api/cxotime/secs2jd
+   /api/cxotime/secs2date
+   /api/cxotime/greta2secs
+   /api/cxotime/greta2maude
+   /api/cxotime/greta2jd
+   /api/cxotime/greta2date
+   /api/cxotime/maude2secs
+   /api/cxotime/maude2greta
+   /api/cxotime/maude2jd
+   /api/cxotime/maude2date
+   /api/cxotime/jd2secs
+   /api/cxotime/jd2greta
+   /api/cxotime/jd2maude
+   /api/cxotime/jd2date
+   /api/cxotime/date2secs
+   /api/cxotime/date2greta
+   /api/cxotime/date2maude
+   /api/cxotime/date2jd
+   /api/cxotime/test
+
+.. autoapisummary::
+
+   cxotime.print_time_conversions
+   cxotime.convert_time_format
+   cxotime.secs2greta
+   cxotime.secs2maude
+   cxotime.secs2jd
+   cxotime.secs2date
+   cxotime.greta2secs
+   cxotime.greta2maude
+   cxotime.greta2jd
+   cxotime.greta2date
+   cxotime.maude2secs
+   cxotime.maude2greta
+   cxotime.maude2jd
+   cxotime.maude2date
+   cxotime.jd2secs
+   cxotime.jd2greta
+   cxotime.jd2maude
+   cxotime.jd2date
+   cxotime.date2secs
+   cxotime.date2greta
+   cxotime.date2maude
+   cxotime.date2jd
+   cxotime.test
+
+
+

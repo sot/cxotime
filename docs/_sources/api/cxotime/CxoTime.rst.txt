@@ -1,0 +1,243 @@
+cxotime.CxoTime
+===============
+
+.. py:class:: cxotime.CxoTime(*args, **kwargs)
+
+   Bases: :py:obj:`astropy.time.Time`
+
+
+   
+   Time class for Chandra analysis that is based on ``astropy.time.Time``.
+
+   The CXO-specific time formats which are added to the astropy ``Time`` class
+   are shown in the table below.  Like ``DateTime``, the ``CxoTime`` class
+   default is to interpret any numerical values as ``secs`` (aka ``cxcsec`` in
+   the native ``Time`` class).
+
+   All of these formats use the UTC scale.
+
+   ========= ==============================================
+    Format   Description
+   ========= ==============================================
+   secs      Seconds since 1998-01-01T00:00:00 (TT) (float)
+   date      YYYY:DDD:hh:mm:ss.ss.. (string)
+   frac_year YYYY.ffffff = date as a floating point year
+   greta     YYYYDDD.hhmmsss (string)
+   muade     YYYDDDhhmmsss (integer)
+   ========= ==============================================
+
+   Important differences:
+
+   - In ``CxoTime`` the date '2000:001' is '2000:001:00:00:00' instead of
+     '2000:001:12:00:00' in ``DateTime``.  In most cases this interpretation
+     is more rational and expected.
+
+   - In ``CxoTime`` the date '2001-01-01T00:00:00' is UTC by default, while in
+     ``DateTime`` that is interpreted as TT by default.  This is triggered by
+     the ``T`` in the middle.  A date like '2001-01-01 00:00:00' defaults
+     to UTC in both ``CxoTime`` and ``DateTime``.
+
+   The standard built-in Time formats that are available in ``CxoTime`` are:
+
+   ===========  ==============================
+   Format       Example
+   ===========  ==============================
+   byear        1950.0
+   byear_str    'B1950.0'
+   cxcsec       63072064.184
+   datetime     datetime(2000, 1, 2, 12, 0, 0)
+   decimalyear  2000.45
+   fits         '2000-01-01T00:00:00.000(TAI)'
+   gps          630720013.0
+   iso          '2000-01-01 00:00:00.000'
+   isot         '2000-01-01T00:00:00.000'
+   jd           2451544.5
+   jyear        2000.0
+   jyear_str    'J2000.0'
+   mjd          51544.0
+   plot_date    730120.0003703703
+   unix         946684800.0
+   yday         2000:001:00:00:00.000
+   ===========  ==============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+   .. py:attribute:: NOW
+
+
+   .. py:method:: linspace(start, stop, num = None, step_max = None)
+      :classmethod:
+
+
+      
+      Get a uniform time series that covers the given time range.
+
+      Output times either divide the time range into ``num`` intervals or are
+      uniformly spaced by up to ``step_max``, and cover the time
+      range from ``start`` to ``stop``.
+
+      Note that returned intervals may be larger than ``step_max`` by floating point error.
+      If calling code requires that all the intervals be less than a value, ``step_max`` should
+      be set to a value at least slightly smaller than the desired maximum value.
+
+      :Parameters:
+
+          **start** : CxoTimeLike
+              Start time of the time range.
+
+          **stop** : CxoTimeLike
+              Stop time of the time range.
+
+          **num** : int | None
+              Number of time bins.
+
+          **step_max** : u.Quantity (timelike)
+              Maximum time interval step. Should be positive nonzero.
+
+
+
+      :Returns:
+
+          CxoTime
+              CxoTime with time bin edges for each interval.
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+
+   .. py:method:: now()
+      :classmethod:
+
+
+      
+      Creates a new object corresponding to the instant in time this
+      method is called.
+
+      .. note::
+          "Now" is determined using the `~datetime.datetime.now`
+          function, so its accuracy and precision is determined by that
+          function.  Generally that means it is set by the accuracy of
+          your system clock. The timezone is set to UTC.
+
+
+
+
+      :Returns:
+
+          **nowtime** : :class:`~astropy.time.Time`
+              A new `Time` object (or a subclass of `Time` if this is called from
+              such a subclass) at the current time.
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+
+   .. py:method:: print_conversions(file=sys.stdout)
+
+      
+      Print a table of conversions to a standard set of formats.
+
+      Example::
+
+         >>> from cxotime import CxoTime
+         >>> t = CxoTime('2010:001:00:00:00')
+         >>> t.print_conversions()
+         local       2009 Thu Dec 31 07:00:00 PM EST
+         iso_local   2009-12-31T19:00:00-05:00
+         date        2010:001:00:00:00.000
+         cxcsec      378691266.184
+         decimalyear 2010.00000
+         iso         2010-01-01 00:00:00.000
+         unix        1262304000.000
+
+      :param file: file-like, optional
+          File-like object to write output (default=sys.stdout).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+
+   .. py:method:: get_conversions()
+
+      
+      Get a dict of conversions to a standard set of formats.
+
+      Example::
+
+         >>> from cxotime import CxoTime
+         >>> t = CxoTime('2010:001:00:00:00')
+         >>> t.get_conversions()
+         {'local': '2009 Thu Dec 31 07:00:00 PM EST',
+         'iso_local': '2009-12-31T19:00:00-05:00',
+         'date': '2010:001:00:00:00.000',
+         'cxcsec': 378691266.184,
+         'decimalyear': 2010.0,
+         'iso': '2010-01-01 00:00:00.000',
+         'unix': 1262304000.0}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+

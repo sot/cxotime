@@ -1,0 +1,39 @@
+cxotime.convert_time_format
+===========================
+
+.. py:function:: cxotime.convert_time_format(val, fmt_out, *, fmt_in=None)
+
+   
+   Convert a time to a different format.
+
+
+   :Parameters:
+
+       **val** : CxoTimeLike
+           Time value
+
+       **fmt_out** : str
+           Output format
+
+       **fmt_in** : str
+           Input format (default is to guess)
+
+
+
+   :Returns:
+
+       **val_out** : str
+           Time string in output format
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

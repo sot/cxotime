@@ -1,0 +1,648 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>cxotime.CxoTime &#8212; cxotime 3.10.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=f8d09eac"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=30646c52"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/cxotime/CxoTime';</script>
+    <link rel="canonical" href="https://sot.github.io/cxotime/api/cxotime/CxoTime.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="cxotime.CxoTimeDescriptor" href="CxoTimeDescriptor.html" />
+    <link rel="prev" title="cxotime.tests" href="tests/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="3.10.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item"><a href="../../index.html" style="text-decoration: none;">
+    <span style="color: rgb(186, 70, 21); font-size: x-large;">cxotime</span>
+</a>
+&nbsp;
+<span style="font-size: x-large;">3.10.0</span></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/sot/cxotime" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/sot/cxotime" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">API Reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">cxotime</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">cxotime.CxoTime</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="cxotime-cxotime">
+<h1>cxotime.CxoTime<a class="headerlink" href="#cxotime-cxotime" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="cxotime.CxoTime">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cxotime.</span></span><span class="sig-name descname"><span class="pre">CxoTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.CxoTime" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">astropy.time.Time</span></code></p>
+<p>Time class for Chandra analysis that is based on <code class="docutils literal notranslate"><span class="pre">astropy.time.Time</span></code>.</p>
+<p>The CXO-specific time formats which are added to the astropy <code class="docutils literal notranslate"><span class="pre">Time</span></code> class
+are shown in the table below.  Like <code class="docutils literal notranslate"><span class="pre">DateTime</span></code>, the <code class="docutils literal notranslate"><span class="pre">CxoTime</span></code> class
+default is to interpret any numerical values as <code class="docutils literal notranslate"><span class="pre">secs</span></code> (aka <code class="docutils literal notranslate"><span class="pre">cxcsec</span></code> in
+the native <code class="docutils literal notranslate"><span class="pre">Time</span></code> class).</p>
+<p>All of these formats use the UTC scale.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Format</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>secs</p></td>
+<td><p>Seconds since 1998-01-01T00:00:00 (TT) (float)</p></td>
+</tr>
+<tr class="row-odd"><td><p>date</p></td>
+<td><p>YYYY:DDD:hh:mm:ss.ss.. (string)</p></td>
+</tr>
+<tr class="row-even"><td><p>frac_year</p></td>
+<td><p>YYYY.ffffff = date as a floating point year</p></td>
+</tr>
+<tr class="row-odd"><td><p>greta</p></td>
+<td><p>YYYYDDD.hhmmsss (string)</p></td>
+</tr>
+<tr class="row-even"><td><p>muade</p></td>
+<td><p>YYYDDDhhmmsss (integer)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Important differences:</p>
+<ul class="simple">
+<li><p>In <code class="docutils literal notranslate"><span class="pre">CxoTime</span></code> the date ‘2000:001’ is ‘2000:001:00:00:00’ instead of
+‘2000:001:12:00:00’ in <code class="docutils literal notranslate"><span class="pre">DateTime</span></code>.  In most cases this interpretation
+is more rational and expected.</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">CxoTime</span></code> the date ‘2001-01-01T00:00:00’ is UTC by default, while in
+<code class="docutils literal notranslate"><span class="pre">DateTime</span></code> that is interpreted as TT by default.  This is triggered by
+the <code class="docutils literal notranslate"><span class="pre">T</span></code> in the middle.  A date like ‘2001-01-01 00:00:00’ defaults
+to UTC in both <code class="docutils literal notranslate"><span class="pre">CxoTime</span></code> and <code class="docutils literal notranslate"><span class="pre">DateTime</span></code>.</p></li>
+</ul>
+<p>The standard built-in Time formats that are available in <code class="docutils literal notranslate"><span class="pre">CxoTime</span></code> are:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Format</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>byear</p></td>
+<td><p>1950.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>byear_str</p></td>
+<td><p>‘B1950.0’</p></td>
+</tr>
+<tr class="row-even"><td><p>cxcsec</p></td>
+<td><p>63072064.184</p></td>
+</tr>
+<tr class="row-odd"><td><p>datetime</p></td>
+<td><p>datetime(2000, 1, 2, 12, 0, 0)</p></td>
+</tr>
+<tr class="row-even"><td><p>decimalyear</p></td>
+<td><p>2000.45</p></td>
+</tr>
+<tr class="row-odd"><td><p>fits</p></td>
+<td><p>‘2000-01-01T00:00:00.000(TAI)’</p></td>
+</tr>
+<tr class="row-even"><td><p>gps</p></td>
+<td><p>630720013.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>iso</p></td>
+<td><p>‘2000-01-01 00:00:00.000’</p></td>
+</tr>
+<tr class="row-even"><td><p>isot</p></td>
+<td><p>‘2000-01-01T00:00:00.000’</p></td>
+</tr>
+<tr class="row-odd"><td><p>jd</p></td>
+<td><p>2451544.5</p></td>
+</tr>
+<tr class="row-even"><td><p>jyear</p></td>
+<td><p>2000.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>jyear_str</p></td>
+<td><p>‘J2000.0’</p></td>
+</tr>
+<tr class="row-even"><td><p>mjd</p></td>
+<td><p>51544.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>plot_date</p></td>
+<td><p>730120.0003703703</p></td>
+</tr>
+<tr class="row-even"><td><p>unix</p></td>
+<td><p>946684800.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>yday</p></td>
+<td><p>2000:001:00:00:00.000</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cxotime.CxoTime.NOW">
+<span class="sig-name descname"><span class="pre">NOW</span></span><a class="headerlink" href="#cxotime.CxoTime.NOW" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cxotime.CxoTime.linspace">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.CxoTime.linspace" title="Link to this definition">#</a></dt>
+<dd><p>Get a uniform time series that covers the given time range.</p>
+<p>Output times either divide the time range into <code class="docutils literal notranslate"><span class="pre">num</span></code> intervals or are
+uniformly spaced by up to <code class="docutils literal notranslate"><span class="pre">step_max</span></code>, and cover the time
+range from <code class="docutils literal notranslate"><span class="pre">start</span></code> to <code class="docutils literal notranslate"><span class="pre">stop</span></code>.</p>
+<p>Note that returned intervals may be larger than <code class="docutils literal notranslate"><span class="pre">step_max</span></code> by floating point error.
+If calling code requires that all the intervals be less than a value, <code class="docutils literal notranslate"><span class="pre">step_max</span></code> should
+be set to a value at least slightly smaller than the desired maximum value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>start</strong><span class="classifier">CxoTimeLike</span></dt><dd><p>Start time of the time range.</p>
+</dd>
+<dt><strong>stop</strong><span class="classifier">CxoTimeLike</span></dt><dd><p>Stop time of the time range.</p>
+</dd>
+<dt><strong>num</strong><span class="classifier">int | None</span></dt><dd><p>Number of time bins.</p>
+</dd>
+<dt><strong>step_max</strong><span class="classifier">u.Quantity (timelike)</span></dt><dd><p>Maximum time interval step. Should be positive nonzero.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>CxoTime</dt><dd><p>CxoTime with time bin edges for each interval.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cxotime.CxoTime.now">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">now</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.CxoTime.now" title="Link to this definition">#</a></dt>
+<dd><p>Creates a new object corresponding to the instant in time this
+method is called.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>“Now” is determined using the <cite>~datetime.datetime.now</cite>
+function, so its accuracy and precision is determined by that
+function.  Generally that means it is set by the accuracy of
+your system clock. The timezone is set to UTC.</p>
+</div>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>nowtime</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Time</span></code></span></dt><dd><p>A new <cite>Time</cite> object (or a subclass of <cite>Time</cite> if this is called from
+such a subclass) at the current time.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cxotime.CxoTime.print_conversions">
+<span class="sig-name descname"><span class="pre">print_conversions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.stdout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.CxoTime.print_conversions" title="Link to this definition">#</a></dt>
+<dd><p>Print a table of conversions to a standard set of formats.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cxotime</span> <span class="kn">import</span> <span class="n">CxoTime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">CxoTime</span><span class="p">(</span><span class="s1">&#39;2010:001:00:00:00&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">print_conversions</span><span class="p">()</span>
+<span class="go">local       2009 Thu Dec 31 07:00:00 PM EST</span>
+<span class="go">iso_local   2009-12-31T19:00:00-05:00</span>
+<span class="go">date        2010:001:00:00:00.000</span>
+<span class="go">cxcsec      378691266.184</span>
+<span class="go">decimalyear 2010.00000</span>
+<span class="go">iso         2010-01-01 00:00:00.000</span>
+<span class="go">unix        1262304000.000</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong> – file-like, optional
+File-like object to write output (default=sys.stdout).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cxotime.CxoTime.get_conversions">
+<span class="sig-name descname"><span class="pre">get_conversions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cxotime.CxoTime.get_conversions" title="Link to this definition">#</a></dt>
+<dd><p>Get a dict of conversions to a standard set of formats.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cxotime</span> <span class="kn">import</span> <span class="n">CxoTime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">CxoTime</span><span class="p">(</span><span class="s1">&#39;2010:001:00:00:00&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">get_conversions</span><span class="p">()</span>
+<span class="go">{&#39;local&#39;: &#39;2009 Thu Dec 31 07:00:00 PM EST&#39;,</span>
+<span class="go">&#39;iso_local&#39;: &#39;2009-12-31T19:00:00-05:00&#39;,</span>
+<span class="go">&#39;date&#39;: &#39;2010:001:00:00:00.000&#39;,</span>
+<span class="go">&#39;cxcsec&#39;: 378691266.184,</span>
+<span class="go">&#39;decimalyear&#39;: 2010.0,</span>
+<span class="go">&#39;iso&#39;: &#39;2010-01-01 00:00:00.000&#39;,</span>
+<span class="go">&#39;unix&#39;: 1262304000.0}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="tests/index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">cxotime.tests</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="CxoTimeDescriptor.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">cxotime.CxoTimeDescriptor</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cxotime.CxoTime"><code class="docutils literal notranslate"><span class="pre">cxotime.CxoTime</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cxotime.CxoTime.NOW"><code class="docutils literal notranslate"><span class="pre">cxotime.CxoTime.NOW</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cxotime.CxoTime.linspace"><code class="docutils literal notranslate"><span class="pre">cxotime.CxoTime.linspace()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cxotime.CxoTime.now"><code class="docutils literal notranslate"><span class="pre">cxotime.CxoTime.now()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cxotime.CxoTime.print_conversions"><code class="docutils literal notranslate"><span class="pre">cxotime.CxoTime.print_conversions()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cxotime.CxoTime.get_conversions"><code class="docutils literal notranslate"><span class="pre">cxotime.CxoTime.get_conversions()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Smithsonian Astrophysical Observatory.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+cxotime.converters.jd2secs
+==========================
+
+.. py:function:: cxotime.converters.jd2secs(jd)
+
+   
+   Convert Julian Date to CXC seconds.
+
+   This is equivalent to ``CxoTime(jd, format='jd').secs`` but potentially 10x faster.
+
+   Format in: Julian Date (numeric)
+   Format out: CXC seconds (numeric)
+
+   :Parameters:
+
+       **jd** : float, int, list, ndarray
+           Julian Date
+
+
+
+   :Returns:
+
+       **time** : float, ndarray[float]
+           CXC seconds
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

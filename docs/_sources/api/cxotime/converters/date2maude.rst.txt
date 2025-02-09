@@ -1,0 +1,41 @@
+cxotime.converters.date2maude
+=============================
+
+.. py:function:: cxotime.converters.date2maude(date)
+
+   
+   Convert Date (Year, day-of-year, time) to MAUDE date.
+
+   This is equivalent to ``CxoTime(date, format='date').maude`` but potentially 10x faster.
+
+   Format in:
+   - YYYY:DDD:HH:MM:SS.sss
+   - YYYY:DDD:HH:MM:SS
+   - YYYY:DDD:HH:MM
+   - YYYY:DDD
+   Format out: YYYYDDD.HHMMSSsss (int)
+
+   :Parameters:
+
+       **date** : str, bytes, float, list, ndarray
+           Date (Year, day-of-year, time)
+
+
+
+   :Returns:
+
+       **date** : int, ndarray[int]
+           MAUDE date
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
