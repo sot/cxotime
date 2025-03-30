@@ -241,7 +241,7 @@ def convert_string_to_jd1_jd2(date, time_format_cls):
 
 
 def convert_jd1_jd2_to_date(jd1, jd2):
-    iys, ims, ids, ihmsfs = erfa.d2dtf(b"TT", 3, jd1, jd2)
+    iys, ims, ids, ihmsfs = erfa.d2dtf(b"UTC", 3, jd1, jd2)
     ihrs = ihmsfs["h"]
     imins = ihmsfs["m"]
     isecs = ihmsfs["s"]
