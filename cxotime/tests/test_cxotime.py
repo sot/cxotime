@@ -405,7 +405,7 @@ inputs = [
     ("iso", "2001-01-01 02:03:04.123", "U"),
 ]
 
-test_fmts = {fmt_name for fmt_name, val, fmt_kind in inputs}
+test_fmts = {fmt_name for fmt_name, _, _ in inputs}
 
 
 @pytest.mark.parametrize("fmt_val", inputs)
@@ -452,6 +452,26 @@ def test_convert_functions(fmt_val, val_type, fmt_out):
         out3 = func(val)
         assert type(out) is type(out3)
         assert np.all(out == out3)
+
+
+tm_leapsec = CxoTime("2016-12-31T23:59:60.5")
+inputs_leapsec = [
+    (fmt, val := getattr(tm_leapsec, fmt), np.array(val).dtype.kind)
+    for fmt in test_fmts
+]
+
+
+@pytest.mark.parametrize("fmt_val", inputs_leapsec)
+@pytest.mark.parametrize("fmt_out", test_fmts)
+def test_convert_functions_leapsec(fmt_val, fmt_out):
+    """Test fast convert for a time within a leap second"""
+    fmt_in, val, _ = fmt_val
+
+    exp = getattr(CxoTime(val, format=fmt_in), fmt_out)
+    out = convert_time_format(val, fmt_out, fmt_in=fmt_in)
+
+    assert type(exp) is type(out)
+    assert np.all(exp == out)
 
 
 def test_convert_time_format_obj():
