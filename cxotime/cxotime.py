@@ -47,7 +47,7 @@ class CxoTime(Time):
     date      YYYY:DDD:hh:mm:ss.ss.. (string)
     frac_year YYYY.ffffff = date as a floating point year
     greta     YYYYDDD.hhmmsss (string)
-    muade     YYYDDDhhmmsss (integer)
+    maude     YYYDDDhhmmsss (integer)
     ========= ==============================================
 
     Important differences:
