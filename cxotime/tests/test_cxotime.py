@@ -486,6 +486,22 @@ def test_with_object_input():
         CxoTime(object())
 
 
+def test_delta_time_str_scalar(monkeypatch):
+    monkeypatch.setenv("CXOTIME_NOW", "2020:001")
+    tm = CxoTime("1d 2hr 3.5min 4.25s")
+    assert tm.date == "2020:002:02:03:34.250"
+
+
+def test_delta_time_str_array(monkeypatch):
+    monkeypatch.setenv("CXOTIME_NOW", "2020:001:00:00:30.000")
+    tm = CxoTime([["-1s", "-2s"], ["-3s", "+4s"]])
+    exp = [
+        ["2020:001:00:00:29.000", "2020:001:00:00:28.000"],
+        ["2020:001:00:00:27.000", "2020:001:00:00:34.000"],
+    ]
+    assert np.all(tm.date == exp)
+
+
 @pytest.mark.parametrize("fmt", ["date", "iso", "greta"])
 def test_cxotime_now_env_var(monkeypatch, fmt):
     """Check instantiating with CxoTime.NOW results in current time."""

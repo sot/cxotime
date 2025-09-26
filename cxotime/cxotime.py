@@ -9,7 +9,14 @@ import astropy.units as u
 import erfa
 import numpy as np
 import numpy.typing as npt
-from astropy.time import Time, TimeCxcSec, TimeDecimalYear, TimeJD, TimeYearDayTime
+from astropy.time import (
+    Time,
+    TimeCxcSec,
+    TimeDecimalYear,
+    TimeDelta,
+    TimeJD,
+    TimeYearDayTime,
+)
 from astropy.utils import iers
 from ska_helpers.utils import TypedDescriptor
 
@@ -28,6 +35,28 @@ warnings.filterwarnings("ignore", category=erfa.ErfaWarning, message=r".*dubious
 # For working in Chandra operations, possibly with no network access, we cannot
 # allow auto downloads.
 iers.conf.auto_download = False
+
+
+def _try_args_as_time_delta(args: tuple, kwargs: dict) -> tuple:
+    """Try to interpret args[0] as a TimeDelta quantity string.
+
+    If successful return a tuple with a single element with the date(s) string
+    for the current time plus the TimeDelta.  Also set kwargs['format'] to 'date'.
+    If not successful return the original args unchanged.
+
+    Used in CxoTime.__init__() to handle string input that is not otherwise
+    recognized as a date format.
+    """
+    try:
+        dt = TimeDelta(args[0], format="quantity_str")
+    except Exception:
+        return args
+
+    tm = CxoTime.now() + dt
+    tm.format = "date"
+    kwargs["format"] = "date"
+    kwargs["scale"] = "utc"
+    return (tm.date,)
 
 
 class CxoTime(Time):
@@ -171,6 +200,11 @@ class CxoTime(Time):
                         raise ValueError(f"must use scale 'utc' for format '{fmt}''")
                     return
             kwargs = kwargs_orig
+
+            # For string input that did not already succeed, try a quantity string
+            # TimeDelta like "-1hr" or "2d".
+            if val.dtype.kind == "U":
+                args = _try_args_as_time_delta(args, kwargs)
 
         elif fmt == "maude":
             args = (np.asarray(args[0], dtype="S"),) + args[1:]
