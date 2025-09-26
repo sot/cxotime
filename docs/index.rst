@@ -51,10 +51,11 @@ You can get the current time with the :meth:`~cxotime.CxoTime.now` class method:
 
 >>> t = CxoTime.now()
 
-You can also get the current time plus a delta time in the form ``"1yr 2d 3hr
-4.2min 10.25s"``. The components must be in ``yr, d, hr, min, s`` order, but each
-component is optional. Any function or command line tool that uses Ska ``CxoTime`` or
-``DateTime`` will work with this format.
+You can also get the current time plus a `delta time
+<https://docs.astropy.org/en/stable/api/astropy.time.TimeDeltaQuantityString.html>`_ in
+the form ``"+/-1yr 2d 3hr 4.2min 10.25s"``. The components must be in ``yr, d, hr, min, s``
+order, but each component is optional. Any function or command line tool that uses Ska
+``CxoTime`` or ``DateTime`` will work with this format.
 
 >>> from ska_helpers.utils import temp_env_var
 >>> from cxotime import CxoTime
