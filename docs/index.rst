@@ -51,6 +51,19 @@ You can get the current time with the :meth:`~cxotime.CxoTime.now` class method:
 
 >>> t = CxoTime.now()
 
+You can also get the current time plus a `delta time
+<https://docs.astropy.org/en/stable/api/astropy.time.TimeDeltaQuantityString.html>`_ in
+the form ``"+/-1yr 2d 3hr 4.2min 10.25s"``. The components must be in ``yr, d, hr, min, s``
+order, but each component is optional. Any function or command line tool that uses Ska
+``CxoTime`` or ``DateTime`` will work with this format.
+
+>>> from ska_helpers.utils import temp_env_var
+>>> from cxotime import CxoTime
+>>> # To make the example reproducible we mock the current time to 2020:010:00:00:00.
+>>> with temp_env_var("CXOTIME_NOW", "2020:010"):
+...     print(CxoTime("-2d 12hr"))
+2020:007:12:00:00.000
+
 String formatted inputs are unique and you do not need to specify the format when
 creating a |CxoTime| object.  The format is automatically inferred from the input.
 
@@ -237,9 +250,9 @@ For convenience and compatibility with the DateTime_ class, |CxoTime| provides s
 equivalent ways to specify the current time:
 
 >>> CxoTime.now()  # Preferred method since it is explicit
->>> CxoTime()
->>> CxoTime(None)
 >>> CxoTime(CxoTime.NOW)
+>>> CxoTime(None)  # OK but not preferred
+>>> CxoTime()  # DO NOT use for new code
 
 See below for situations where you should use ``CxoTime.NOW``.
 
@@ -251,10 +264,16 @@ reproducible.
 
 For example, to set the current time to 2022-01-01 00:00:00.000:
 
->>> import os
->>> os.environ['CXOTIME_NOW'] = '2022-01-01 00:00:00.000'
->>> CxoTime.now().date
-'2022:001:00:00:00.000'
+>>> from ska_helpers.utils import temp_env_var
+>>> with temp_env_var("CXOTIME_NOW", "2020:010"):
+...     print(CxoTime.now())
+...     print(CxoTime(CxoTime.NOW))
+...     print(CxoTime(None))
+...     print(CxoTime())
+2020:010:00:00:00.000
+2020:010:00:00:00.000
+2020:010:00:00:00.000
+2020:010:00:00:00.000
 
 ``CxoTime.NOW`` sentinel
 ^^^^^^^^^^^^^^^^^^^^^^^^
