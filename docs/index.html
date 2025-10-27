@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Chandra Time &#8212; cxotime 3.10.2 documentation</title>
+    <title>Chandra Time &#8212; cxotime 3.11.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=6b5090df"></script>
+    <script src="_static/documentation_options.js?v=8905d4f5"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -53,7 +53,7 @@
     <link rel="next" title="API Reference" href="api/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="3.10.2" />
+  <meta name="docsearch:version" content="3.11.0" />
   </head>
   
   
@@ -106,7 +106,7 @@
     <span style="color: rgb(186, 70, 21); font-size: x-large;">cxotime</span>
 </a>
 &nbsp;
-<span style="font-size: x-large;">3.10.2</span></div>
+<span style="font-size: x-large;">3.11.0</span></div>
     
   </div>
   
@@ -321,6 +321,18 @@ of the ways to create a <a class="reference internal" href="api/cxotime/cxotime/
 </div>
 <p>You can get the current time with the <a class="reference internal" href="api/cxotime/CxoTime.html#cxotime.CxoTime.now" title="cxotime.CxoTime.now"><code class="xref py py-meth docutils literal notranslate"><span class="pre">now()</span></code></a> class method:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">CxoTime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You can also get the current time plus a <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.time.TimeDeltaQuantityString.html">delta time</a> in
+the form <code class="docutils literal notranslate"><span class="pre">&quot;+/-1yr</span> <span class="pre">2d</span> <span class="pre">3hr</span> <span class="pre">4.2min</span> <span class="pre">10.25s&quot;</span></code>. The components must be in <code class="docutils literal notranslate"><span class="pre">yr,</span> <span class="pre">d,</span> <span class="pre">hr,</span> <span class="pre">min,</span> <span class="pre">s</span></code>
+order, but each component is optional. Any function or command line tool that uses Ska
+<code class="docutils literal notranslate"><span class="pre">CxoTime</span></code> or <code class="docutils literal notranslate"><span class="pre">DateTime</span></code> will work with this format.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ska_helpers.utils</span> <span class="kn">import</span> <span class="n">temp_env_var</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cxotime</span> <span class="kn">import</span> <span class="n">CxoTime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To make the example reproducible we mock the current time to 2020:010:00:00:00.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">temp_env_var</span><span class="p">(</span><span class="s2">&quot;CXOTIME_NOW&quot;</span><span class="p">,</span> <span class="s2">&quot;2020:010&quot;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">CxoTime</span><span class="p">(</span><span class="s2">&quot;-2d 12hr&quot;</span><span class="p">))</span>
+<span class="go">2020:007:12:00:00.000</span>
 </pre></div>
 </div>
 <p>String formatted inputs are unique and you do not need to specify the format when
@@ -546,9 +558,9 @@ method:</p>
 <p>For convenience and compatibility with the <a class="reference external" href="http://cxc.harvard.edu/mta/ASPECT/tool_doc/pydocs/Chandra.Time.html">DateTime</a> class, <a class="reference internal" href="api/cxotime/cxotime/CxoTime.html#cxotime.cxotime.CxoTime" title="cxotime.cxotime.CxoTime"><code class="xref py py-class docutils literal notranslate"><span class="pre">CxoTime</span></code></a> provides several
 equivalent ways to specify the current time:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">CxoTime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>  <span class="c1"># Preferred method since it is explicit</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">CxoTime</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">CxoTime</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">CxoTime</span><span class="p">(</span><span class="n">CxoTime</span><span class="o">.</span><span class="n">NOW</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">CxoTime</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># OK but not preferred</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">CxoTime</span><span class="p">()</span>  <span class="c1"># DO NOT use for new code</span>
 </pre></div>
 </div>
 <p>See below for situations where you should use <code class="docutils literal notranslate"><span class="pre">CxoTime.NOW</span></code>.</p>
@@ -558,10 +570,16 @@ equivalent ways to specify the current time:</p>
 time.  This is useful for testing or for running Ska Python code that needs to be
 reproducible.</p>
 <p>For example, to set the current time to 2022-01-01 00:00:00.000:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;CXOTIME_NOW&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;2022-01-01 00:00:00.000&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">CxoTime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span>
-<span class="go">&#39;2022:001:00:00:00.000&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ska_helpers.utils</span> <span class="kn">import</span> <span class="n">temp_env_var</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">temp_env_var</span><span class="p">(</span><span class="s2">&quot;CXOTIME_NOW&quot;</span><span class="p">,</span> <span class="s2">&quot;2020:010&quot;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">CxoTime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">CxoTime</span><span class="p">(</span><span class="n">CxoTime</span><span class="o">.</span><span class="n">NOW</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">CxoTime</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">CxoTime</span><span class="p">())</span>
+<span class="go">2020:010:00:00:00.000</span>
+<span class="go">2020:010:00:00:00.000</span>
+<span class="go">2020:010:00:00:00.000</span>
+<span class="go">2020:010:00:00:00.000</span>
 </pre></div>
 </div>
 </section>
