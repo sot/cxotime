@@ -140,8 +140,8 @@ class CxoTime(Time):
 
     def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], CxoTime) and not kwargs:
-            # If input is already a CxoTime instance and no other kwargs
-            # then no other initialization is needed.
+            # If input is already a CxoTime instance and no other kwargs (which
+            # implies copy only if needed) then no other initialization is needed.
             return
 
         if len(args) == 1 and (args[0] is None or args[0] is CxoTime.NOW):
