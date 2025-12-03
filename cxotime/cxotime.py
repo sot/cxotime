@@ -133,15 +133,15 @@ class CxoTime(Time):
 
         if len(args) == 1 and isinstance(args[0], CxoTime) and not kwargs:
             # If input is already a CxoTime instance and no other kwargs just return
-            # the instance. Note that copy=False is the default.
+            # the instance.
             return args[0]
 
         return super().__new__(cls, *args, **kwargs)
 
     def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], CxoTime) and not kwargs:
-            # If input is already a CxoTime instance and no other kwargs (which
-            # implies copy=False) then no other initialization is needed.
+            # If input is already a CxoTime instance and no other kwargs
+            # then no other initialization is needed.
             return
 
         if len(args) == 1 and (args[0] is None or args[0] is CxoTime.NOW):
@@ -181,8 +181,6 @@ class CxoTime(Time):
         if fmt is None and len(args) == 1:
             kwargs_orig = copy(kwargs)
             kwargs["scale"] = "utc"
-            # Do not make a copy unless specifically set by user
-            kwargs.setdefault("copy", False)
             # Convert to np.array at this point to get dtype
             val = np.asarray(args[0])
 
