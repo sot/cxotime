@@ -133,7 +133,8 @@ class CxoTime(Time):
 
         if len(args) == 1 and isinstance(args[0], CxoTime) and not kwargs:
             # If input is already a CxoTime instance and no other kwargs just return
-            # the instance.
+            # the instance. Note that copy only if needed is the default, so returning
+            # the original here is expected.
             return args[0]
 
         return super().__new__(cls, *args, **kwargs)
